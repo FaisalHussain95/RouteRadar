@@ -46,7 +46,7 @@ and `db.py` with idempotent schema creation and an upsert for fare observations,
 - [x] Direct flights (0 stops, no layover) are kept
 
 ## S04 — FareProvider protocol and fixture-backed fake
-- status: todo
+- status: done
 - size: M
 
 `providers/base.py` protocol; `providers/fake.py` loads JSON fixtures from
@@ -54,9 +54,9 @@ and `db.py` with idempotent schema creation and an upsert for fare observations,
 Include at least three realistic fixtures (one per destination) with a mix of carriers
 and in/out-of-scope itineraries.
 
-- [ ] `FakeFareProvider().search(route, date)` returns validated `Itinerary` objects
-- [ ] A missing fixture raises a clear `FixtureMissing` error, not `FileNotFoundError`
-- [ ] Fixtures cover PIA direct, a Gulf 1-stop, and an out-of-scope 2-stop
+- [x] `FakeFareProvider().search(route, date)` returns validated `Itinerary` objects
+- [x] A missing fixture raises a clear `FixtureMissing` error, not `FileNotFoundError`
+- [x] Fixtures cover PIA direct, a Gulf 1-stop, and an out-of-scope 2-stop
 
 ## S05 — Gregorian calendar windows
 - status: todo
@@ -95,6 +95,16 @@ kept/dropped counts.
 - [ ] Running twice for the same day leaves row counts unchanged
 - [ ] `ingest_run.rows_dropped` reflects the out-of-scope fixtures
 - [ ] A provider exception is recorded in `ingest_run.error` and the command exits non-zero
+
+Note from S04: fake fixtures are keyed by exact departure date and only exist for
+`2026-12-20` (CDG→ISB/LHE/SKT, ORY→ISB). Six horizons from a real "today" will not hit
+them, so the ingest test needs a fixed observation date (e.g. an `--observed-on` option or
+an injected clock) with fixtures added for each resulting departure date, or a fake option
+that falls back to a date-less fixture. Missing fixtures raise `FixtureMissing`, a
+`ProviderError`, so they land in `ingest_run.error` rather than crashing the run. Also:
+the fixtures' non-economy records reuse the carrier and flight numbers of an economy
+record, and `fare_observation`'s primary key has no cabin column, so filter **before**
+upserting or the two collide and one silently overwrites the other.
 
 ## S08 — SerpApi Google Flights provider
 - status: todo

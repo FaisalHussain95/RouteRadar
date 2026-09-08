@@ -1,0 +1,14 @@
+{
+  "route": {"origin": "CDG", "destination": "LHE"},
+  "departure_date": "2026-12-20",
+  "note": "Gulf Air is the price setter on this pair. Drops: Emirates on an 8h15 layover, a Saudia 2-stop, and a premium-economy Qatar fare.",
+  "itineraries": [
+    {"carrier": "PK", "flight_numbers": ["PK758"], "stops": 0, "layover_minutes": 0, "duration_minutes": 465, "cabin": "economy", "price_eur": 530, "raw_ref": "pia-direct"},
+    {"carrier": "GF", "flight_numbers": ["GF18", "GF782"], "stops": 1, "layover_minutes": 95, "duration_minutes": 690, "cabin": "economy", "price_eur": 489, "raw_ref": "gulfair-bah"},
+    {"carrier": "QR", "flight_numbers": ["QR40", "QR620"], "stops": 1, "layover_minutes": 120, "duration_minutes": 660, "cabin": "economy", "price_eur": 612, "raw_ref": "qatar-doh"},
+    {"carrier": "TK", "flight_numbers": ["TK1828", "TK714"], "stops": 1, "layover_minutes": 180, "duration_minutes": 680, "cabin": "economy", "price_eur": 570, "raw_ref": "turkish-ist"},
+    {"carrier": "EK", "flight_numbers": ["EK74", "EK622"], "stops": 1, "layover_minutes": 495, "duration_minutes": 1090, "cabin": "economy", "price_eur": 505, "raw_ref": "emirates-long-layover"},
+    {"carrier": "SV", "flight_numbers": ["SV128", "SV1024", "SV734"], "stops": 2, "layover_minutes": 270, "duration_minutes": 960, "cabin": "economy", "price_eur": 449, "raw_ref": "saudia-two-stop"},
+    {"carrier": "QR", "flight_numbers": ["QR40", "QR620"], "stops": 1, "layover_minutes": 120, "duration_minutes": 660, "cabin": "premium_economy", "price_eur": 1180, "raw_ref": "qatar-premium-economy"}
+  ]
+}

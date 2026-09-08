@@ -1,0 +1,14 @@
+{
+  "route": {"origin": "CDG", "destination": "ISB"},
+  "departure_date": "2026-12-20",
+  "note": "Wedding-season Sunday. PIA direct, Gulf/Turkish 1-stops, and three drops: Emirates on a 9h40 Dubai layover, Saudia 2-stop via JED+RUH, Qatar in business.",
+  "itineraries": [
+    {"carrier": "PK", "flight_numbers": ["PK750"], "stops": 0, "layover_minutes": 0, "duration_minutes": 470, "cabin": "economy", "price_eur": 540, "raw_ref": "pia-direct"},
+    {"carrier": "QR", "flight_numbers": ["QR40", "QR614"], "stops": 1, "layover_minutes": 125, "duration_minutes": 700, "cabin": "economy", "price_eur": 612, "raw_ref": "qatar-doh"},
+    {"carrier": "GF", "flight_numbers": ["GF18", "GF784"], "stops": 1, "layover_minutes": 110, "duration_minutes": 695, "cabin": "economy", "price_eur": 498, "raw_ref": "gulfair-bah"},
+    {"carrier": "TK", "flight_numbers": ["TK1828", "TK710"], "stops": 1, "layover_minutes": 195, "duration_minutes": 700, "cabin": "economy", "price_eur": 585, "raw_ref": "turkish-ist"},
+    {"carrier": "EK", "flight_numbers": ["EK74", "EK612"], "stops": 1, "layover_minutes": 580, "duration_minutes": 1175, "cabin": "economy", "price_eur": 489, "raw_ref": "emirates-long-layover"},
+    {"carrier": "SV", "flight_numbers": ["SV128", "SV1024", "SV730"], "stops": 2, "layover_minutes": 300, "duration_minutes": 990, "cabin": "economy", "price_eur": 455, "raw_ref": "saudia-two-stop"},
+    {"carrier": "QR", "flight_numbers": ["QR40", "QR614"], "stops": 1, "layover_minutes": 125, "duration_minutes": 700, "cabin": "business", "price_eur": 2450, "raw_ref": "qatar-business"}
+  ]
+}

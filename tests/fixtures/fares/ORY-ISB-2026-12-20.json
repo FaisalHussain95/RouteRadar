@@ -1,0 +1,6 @@
+{
+  "route": {"origin": "ORY", "destination": "ISB"},
+  "departure_date": "2026-12-20",
+  "note": "Orly has no single-ticket service to Pakistan (PRD open question). An empty result is the realistic answer, and callers must treat it as 'no flights', not as a failure.",
+  "itineraries": []
+}

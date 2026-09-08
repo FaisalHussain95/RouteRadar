@@ -1,0 +1,13 @@
+{
+  "route": {"origin": "CDG", "destination": "SKT"},
+  "departure_date": "2026-12-20",
+  "note": "No direct service to Sialkot; flydubai is sold under Emirates EK2xxx codeshare numbers. Drops: a Qatar connection whose 6h50 layover is fine but pushes total time past 15h, a Saudia 2-stop, and Emirates premium economy.",
+  "itineraries": [
+    {"carrier": "QR", "flight_numbers": ["QR40", "QR632"], "stops": 1, "layover_minutes": 130, "duration_minutes": 655, "cabin": "economy", "price_eur": 634, "raw_ref": "qatar-doh"},
+    {"carrier": "EK", "flight_numbers": ["EK74", "EK2342"], "stops": 1, "layover_minutes": 240, "duration_minutes": 840, "cabin": "economy", "price_eur": 598, "raw_ref": "emirates-flydubai-codeshare"},
+    {"carrier": "TK", "flight_numbers": ["TK1828", "TK716"], "stops": 1, "layover_minutes": 190, "duration_minutes": 690, "cabin": "economy", "price_eur": 575, "raw_ref": "turkish-ist"},
+    {"carrier": "QR", "flight_numbers": ["QR38", "QR632"], "stops": 1, "layover_minutes": 410, "duration_minutes": 975, "cabin": "economy", "price_eur": 588, "raw_ref": "qatar-over-fifteen-hours"},
+    {"carrier": "SV", "flight_numbers": ["SV128", "SV1024", "SV738"], "stops": 2, "layover_minutes": 320, "duration_minutes": 1010, "cabin": "economy", "price_eur": 470, "raw_ref": "saudia-two-stop"},
+    {"carrier": "EK", "flight_numbers": ["EK74", "EK2342"], "stops": 1, "layover_minutes": 240, "duration_minutes": 840, "cabin": "premium_economy", "price_eur": 1320, "raw_ref": "emirates-premium-economy"}
+  ]
+}

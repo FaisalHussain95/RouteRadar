@@ -128,6 +128,23 @@ Decisions from S03 (2026-09-09):
   interest" row is an analysis focus, not a filter: an in-scope fare on an unlisted carrier
   is recorded, not dropped. All limits are inclusive.
 
+Decisions from S04 (2026-09-09):
+
+- `providers/base.py` defines `FareProvider` (a `runtime_checkable` Protocol: `name` plus
+  `search(route, departure_date) -> list[Itinerary]`) and `ProviderError`, the one exception
+  family the pipeline catches. Providers raise a `ProviderError` subclass for anything they
+  can foresee (quota, missing fixture, unparseable response) so S07 can record it in
+  `ingest_run.error`; anything else is a bug and propagates. Providers return unfiltered
+  results; scope filtering stays in the pipeline so drop counts reflect what came back.
+- Fake fixtures live at `tests/fixtures/fares/<origin>-<dest>-<YYYY-MM-DD>.json`, one file
+  per query, with `route` and `departure_date` in the body that **must match the file name**
+  (`FixtureInvalid` otherwise). Records omit route/date/provider; the fake stamps them and
+  builds `raw_ref` as `fixture:<file>#<index>:<label>`. An empty `itineraries` list is a
+  valid "no flights" answer (ORY has none), not an error.
+- `FakeFareProvider` defaults its fixtures directory to the repo's `tests/fixtures/fares`
+  resolved relative to the package, reaching out of `src/` on purpose: `fd ingest --provider
+  fake` and the tests share one set of fixtures.
+
 ## The JSON contract (`dashboard.json`)
 
 Shaped by what the design's component consumes (see `specs/ux/design-system.md` § Data
