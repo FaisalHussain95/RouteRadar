@@ -59,7 +59,7 @@ and in/out-of-scope itineraries.
 - [x] Fixtures cover PIA direct, a Gulf 1-stop, and an out-of-scope 2-stop
 
 ## S05 — Gregorian calendar windows
-- status: todo
+- status: done
 - size: S
 
 `calendar_engine/gregorian.py`: wedding rush (Nov 15–Jan 15), Christmas/New Year
@@ -67,9 +67,9 @@ and in/out-of-scope itineraries.
 design: 2026-10-17 → 2026-11-02; encode the rule, not the dates). Multiplier ranges as data
 with a comment citing `specs/brainstorming.md` § 2 and `specs/ux/design-system.md`.
 
-- [ ] Year-spanning windows work (Jan 3 is both wedding and Christmas)
-- [ ] Each tag carries `multiplier_low/high`
-- [ ] Table-driven tests for window edges (Nov 14 vs Nov 15, Jan 15 vs Jan 16)
+- [x] Year-spanning windows work (Jan 3 is both wedding and Christmas)
+- [x] Each tag carries `multiplier_low/high`
+- [x] Table-driven tests for window edges (Nov 14 vs Nov 15, Jan 15 vs Jan 16)
 
 ## S06 — Hijri calendar windows
 - status: todo

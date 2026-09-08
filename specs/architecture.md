@@ -145,6 +145,28 @@ Decisions from S04 (2026-09-09):
   resolved relative to the package, reaching out of `src/` on purpose: `fd ingest --provider
   fake` and the tests share one set of fixtures.
 
+Decisions from S05 (2026-09-09):
+
+- `calendar_engine/gregorian.py` keeps each window as a `Window` row in `WINDOWS`: stored
+  `tag` (`wedding_rush`, `christmas_new_year`, `french_summer`, `french_toussaint`), a band
+  `label` and `kind` for the dashboard export, the multiplier range, and a `span(year)` rule
+  returning the inclusive first and last day of the edition *starting* in that year.
+  `contains(day)` checks the editions starting this year and last year, which is how
+  year-spanning windows work without special cases. Add a window by adding a row.
+- Christmas/New Year is `kind="wedding"`: the brainstorm treats it as the spike on top of
+  the wedding rush, and `religious` is reserved for the Hijri bands. If the export wants
+  a separate colour for it, that is a design-token change, not a calendar one.
+- Toussaint is a rule, not a lookup: two full weeks ending on the first Monday strictly
+  after 1 November (the same in every zone). The tests pin it to the published 2021–2027
+  calendars. Both French spans include the Monday classes resume, so the bands match the
+  design's `from`/`to` exactly.
+- Multiplier ranges: wedding 1.40–1.80 (brainstorm § 2), Christmas 1.60–2.00 (the PRD's
+  2x ceiling), summer 1.15–1.35 and Toussaint 1.05–1.15 (bracketing the design's point
+  values). The design's wedding 1.34 is below the brainstorm floor; the brainstorm wins as
+  the cited source. These are inputs to revise from data, not conclusions.
+- `gregorian_tags(day)` returns `CalendarTag`s sorted by tag. S06's `tags_for` unions it
+  with the Hijri tags and owns dedupe across the two.
+
 ## The JSON contract (`dashboard.json`)
 
 Shaped by what the design's component consumes (see `specs/ux/design-system.md` § Data
