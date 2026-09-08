@@ -121,6 +121,13 @@ Decisions from S02 (2026-09-09):
   The test `conftest.py` points both `FD_DB_PATH` and `FD_DOTENV` into `tmp_path`, which is
   what keeps tests away from `data/` and from a developer's real key.
 
+Decisions from S03 (2026-09-09):
+
+- `providers/filters.py` checks stops, layover, duration and cabin only. Origins and
+  destinations are already enforced by the `Route` literals, and the PRD's "carriers of
+  interest" row is an analysis focus, not a filter: an in-scope fare on an unlisted carrier
+  is recorded, not dropped. All limits are inclusive.
+
 ## The JSON contract (`dashboard.json`)
 
 Shaped by what the design's component consumes (see `specs/ux/design-system.md` § Data

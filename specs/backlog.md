@@ -35,15 +35,15 @@ and `db.py` with idempotent schema creation and an upsert for fare observations,
 - [x] Tests use a temporary DB path, never `data/`
 
 ## S03 — Scope filters
-- status: todo
+- status: done
 - size: S
 
 `providers/filters.py`: `is_in_scope(itinerary) -> bool` and `apply_scope(itineraries)
 -> tuple[kept, dropped_count]` implementing the PRD scope table.
 
-- [ ] Rejects 2+ stops, layover > 7 h, duration > 15 h, non-economy
-- [ ] Boundary tests: exactly 7 h layover and exactly 15 h duration are kept
-- [ ] Direct flights (0 stops, no layover) are kept
+- [x] Rejects 2+ stops, layover > 7 h, duration > 15 h, non-economy
+- [x] Boundary tests: exactly 7 h layover and exactly 15 h duration are kept
+- [x] Direct flights (0 stops, no layover) are kept
 
 ## S04 — FareProvider protocol and fixture-backed fake
 - status: todo
