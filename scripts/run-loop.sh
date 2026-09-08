@@ -29,7 +29,10 @@ for i in $(seq 1 "$max"); do
   fi
   last_doing="$doing"
   echo "=== $(date -Is) session $i start (doing=$doing)" | tee -a "$log"
-  claude -p "$(cat prompts/dev-story.md)" --permission-mode auto 2>&1 | tee -a "$log"
+  # Pushing is allowed for interactive sessions (project settings) but never for the
+  # loop: a bad autonomous run must stay local until a human has looked at `dev`.
+  claude -p "$(cat prompts/dev-story.md)" --permission-mode auto \
+    --disallowedTools "Bash(git push:*)" 2>&1 | tee -a "$log"
   echo "=== $(date -Is) session $i end" | tee -a "$log"
   last_doing="$(grep -B2 'status: doing' specs/backlog.md | grep -o '^## S[0-9]*' | head -1)"
   [ -n "$last_doing" ] && [ "$last_doing" = "$doing" ] && { echo "story $doing left 'doing' — blocked, stopping" | tee -a "$log"; exit 1; }
