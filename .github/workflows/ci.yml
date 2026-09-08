@@ -1,0 +1,26 @@
+# Definition of done, on every push and PR: the same scripts/check.sh the Stop hook runs
+# locally, so CI and the dev loop can never disagree about what "green" means.
+name: ci
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - uses: pnpm/action-setup@v4
+        if: hashFiles('web/package.json') != ''
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        if: hashFiles('web/package.json') != ''
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+      - run: bash scripts/check.sh

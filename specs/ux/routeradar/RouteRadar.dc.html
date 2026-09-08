@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="_ds/nocturne-1a4cd432-144b-455d-9af6-a30371950bdc/styles.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="_ds/nocturne-1a4cd432-144b-455d-9af6-a30371950bdc/_ds_bundle.js"></script>
+<style>
+  body { margin: 0; background: #161826; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: #3f424d; border-radius: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  a { color: #b5abfc; }
+  a:hover { color: #d2cefd; }
+</style>
+</helmet>
+<div ref="{{ rootRef }}" style="min-height:100vh;background:#161826;color:#e9e9ed;font-family:Inter,system-ui,sans-serif;font-size:15px">
+
+  <header style="{{ headerStyle }}">
+    <div style="display:flex;align-items:center;gap:8.4px">
+      <div style="width:22px;height:22px;border-radius:50%;border:1.5px solid #9184d9;box-shadow:0 0 12px rgba(145,132,217,0.5);display:flex;align-items:center;justify-content:center">
+        <div style="width:5px;height:5px;border-radius:50%;background:#9184d9"></div>
+      </div>
+      <div style="font-weight:600;letter-spacing:-0.01em;font-size:16px">RouteRadar</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#9184d9;letter-spacing:0.04em">CDG → PK-NORTH</div>
+    </div>
+    <div style="flex:1"></div>
+    <div style="display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;border:1px solid rgba(233,233,237,0.16);font-family:'JetBrains Mono',monospace;font-size:11.5px;color:rgba(233,233,237,0.72);white-space:nowrap">
+      <span style="color:#9184d9">◈</span> Max 1 Stop <span style="opacity:0.35">|</span> Layover ≤ 7h
+    </div>
+    <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:rgba(233,233,237,0.55)">
+      <span style="width:6px;height:6px;border-radius:50%;background:#4bb87c;box-shadow:0 0 8px #4bb87c"></span>
+      Updated today <span style="font-family:'JetBrains Mono',monospace;color:rgba(233,233,237,0.8)">04:00 CET</span> · Daily cron ingest
+    </div>
+  </header>
+
+  <div style="{{ filterBar }}">
+    <div>
+      <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(233,233,237,0.45);margin-bottom:6px">Origin</div>
+      <div style="display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:8px;background:#232532;box-shadow:0 0 0 1px #3f424d;font-family:'JetBrains Mono',monospace;font-size:13px">
+        CDG <span style="opacity:0.4">/</span> ORY <span style="font-family:Inter,sans-serif;font-size:11px;color:rgba(233,233,237,0.45)">Paris · fixed</span>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(233,233,237,0.45);margin-bottom:6px">Destination</div>
+      <div style="display:flex;border:1px solid rgba(233,233,237,0.16);border-radius:8px;overflow:hidden">
+        <sc-for list="{{ dests }}" as="d" hint-placeholder-count="4">
+          <button onClick="{{ d.pick }}" style="{{ d.style }}" style-hover="background:rgba(233,233,237,0.07)">{{ d.label }}</button>
+        </sc-for>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(233,233,237,0.45);margin-bottom:6px">Carriers</div>
+      <div style="display:flex;gap:5.6px;flex-wrap:wrap">
+        <sc-for list="{{ carrierChips }}" as="c" hint-placeholder-count="6">
+          <button onClick="{{ c.toggle }}" style="{{ c.style }}">
+            <span style="{{ c.dotStyle }}"></span>{{ c.name }}
+          </button>
+        </sc-for>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(233,233,237,0.45);margin-bottom:6px">Booking horizon</div>
+      <div style="display:flex;border:1px solid rgba(233,233,237,0.16);border-radius:8px;overflow:hidden">
+        <sc-for list="{{ horizons }}" as="h" hint-placeholder-count="6">
+          <button onClick="{{ h.pick }}" style="{{ h.style }}">{{ h.label }}</button>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <div style="{{ mainGrid }}">
+
+    <section style="{{ chartCard }}">
+      <div style="display:flex;align-items:baseline;gap:11.2px;margin-bottom:4px;flex-wrap:wrap">
+        <h4 style="margin:0;font-size:17px">Lowest fare by carrier</h4>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#9184d9">CDG → {{ destLabel }}</span>
+        <div style="flex:1"></div>
+        <span style="font-size:11.5px;color:rgba(233,233,237,0.45)">Rolling 11 months · departure date × minimum EUR fare</span>
+      </div>
+
+      <div style="{{ scrollWrap }}">
+      <div style="{{ plotFrame }}">
+        <div ref="{{ plotRef }}" onMouseMove="{{ onMove }}" onMouseLeave="{{ onLeave }}" style="position:relative;height:340px;cursor:crosshair">
+          <sc-for list="{{ bands }}" as="b" hint-placeholder-count="5"><div style="{{ b.style }}"></div></sc-for>
+          <sc-for list="{{ yTicks }}" as="t" hint-placeholder-count="6"><div style="{{ t.lineStyle }}"></div></sc-for>
+          <sc-for list="{{ pins }}" as="p" hint-placeholder-count="6"><div style="{{ p.lineStyle }}"></div></sc-for>
+          <svg viewBox="0 0 1000 340" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible">
+            <sc-for list="{{ series }}" as="s" hint-placeholder-count="6">
+              <path d="{{ s.d }}" fill="none" stroke="{{ s.color }}" stroke-width="1.6" vector-effect="non-scaling-stroke" stroke-linejoin="round"></path>
+            </sc-for>
+          </svg>
+          <sc-for list="{{ bands }}" as="b" hint-placeholder-count="5"><div style="{{ b.labelStyle }}">{{ b.label }}</div></sc-for>
+          <sc-for list="{{ yTicks }}" as="t" hint-placeholder-count="6"><div style="{{ t.style }}">{{ t.label }}</div></sc-for>
+          <sc-if value="{{ hoverOn }}" hint-placeholder-val="{{ false }}">
+            <div style="{{ hoverLine }}"></div>
+            <div style="{{ hoverCard }}">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:#e9e9ed">{{ hoverDate }}</span>
+                <sc-for list="{{ hoverTags }}" as="t" hint-placeholder-count="1"><span style="{{ t.style }}">{{ t.label }}</span></sc-for>
+              </div>
+              <sc-for list="{{ hoverRows }}" as="r" hint-placeholder-count="4">
+                <div style="{{ r.rowStyle }}">
+                  <span style="{{ r.dot }}"></span>
+                  <span style="font-size:12px">{{ r.name }} <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:rgba(233,233,237,0.5)">{{ r.route }} · {{ r.dur }}</span></span>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500">{{ r.fare }}</span>
+                </div>
+              </sc-for>
+              <sc-for list="{{ hoverNews }}" as="n" hint-placeholder-count="0">
+                <div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(233,233,237,0.12);font-size:11.5px;color:rgba(233,233,237,0.75)">
+                  <span style="color:#e0574a">◆</span> {{ n.head }}
+                  <span style="font-family:'JetBrains Mono',monospace;color:rgba(233,233,237,0.5)"> {{ n.impact }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-for list="{{ pins }}" as="p" hint-placeholder-count="6">
+            <button onClick="{{ p.open }}" style="{{ p.style }}">{{ p.glyph }}</button>
+          </sc-for>
+        </div>
+        <div style="position:relative;height:18px;margin-top:16.8px">
+          <sc-for list="{{ xTicks }}" as="t" hint-placeholder-count="11"><div style="{{ t.style }}">{{ t.label }}</div></sc-for>
+        </div>
+      </div>
+
+      </div>
+      <div style="display:flex;gap:16.8px;flex-wrap:wrap;padding:11.2px 0 8.4px;border-top:1px solid rgba(233,233,237,0.1);margin-top:8.4px;font-size:11.5px;color:rgba(233,233,237,0.55)">
+        <span><span style="display:inline-block;width:18px;height:9px;border-radius:2px;background:rgba(214,166,60,0.28);border-left:1px solid #d6a63c;border-right:1px solid #d6a63c;margin-right:6px"></span>Wedding season</span>
+        <span><span style="display:inline-block;width:18px;height:9px;border-radius:2px;background:rgba(63,174,141,0.28);border-left:1px solid #3fae8d;border-right:1px solid #3fae8d;margin-right:6px"></span>Ramadan / Eid / Hajj</span>
+        <span><span style="display:inline-block;width:18px;height:9px;border-radius:2px;background:rgba(111,143,214,0.28);border-left:1px solid #6f8fd6;border-right:1px solid #6f8fd6;margin-right:6px"></span>French holidays</span>
+        <span><span style="display:inline-block;width:11px;height:11px;border-radius:50%;border:1px solid #e0574a;margin-right:6px;vertical-align:-2px"></span>News event — click a pin</span>
+      </div>
+    </section>
+
+    <aside style="{{ asideStyle }}">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:11.2px">
+        <h5 style="margin:0;font-size:15px">Event feed</h5>
+        <div style="flex:1"></div>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:rgba(233,233,237,0.45)">GDELT · AVH · EASA</span>
+      </div>
+      <div style="{{ feedListStyle }}">
+        <sc-for list="{{ feed }}" as="f" hint-placeholder-count="6">
+          <button onClick="{{ f.open }}" style="display:flex;gap:9px;text-align:left;background:transparent;border:0;border-radius:8px;padding:9px;cursor:pointer;color:#e9e9ed;font-family:Inter,sans-serif" style-hover="background:rgba(233,233,237,0.05)">
+            <span style="{{ f.sevStyle }}"></span>
+            <span style="min-width:0">
+              <span style="display:block;font-size:12.5px;line-height:1.35;text-wrap:pretty">{{ f.head }}</span>
+              <span style="display:block;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:rgba(233,233,237,0.45);margin-top:3px">{{ f.date }} · {{ f.src }} · impact {{ f.score }}</span>
+              <span style="display:block;font-family:'JetBrains Mono',monospace;font-size:11px;color:#b5abfc;margin-top:2px">{{ f.impact }}</span>
+            </span>
+          </button>
+        </sc-for>
+      </div>
+    </aside>
+  </div>
+
+  <div style="{{ modulesGrid }}">
+
+    <section style="border-radius:8px;background:#1b1d2c;box-shadow:0 0 0 1px #3f424d;padding:16.8px">
+      <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#9184d9;margin-bottom:8.4px">Airport arbitrage</div>
+      <h5 style="margin:0 0 11.2px;font-size:15px">LHE + M-11 transfer vs. SKT direct</h5>
+      <div style="display:grid;grid-template-columns:52px 1fr auto;gap:8px 11.2px;align-items:center;font-family:'JetBrains Mono',monospace;font-size:12.5px">
+        <span style="color:rgba(233,233,237,0.6)">LHE</span>
+        <span style="height:7px;background:rgba(233,233,237,0.06);border-radius:3px"><span style="{{ arbBarLHE }}"></span></span>
+        <span>{{ arbLHE }}</span>
+        <span style="color:rgba(233,233,237,0.6)">SKT</span>
+        <span style="height:7px;background:rgba(233,233,237,0.06);border-radius:3px"><span style="{{ arbBarSKT }}"></span></span>
+        <span>{{ arbSKT }}</span>
+      </div>
+      <div style="margin-top:14px;padding-top:11.2px;border-top:1px solid rgba(233,233,237,0.1)">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:22px;color:#d2cefd">{{ arbSpread }}</div>
+        <div style="font-size:12px;color:rgba(233,233,237,0.55);margin-top:2px">spread SKT − LHE on the sampled date</div>
+        <div style="margin-top:9px;display:inline-flex;align-items:center;gap:7px;padding:5px 10px;border-radius:8px;background:rgba(145,132,217,0.12);box-shadow:inset 0 0 0 1px #9184d9;font-size:12.5px;color:#d2cefd">
+          {{ arbVerdict }}
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:rgba(233,233,237,0.5);margin-top:7px">{{ arbNet }} · 4h 10m road, M-11</div>
+      </div>
+    </section>
+
+    <section style="border-radius:8px;background:#1b1d2c;box-shadow:0 0 0 1px #3f424d;padding:16.8px">
+      <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#9184d9;margin-bottom:8.4px">Carrier efficiency matrix</div>
+      <h5 style="margin:0 0 14px;font-size:15px">Price vs. total transit time</h5>
+      <div style="position:relative;height:190px;margin-left:34px;border-left:1px solid rgba(233,233,237,0.14);border-bottom:1px solid rgba(233,233,237,0.14)">
+        <div style="position:absolute;inset:0;background:linear-gradient(to top right,rgba(63,174,109,0.10),transparent 55%);pointer-events:none"></div>
+        <div style="position:absolute;left:0;bottom:0;width:50%;height:50%;border-right:1px dashed rgba(233,233,237,0.12);border-top:1px dashed rgba(233,233,237,0.12);pointer-events:none"></div>
+        <div style="position:absolute;left:6px;bottom:6px;font-size:10px;letter-spacing:0.06em;text-transform:uppercase;color:rgba(63,174,109,0.85)">Sweet spot</div>
+        <sc-for list="{{ pts }}" as="p" hint-placeholder-count="6"><div style="{{ p.style }}"></div></sc-for>
+        <sc-for list="{{ pts }}" as="p" hint-placeholder-count="6"><div style="{{ p.labelStyle }}">{{ p.name }} {{ p.fare }}</div></sc-for>
+        <div style="position:absolute;left:-34px;top:-2px;font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(233,233,237,0.4)">€1100</div>
+        <div style="position:absolute;left:-34px;bottom:-2px;font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(233,233,237,0.4)">€480</div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-left:34px;margin-top:6px;font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(233,233,237,0.4)">
+        <span>7h</span><span>total transit</span><span>17h</span>
+      </div>
+    </section>
+
+    <section style="border-radius:8px;background:#1b1d2c;box-shadow:0 0 0 1px #3f424d;padding:16.8px">
+      <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#9184d9;margin-bottom:8.4px">Seasonal multiplier</div>
+      <h5 style="margin:0 0 14px;font-size:15px">Current window vs. February baseline</h5>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:44px;line-height:1;color:#d6a63c">{{ gaugePct }}</div>
+      <div style="height:9px;background:rgba(233,233,237,0.06);border-radius:999px;margin:14px 0 11.2px"><div style="{{ gaugeFill }}"></div></div>
+      <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:12.5px">
+        <span>{{ gaugeNow }} <span style="font-family:Inter,sans-serif;font-size:11.5px;color:rgba(233,233,237,0.5)">current avg</span></span>
+        <span style="color:rgba(233,233,237,0.6)">{{ gaugeBase }} <span style="font-family:Inter,sans-serif;font-size:11.5px;color:rgba(233,233,237,0.5)">Feb shoulder</span></span>
+      </div>
+      <div style="margin-top:14px;padding-top:11.2px;border-top:1px solid rgba(233,233,237,0.1);font-size:12px;color:rgba(233,233,237,0.6);text-wrap:pretty">
+        Baseline is the mean lowest fare across the six carriers over the February off-peak shoulder, same destination and constraints.
+      </div>
+    </section>
+  </div>
+
+  <sc-if value="{{ evOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeEvent }}" style="position:fixed;inset:0;background:rgba(10,11,18,0.6);backdrop-filter:blur(2px);z-index:60"></div>
+    <div style="position:fixed;top:0;right:0;bottom:0;width:min(430px,92vw);background:#1b1d2c;box-shadow:0 0 0 1px #595d6c,0 16px 40px rgba(0,0,0,0.65);z-index:61;padding:22.4px;overflow-y:auto">
+      <div style="display:flex;align-items:center;gap:8.4px;margin-bottom:16.8px">
+        <span style="{{ evSevStyle }}">{{ evSev }}</span>
+        <div style="flex:1"></div>
+        <button onClick="{{ closeEvent }}" class="btn btn-secondary" style="padding:4px 10px;font-size:13px">Close</button>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(233,233,237,0.5);margin-bottom:6px">{{ evDate }}</div>
+      <h4 style="margin:0 0 11.2px;font-size:22px;text-wrap:pretty">{{ evHead }}</h4>
+      <p style="font-size:13.5px;line-height:1.6;color:rgba(233,233,237,0.75);text-wrap:pretty">{{ evBody }}</p>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:8px 16.8px;margin-top:16.8px;padding-top:14px;border-top:1px solid rgba(233,233,237,0.12);font-size:12.5px">
+        <span style="color:rgba(233,233,237,0.5)">Source</span><span style="font-family:'JetBrains Mono',monospace">{{ evSrc }}</span>
+        <span style="color:rgba(233,233,237,0.5)">Est. fare impact</span><span style="font-family:'JetBrains Mono',monospace;color:#d2cefd">{{ evImpact }}</span>
+        <span style="color:rgba(233,233,237,0.5)">Scope</span><span>Carrier set under Max 1 Stop · Layover ≤ 7h</span>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1100}}">
+const CARRIERS = [
+  { code: "PK", name: "PIA", color: "#3fae6d", base: 612, hub: "Direct", transit: 8.1, direct: true },
+  { code: "QR", name: "Qatar", color: "#d1487f", base: 705, hub: "DOH", transit: 12.4 },
+  { code: "EK", name: "Emirates", color: "#e0574a", base: 738, hub: "DXB", transit: 13.9 },
+  { code: "GF", name: "Gulf Air", color: "#d6a63c", base: 574, hub: "BAH", transit: 15.6 },
+  { code: "TK", name: "Turkish", color: "#e0435c", base: 651, hub: "IST", transit: 11.2 },
+  { code: "SV", name: "Saudia", color: "#37a894", base: 629, hub: "JED", transit: 14.8 },
+];
+const DESTS = [
+  { code: "ISB", label: "ISB", mult: 1.0 },
+  { code: "LHE", label: "LHE", mult: 0.955 },
+  { code: "SKT", label: "SKT", mult: 1.085 },
+  { code: "ALL", label: "All · compare", mult: 1.0 },
+];
+const HORIZONS = [14, 30, 60, 90, 120, 180];
+const DAY = 86400000;
+const START = Date.UTC(2026, 8, 9);
+const N = 111, STEP = 3;
+const BANDS = [
+  { label: "Desi wedding season", from: "2026-11-15", to: "2027-01-15", color: "#d6a63c", mult: 1.34, tag: "Wedding peak" },
+  { label: "French Toussaint", from: "2026-10-17", to: "2026-11-02", color: "#6f8fd6", mult: 1.11, tag: "FR school holiday" },
+  { label: "Ramadan", from: "2027-02-17", to: "2027-03-18", color: "#3fae8d", mult: 0.92, tag: "Ramadan" },
+  { label: "Eid-ul-Fitr corridor", from: "2027-03-18", to: "2027-03-28", color: "#3fae8d", mult: 1.27, tag: "Eid-ul-Fitr" },
+  { label: "Eid-ul-Adha / Hajj", from: "2027-05-22", to: "2027-06-08", color: "#3fae8d", mult: 1.21, tag: "Hajj corridor" },
+  { label: "French summer", from: "2027-07-04", to: "2027-08-05", color: "#6f8fd6", mult: 1.26, tag: "FR summer peak" },
+];
+const EVENTS = [
+  { date: "2026-10-06", sev: "high", head: "Middle East airspace restriction extended", src: "Aviation Herald", impact: "+7.4% on DOH/DXB routings", body: "Overflight corridor closures push Gulf-hub itineraries onto longer southern tracks; transit times up 40–70 min and re-accommodation pressure lifts Q-class fares." },
+  { date: "2026-11-21", sev: "med", head: "PIA adds 3rd weekly CDG–ISB direct", src: "GDELT / carrier notice", impact: "−4.1% direct fares", body: "Capacity added into the wedding peak. Direct inventory eases the December squeeze, mostly on mid-week departures." },
+  { date: "2027-01-09", sev: "low", head: "EASA safety review update — EU operations", src: "EASA bulletin", impact: "Neutral", body: "Routine airworthiness directive review, no operational restriction applied to the route set." },
+  { date: "2027-02-24", sev: "med", head: "Umrah quota raised for European pilgrims", src: "GDELT", impact: "+5.8% JED-hub", body: "Saudia and Gulf carriers re-allocate seats toward Umrah demand during Ramadan, tightening JED-transit availability." },
+  { date: "2027-04-14", sev: "high", head: "French ATC strike — 48h action notice", src: "GDELT / DGAC", impact: "+9.2% spot fares", body: "Rolling controller action at CDG. Same-week departures repriced sharply; the shock decays within nine days of the notice." },
+  { date: "2027-06-19", sev: "low", head: "Fuel surcharge revision, IATA area 2", src: "Aviation Herald", impact: "+2.0% all carriers", body: "Quarterly surcharge reset applied across the carrier set. A flat shift rather than a demand shock." },
+];
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const dnum = (s) => { const p = s.split("-").map(Number); return Date.UTC(p[0], p[1] - 1, p[2]); };
+const idxOf = (ms) => (ms - START) / DAY / STEP;
+const fmtDate = (ms) => { const d = new Date(ms); return d.getUTCDate() + " " + MONTHS[d.getUTCMonth()] + " " + d.getUTCFullYear(); };
+
+class Component extends DCLogic {
+  state = { dest: "ISB", horizon: 60, off: {}, hover: null, event: null, feedOpen: true };
+
+  bandsAt(i) {
+    const ms = START + i * STEP * DAY;
+    return BANDS.filter(b => ms >= dnum(b.from) && ms <= dnum(b.to));
+  }
+  fare(c, i, destMult) {
+    const ms = START + i * STEP * DAY;
+    let m = 1;
+    this.bandsAt(i).forEach(b => { m *= b.mult; });
+    EVENTS.forEach(e => {
+      const gap = (ms - dnum(e.date)) / DAY;
+      if (gap >= 0 && gap < 27) {
+        const amp = e.sev === "high" ? 0.085 : e.sev === "med" ? (e.impact[0] === "−" ? -0.042 : 0.05) : 0.018;
+        m *= 1 + amp * Math.exp(-gap / 9);
+      }
+    });
+    const wob = Math.sin(i * 0.9 + c.base) * 0.021 + Math.sin(i * 0.31 + c.transit) * 0.034;
+    const drift = 1 + (i / N) * 0.06;
+    return Math.round(c.base * destMult * m * drift * (1 + wob));
+  }
+
+  plotRef = React.createRef();
+  rootRef = React.createRef();
+  componentDidMount() {
+    const el = this.plotRef.current, root = this.rootRef.current;
+    const set = () => {
+      const w = el ? el.clientWidth : 0, vw = root ? root.clientWidth : 1440;
+      if ((w && w !== this.state.plotW) || vw !== this.state.vw) this.setState({ plotW: w, vw: vw });
+    };
+    set();
+    if (window.ResizeObserver) {
+      this.ro = new ResizeObserver(set);
+      if (el) this.ro.observe(el);
+      if (root) this.ro.observe(root);
+    }
+  }
+  componentWillUnmount() { if (this.ro) this.ro.disconnect(); }
+
+  hoverVals(data, lo, hi, act) {
+    const i = this.state.hover;
+    if (i == null || !act.length) return { hoverOn: false, hoverRows: [], hoverNews: [], hoverTags: [] };
+    const ms = START + i * STEP * DAY;
+    const rows = act.map(c => ({
+      name: c.name, color: c.color, dot: "width:7px;height:7px;border-radius:2px;background:" + c.color,
+      fare: "€" + data[c.code][i],
+      route: "CDG-" + (c.direct ? "" : c.hub + "-") + (this.state.dest === "ALL" ? "ISB" : this.state.dest),
+      dur: Math.floor(c.transit) + "h " + String(Math.round((c.transit % 1) * 60)).padStart(2, "0") + "m",
+    })).sort((a, b) => Number(a.fare.slice(1)) - Number(b.fare.slice(1)));
+    rows.forEach((r, k) => { r.rowStyle = "display:grid;grid-template-columns:14px 1fr auto;gap:8px;align-items:center;padding:3px 0;opacity:" + (k === 0 ? 1 : 0.72); });
+    const news = EVENTS.filter(e => Math.abs((ms - dnum(e.date)) / DAY) <= 5)
+      .map(e => ({ head: e.head, impact: e.impact }));
+    const tags = this.bandsAt(i).map(b => ({ label: b.tag, style: "padding:2px 7px;border-radius:4px;font-size:10px;letter-spacing:0.06em;text-transform:uppercase;color:" + b.color + ";background:" + b.color + "1f" }));
+    const l = (i / (N - 1)) * 100;
+    return {
+      hoverOn: true, hoverRows: rows, hoverNews: news, hoverTags: tags,
+      hoverDate: fmtDate(ms),
+      hoverLine: "position:absolute;top:0;bottom:0;left:" + l + "%;width:1px;background:rgba(233,233,237,0.45);pointer-events:none",
+      hoverCard: "position:absolute;top:14px;" + (l > 58 ? "right:" + (100 - l) + "%;margin-right:12px;" : "left:" + l + "%;margin-left:12px;") +
+        "width:" + (this.state.vw && this.state.vw < 620 ? 250 : 290) + "px;padding:11.2px;border-radius:8px;background:rgba(35,37,50,0.97);box-shadow:0 0 0 1px #595d6c,0 16px 40px rgba(0,0,0,0.65);pointer-events:none;z-index:6",
+    };
+  }
+
+  moduleVals(data, act, dm) {
+    const i = this.state.hover == null ? 24 : this.state.hover;
+    const cheap = (code) => Math.min.apply(null, CARRIERS.map(c => this.fare(c, i, DESTS.find(d => d.code === code).mult)));
+    const lhe = cheap("LHE"), skt = cheap("SKT"), isb = cheap("ISB");
+    const spread = skt - lhe, ground = 34;
+    const feb = Math.round(CARRIERS.reduce((s, c) => s + this.fare(c, 51, dm), 0) / CARRIERS.length);
+    const nowAvg = Math.round(CARRIERS.reduce((s, c) => s + this.fare(c, 26, dm), 0) / CARRIERS.length);
+    const pct = Math.round(((nowAvg - feb) / feb) * 100);
+    const pts = act.map(c => {
+      const f = this.fare(c, i, dm);
+      return { code: c.code, name: c.name, color: c.color, fare: "€" + f, hrs: c.transit.toFixed(1) + "h",
+        style: "position:absolute;left:" + (((c.transit - 7) / 10) * 100) + "%;top:" + ((1 - (f - 480) / 620) * 100) + "%;transform:translate(-50%,-50%);width:11px;height:11px;border-radius:50%;background:" + c.color + ";box-shadow:0 0 12px " + c.color + ";cursor:pointer",
+        labelStyle: (function () {
+          const x = ((c.transit - 7) / 10) * 100, y = Math.min(96, Math.max(4, (1 - (f - 480) / 620) * 100));
+          const side = x > 55 ? "right:" + (100 - x) + "%;margin-right:7px;text-align:right;" : "left:" + x + "%;margin-left:7px;";
+          return "position:absolute;" + side + "top:" + y + "%;transform:translateY(-50%);font-family:'JetBrains Mono',monospace;font-size:10px;color:" + c.color + ";white-space:nowrap";
+        })() };
+    });
+    const feed = EVENTS.slice().reverse().map(e => ({
+      head: e.head, src: e.src, impact: e.impact, date: fmtDate(dnum(e.date)),
+      open: () => this.setState({ event: e }),
+      sevStyle: "width:6px;height:6px;border-radius:50%;margin-top:6px;flex:none;background:" + (e.sev === "high" ? "#e0574a" : e.sev === "med" ? "#d6a63c" : "rgba(233,233,237,0.4)") +
+        ";box-shadow:0 0 8px " + (e.sev === "high" ? "#e0574a" : e.sev === "med" ? "#d6a63c" : "transparent"),
+      score: e.sev === "high" ? "0.91" : e.sev === "med" ? "0.64" : "0.22",
+    }));
+    const ev = this.state.event;
+    return {
+      arbLHE: "€" + lhe, arbSKT: "€" + skt, arbISB: "€" + isb,
+      arbSpread: (spread >= 0 ? "+€" : "−€") + Math.abs(spread),
+      arbVerdict: spread - ground > 0 ? "Fly LHE + M-11 transfer" : "Fly SKT direct",
+      arbNet: (spread - ground >= 0 ? "saves €" : "costs €") + Math.abs(spread - ground) + " after €34 ground transfer",
+      arbBarLHE: "height:100%;width:" + Math.round((lhe / Math.max(lhe, skt)) * 100) + "%;background:linear-gradient(90deg,#5d5294,#9184d9);border-radius:3px",
+      arbBarSKT: "height:100%;width:" + Math.round((skt / Math.max(lhe, skt)) * 100) + "%;background:linear-gradient(90deg,#423a6a,#796cbf);border-radius:3px",
+      pts, feed,
+      gaugePct: (pct >= 0 ? "+" : "") + pct + "%",
+      gaugeNow: "€" + nowAvg, gaugeBase: "€" + feb,
+      gaugeFill: "height:100%;width:" + Math.min(100, Math.abs(pct) * 1.3) + "%;background:linear-gradient(90deg,#d6a63c,#e0574a);border-radius:999px",
+      evOpen: !!ev, evHead: ev ? ev.head : "", evBody: ev ? ev.body : "", evSrc: ev ? ev.src : "",
+      evDate: ev ? fmtDate(dnum(ev.date)) : "", evImpact: ev ? ev.impact : "",
+      evSev: ev ? ev.sev.toUpperCase() + " SEVERITY" : "",
+      evSevStyle: "padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.08em;color:" +
+        (ev && ev.sev === "high" ? "#e0574a" : ev && ev.sev === "med" ? "#d6a63c" : "rgba(233,233,237,0.6)") + ";background:" +
+        (ev && ev.sev === "high" ? "rgba(224,87,74,0.14)" : ev && ev.sev === "med" ? "rgba(214,166,60,0.14)" : "rgba(233,233,237,0.08)"),
+      closeEvent: () => this.setState({ event: null }),
+    };
+  }
+
+  active() { return CARRIERS.filter(c => !this.state.off[c.code]); }
+  destMult() { const d = DESTS.find(x => x.code === this.state.dest); return d ? d.mult : 1; }
+
+  onMove = (e) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    const p = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+    this.setState({ hover: Math.round(p * (N - 1)) });
+  };
+  onLeave = () => this.setState({ hover: null });
+
+  renderVals() {
+    const S = this.state, dm = this.destMult(), act = this.active();
+    const dests = DESTS.map(d => ({
+      label: d.label, pick: () => this.setState({ dest: d.code }),
+      style: "padding:7px 14px;border:0;cursor:pointer;background:" + (S.dest === d.code ? "rgba(145,132,217,0.16)" : "transparent") +
+        ";color:" + (S.dest === d.code ? "#d2cefd" : "rgba(233,233,237,0.6)") +
+        ";font-family:'JetBrains Mono',monospace;font-size:13px;box-shadow:" + (S.dest === d.code ? "inset 0 0 0 1px #9184d9" : "none"),
+    }));
+    const carrierChips = CARRIERS.map(c => {
+      const on = !S.off[c.code];
+      return {
+        name: c.name,
+        toggle: () => this.setState(s => ({ off: Object.assign({}, s.off, { [c.code]: on }) })),
+        style: "display:inline-flex;align-items:center;gap:6px;white-space:nowrap;padding:6px 11px;border-radius:8px;cursor:pointer;font-size:12.5px;font-family:Inter,sans-serif;background:" +
+          (on ? "rgba(233,233,237,0.05)" : "transparent") + ";color:" + (on ? "#e9e9ed" : "rgba(233,233,237,0.38)") +
+          ";border:1px solid " + (on ? "rgba(233,233,237,0.16)" : "rgba(233,233,237,0.08)"),
+        dotStyle: "width:8px;height:8px;border-radius:2px;background:" + (on ? c.color : "rgba(233,233,237,0.25)") +
+          ";box-shadow:" + (on ? "0 0 8px " + c.color : "none"),
+      };
+    });
+    const horizons = HORIZONS.map(h => ({
+      label: h + "d", pick: () => this.setState({ horizon: h }),
+      style: "padding:7px 12px;border:0;cursor:pointer;background:" + (S.horizon === h ? "rgba(145,132,217,0.16)" : "transparent") +
+        ";color:" + (S.horizon === h ? "#d2cefd" : "rgba(233,233,237,0.6)") +
+        ";font-family:'JetBrains Mono',monospace;font-size:12.5px;box-shadow:" + (S.horizon === h ? "inset 0 0 0 1px #9184d9" : "none"),
+    }));
+
+    const data = {};
+    CARRIERS.forEach(c => { data[c.code] = Array.from({ length: N }, (_, i) => this.fare(c, i, dm)); });
+    let lo = 1e9, hi = 0;
+    act.forEach(c => data[c.code].forEach(v => { lo = Math.min(lo, v); hi = Math.max(hi, v); }));
+    if (!act.length) { lo = 500; hi = 1000; }
+    lo = Math.floor((lo - 60) / 50) * 50; hi = Math.ceil((hi + 40) / 50) * 50;
+    const W = 1000, H = 340;
+    const px = i => (i / (N - 1)) * W;
+    const py = v => H - ((v - lo) / (hi - lo)) * H;
+    const series = act.map(c => ({
+      code: c.code, color: c.color,
+      d: data[c.code].map((v, i) => (i ? "L" : "M") + px(i).toFixed(1) + " " + py(v).toFixed(1)).join(" "),
+    }));
+    const bands = BANDS.map((b, bi) => {
+      const a = Math.max(0, idxOf(dnum(b.from))), z = Math.min(N - 1, idxOf(dnum(b.to)));
+      const l = (a / (N - 1)) * 100, w = ((z - a) / (N - 1)) * 100;
+      return {
+        label: (function () {
+          const px = (w / 100) * (S.plotW || 1000), alias = { "Desi wedding season": "Wedding", "French Toussaint": "Toussaint", "Eid-ul-Fitr corridor": "Eid-ul-Fitr", "Eid-ul-Adha / Hajj": "Hajj", "French summer": "FR summer" }[b.label] || b.label;
+          if (px >= b.label.length * 7) return b.label;
+          if (px >= alias.length * 7) return alias;
+          return "";
+        })(),
+        show: z > 0 && a < N - 1, row: bi % 2 ? 22 : 6,
+        style: "position:absolute;top:0;bottom:0;left:" + l + "%;width:" + w + "%;background:linear-gradient(to bottom," +
+          b.color + "22," + b.color + "0d);border-left:1px solid " + b.color + "40;border-right:1px solid " + b.color + "40;pointer-events:none",
+        labelStyle: "position:absolute;top:" + (bi % 2 ? 22 : 6) + "px;left:" + (l + 0.5) + "%;width:" + Math.max(0, w - 1) +
+          "%;font-size:9.5px;letter-spacing:0.08em;text-transform:uppercase;color:" + b.color +
+          ";white-space:nowrap;overflow:hidden;text-overflow:clip;pointer-events:none;opacity:0.85",
+      };
+    }).filter(b => b.show);
+    const pins = EVENTS.map(e => {
+      const l = (idxOf(dnum(e.date)) / (N - 1)) * 100;
+      const col = e.sev === "high" ? "#e0574a" : e.sev === "med" ? "#d6a63c" : "rgba(233,233,237,0.5)";
+      return {
+        glyph: e.sev === "high" ? "!" : e.sev === "med" ? "▲" : "•",
+        open: () => this.setState({ event: e }),
+        style: "position:absolute;bottom:-11px;left:" + l + "%;transform:translateX(-50%);width:20px;height:20px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;color:" +
+          col + ";background:#161826;border:1px solid " + col + ";box-shadow:0 0 10px " + col + "66",
+        lineStyle: "position:absolute;top:0;bottom:0;left:" + l + "%;width:1px;background:linear-gradient(to bottom,transparent," + col + "55);pointer-events:none",
+      };
+    });
+    const yTicks = [];
+    for (let v = lo; v <= hi; v += Math.round((hi - lo) / 5 / 50) * 50 || 50) {
+      yTicks.push({ label: "€" + v, style: "position:absolute;right:100%;margin-right:8px;top:" + ((py(v) / H) * 100) + "%;transform:translateY(-50%);font-family:'JetBrains Mono',monospace;font-size:10.5px;color:rgba(233,233,237,0.4)", lineStyle: "position:absolute;left:0;right:0;top:" + ((py(v) / H) * 100) + "%;height:1px;background:rgba(233,233,237,0.06)" });
+    }
+    const xTicks = [];
+    for (let i = 0; i < N; i++) {
+      const d = new Date(START + i * STEP * DAY);
+      if (d.getUTCDate() <= STEP) {
+        const l = (i / (N - 1)) * 100;
+        const anchor = l > 90 ? "right:" + (100 - l) + "%;transform:translateX(0)" : "left:" + l + "%";
+        xTicks.push({ label: MONTHS[d.getUTCMonth()] + (d.getUTCMonth() === 0 ? " " + String(d.getUTCFullYear()).slice(2) : ""), style: "position:absolute;" + anchor + ";white-space:nowrap;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:rgba(233,233,237,0.4)" });
+      }
+    }
+    const vw = S.vw || 1440, narrow = vw < 900, tiny = vw < 620;
+    const pad = tiny ? "12px" : "22.4px";
+    const layout = {
+      rootRef: this.rootRef,
+      mainGrid: "display:grid;grid-template-columns:" + (narrow ? "minmax(0,1fr)" : "minmax(0,1fr) 320px") +
+        ";gap:16.8px;padding:16.8px " + pad + ";align-items:start",
+      asideStyle: "border-radius:8px;background:#1b1d2c;box-shadow:0 0 0 1px #3f424d;padding:16.8px;min-width:0" +
+        (narrow ? "" : ";position:sticky;top:74px"),
+      feedListStyle: "display:flex;flex-direction:column;gap:2px;max-height:" + (narrow ? "300px" : "430px") + ";overflow-y:auto",
+      chartCard: "min-width:0;border-radius:8px;background:#1b1d2c;box-shadow:0 0 0 1px #3f424d;padding:" +
+        (tiny ? "12px 12px 6px" : "16.8px 16.8px 8.4px"),
+      scrollWrap: "overflow-x:auto;overflow-y:hidden;margin:0 -2px;padding:0 2px 4px",
+      plotFrame: "position:relative;margin:22.4px 0 0 44px;min-width:" + (narrow ? "760px" : "0"),
+      headerStyle: "display:flex;align-items:center;gap:" + (tiny ? "10px" : "16.8px") + ";padding:11.2px " + pad +
+        ";border-bottom:1px solid rgba(233,233,237,0.16);position:sticky;top:0;background:rgba(22,24,38,0.92);backdrop-filter:blur(8px);z-index:30;flex-wrap:wrap",
+      filterBar: "display:flex;align-items:flex-end;gap:" + (tiny ? "12px" : "22.4px") + ";padding:16.8px " + pad +
+        ";border-bottom:1px solid rgba(233,233,237,0.16);flex-wrap:wrap;overflow-x:auto",
+      modulesGrid: "display:grid;grid-template-columns:repeat(auto-fit,minmax(" + (tiny ? "260px" : "300px") +
+        ",1fr));gap:16.8px;padding:0 " + pad + " 33.6px",
+      scrollHint: narrow, tooltipW: tiny ? "250px" : "290px",
+    };
+    return Object.assign(layout, { dests, carrierChips, horizons, series, bands, pins, yTicks, xTicks,
+      onMove: this.onMove, onLeave: this.onLeave, plotRef: this.plotRef, destLabel: S.dest === "ALL" ? "ALL" : S.dest },
+      this.hoverVals(data, lo, hi, act), this.moduleVals(data, act, dm));
+  }
+}
+
+</script>
+</body>
+</html>

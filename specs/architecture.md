@@ -1,0 +1,150 @@
+# Architecture — Flight Detective
+
+Lead-tech decisions. Dev sessions follow these without re-deciding them. Change here first.
+
+## Shape: two apps, one contract
+
+```
+ [ pipeline ]  Python, runs daily on this box              [ site ]  static, built in CI
+ fd ingest → fd tag-dates → fd news-ingest → fd export-site
+                                              │
+                                              ▼
+                              data/site/dashboard.json  ── git commit + push ──▶  GitHub
+                              (atomic write, versioned schema)                       │
+                                                                 push touching web/** or the JSON
+                                                                                     ▼
+                                                        Actions: pnpm build → deploy-pages (atomic)
+                                                                                     ▼
+                                                                          GitHub Pages (CDN)
+```
+
+Decisions this encodes (2026-09-09):
+
+- **The dashboard is a static site, fully cacheable.** No API, no server-side rendering,
+  no runtime data fetch. The site is built *from* `dashboard.json`; the data is bundled as
+  a hashed asset. Every deploy is a new immutable set of files behind a tiny `index.html`.
+- **The pipeline never builds the site.** It writes one JSON file and commits it. The
+  build and deploy live in `.github/workflows/deploy-site.yml`, triggered by that commit
+  (and by changes under `web/`). A failed ingest commits nothing, so yesterday's site
+  stays up; a failed build leaves the previous Pages deployment serving.
+- **Zero downtime comes from Pages, not from us.** A Pages deployment swaps atomically.
+  There is no symlink dance and no nginx to keep alive on the box.
+- **Rebuild only on change.** The workflow's `paths:` filter is the change detection: a
+  pipeline run that produces an identical JSON makes no commit (`git diff --quiet`), and
+  no commit means no build.
+- **Deployment is a directory.** `web/dist/` is plain files. Pages is the chosen host
+  because it needs no server and no secrets beyond the repo itself; moving to Cloudflare
+  Pages or the box's nginx changes only the last workflow step.
+- **The box needs push rights.** A deploy key limited to this repo, in
+  `~/.ssh/flight-detective-deploy` on the box, used only by `deploy/push-data.sh`.
+
+## Stack
+
+| Layer | Choice | Why |
+|---|---|---|
+| Pipeline | Python 3.12, `uv`, src layout | `hijri-converter`, DuckDB and the scraping APIs are Python-first; uv makes a clean `uv sync` on the immutable host. |
+| Storage | DuckDB, single file `data/flight_detective.duckdb` | One process, one host, analytical queries. No server to babysit. |
+| CLI | Typer (`fd …`) | Every pipeline step is a subcommand so a systemd timer and a human run the same thing. |
+| Models | Pydantic v2 | Validated boundaries at provider adapters and for the JSON contract. |
+| HTTP | httpx | Sync is fine; 36 calls a day. |
+| Contract | `data/site/dashboard.json`, JSON Schema in `specs/dashboard-data.schema.json` | Generated from the Pydantic model; the site's TypeScript types are generated from the schema, so both sides fail loudly on drift. |
+| Site | Vite + React + TypeScript in `web/`, `pnpm` | The design (`specs/ux/routeradar/`) is one React-style component; Vite builds it in seconds on the N100 and emits hashed static files. Next.js was considered and rejected: heavier build, and nothing here needs routing or SSR. |
+| Charts | Hand-rolled SVG, as in the design | The design draws its own paths and bands; a chart library would fight it. |
+| Serving | GitHub Pages via `.github/workflows/deploy-site.yml` | CDN, atomic deployments, zero infrastructure. Pages sets its own cache headers (short max-age on everything); hashed asset names make that safe. |
+| CI | `.github/workflows/ci.yml` runs `scripts/check.sh` | One definition of green, shared by the Stop hook, the QA agent and CI. |
+| Tests | pytest with fixtures; Vitest for the site | No network in tests, ever. |
+| Quality | ruff, mypy `--strict`; eslint + tsc for `web/` | `scripts/check.sh` is the definition of done for both. |
+
+## Module map (`src/flight_detective/`)
+
+```
+cli.py              Typer app; one subcommand per pipeline step
+config.py           Settings from env (.env for local), API keys, DB path, site export path
+models.py           Route, Itinerary, FareObservation, CalendarTag, NewsEvent, IngestRun
+db.py               DuckDB connection, schema migrations (idempotent CREATE), upserts
+providers/
+  base.py           FareProvider protocol: search(route, departure_date) -> list[Itinerary]
+  fake.py           Fixture-backed provider for tests/offline
+  serpapi.py        Google Flights via SerpApi
+  filters.py        Scope rules from the PRD (stops, layover, duration, cabin)
+calendar_engine/
+  gregorian.py      Fixed windows: wedding rush, Christmas, French Zone C holidays
+  hijri.py          Ramadan, Eid-ul-Fitr, Eid-ul-Adha/Hajj via hijri-converter
+  tags.py           tags_for(date) -> list[CalendarTag] (union of the above)
+news/
+  gdelt.py          GDELT DOC 2.0 client with the taxonomy queries
+  dedupe.py         One row per incident (title similarity + same day)
+analytics/
+  queries.py        The five F5 questions as functions returning records
+  explain.py        F6: tags + nearby events for a fare row
+export/
+  site.py           Builds DashboardData (Pydantic) from analytics and writes dashboard.json
+  schema.py         Emits specs/dashboard-data.schema.json from the model
+```
+
+`web/` (added by its story): `src/App.tsx` and components per design region, `src/data.ts`
+importing `dashboard.json` (real export if present, else `web/fixtures/dashboard.json`),
+`src/types.ts` generated from the schema.
+
+`deploy/`: systemd units for the box, `push-data.sh`, `install.sh`.
+
+## Data model (pipeline)
+
+`fare_observation` — one row per itinerary seen:
+`observed_on DATE, departure_date DATE, origin, destination, carrier, flight_numbers,
+stops INT, layover_minutes INT, duration_minutes INT, price_eur DECIMAL, provider,
+raw_ref` with primary key `(observed_on, departure_date, origin, destination, carrier,
+flight_numbers)`.
+
+`calendar_tag` — materialised per departure date: `date, tag, multiplier_low,
+multiplier_high`. Recomputed by `fd tag-dates`; cheap, deterministic.
+
+`news_event` — `event_date, category, severity (1–3), headline, source_url, dedupe_key,
+impact_note`.
+
+`ingest_run` — `run_at, provider, queries, rows_kept, rows_dropped, error` so silent
+provider failures show up as a run with zero rows kept.
+
+## The JSON contract (`dashboard.json`)
+
+Shaped by what the design's component consumes (see `specs/ux/design-system.md` § Data
+the page needs). Top level: `schema_version`, `generated_at`, `observed_on`, `carriers[]`,
+`destinations[]`, `horizons[]`, `series[]` (per destination × horizon × carrier: `[date,
+price_eur]` points), `bands[]`, `events[]`, `arbitrage`, `efficiency[]`, `seasonal_gauge`.
+Written with `tmp + os.replace` so a reader never sees a partial file.
+
+## Rules every story follows
+
+- **No network in tests.** Providers and GDELT are called only behind a flag/CLI; tests
+  use fixtures. Recording a new fixture is a manual step documented in the provider file.
+- **Idempotent writes.** Re-running any `fd` command for the same day must not duplicate
+  rows. Use `INSERT … ON CONFLICT DO UPDATE`.
+- **Dates are dates.** `datetime.date` in models; timezone is Europe/Paris only where
+  time-of-day matters (it mostly does not).
+- **Scope filters live in one place** (`providers/filters.py`) and are unit-tested with
+  edge cases at exactly 7 h and 15 h.
+- **Money is `Decimal`** in EUR in the pipeline. The JSON carries integers of euros
+  (prices are whole euros in every provider seen), never floats.
+- **Hand-set multipliers** live in `calendar_engine` as data, with a comment citing the
+  brainstorm table. They are inputs, not outputs, in v1.
+- **The site reads only `dashboard.json`.** No fetches, no env-dependent URLs. If the
+  page needs something, the export grows and the schema version bumps.
+- **Colours and spacing in `web/` come from tokens** in `specs/ux/design-system.md`, never
+  ad-hoc hex values.
+
+## Operational
+
+- `flight-detective-pipeline.service` (oneshot, user unit under `~/.config/systemd/user/`,
+  mirroring how `cloudgaming-panel.service` is run) runs `fd ingest && fd tag-dates &&
+  fd news-ingest && fd export-site && deploy/push-data.sh`;
+  `flight-detective-pipeline.timer` fires it daily at 06:30 Europe/Paris. It pins the
+  absolute `uv` path because systemd does not source the shell profile.
+- `deploy/push-data.sh` commits `data/site/dashboard.json` on `main` with the message
+  `data: <observed_on>` and pushes with the deploy key. If the file is unchanged it exits 0
+  without committing. It never touches anything else in the tree.
+- `deploy-site.yml` builds on that push and deploys to Pages; `ci.yml` runs the checks on
+  every push and PR.
+- Secrets: `SERPAPI_KEY` in `.env` (git-ignored), read by `config.py`. Never in code or
+  specs. The site build has no secrets at all; the deploy key is on the box only.
+- `data/site/dashboard.json` is the **one tracked file under `data/`**; `.gitignore`
+  keeps the DuckDB file and everything else out.

@@ -1,0 +1,57 @@
+# Builds the static dashboard and deploys it to GitHub Pages.
+#
+# Triggered by the two things that can change the page: the site's own code under web/,
+# and the daily data export the pipeline commits at data/site/dashboard.json. Nothing else
+# (pipeline code, specs) rebuilds the site. A Pages deployment replaces the previous one
+# atomically, so there is no window with a missing or half-updated page, and a failed build
+# leaves the previous deployment serving — which is the zero-downtime requirement in
+# specs/prd.md F8 without any server of our own.
+name: deploy-site
+on:
+  push:
+    branches: [main]
+    paths:
+      - "web/**"
+      - "data/site/dashboard.json"
+      - ".github/workflows/deploy-site.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false   # let an in-flight deploy finish; the next one supersedes it
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+        working-directory: web
+      - run: pnpm gen && pnpm lint && pnpm typecheck && pnpm test && pnpm build
+        working-directory: web
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
