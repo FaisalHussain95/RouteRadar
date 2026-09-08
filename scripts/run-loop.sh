@@ -11,6 +11,9 @@
 set -uo pipefail
 cd "$(dirname "$0")/.."
 max=${1:-20}
+# When started from inside an interactive Claude session these mark the child as nested
+# and it refuses to run; the loop's sessions are independent, so drop them.
+unset CLAUDECODE CLAUDE_CODE_ENTRYPOINT
 mkdir -p .loop-state
 log=.loop-state/run-loop.log
 
