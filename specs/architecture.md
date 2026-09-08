@@ -103,7 +103,23 @@ multiplier_high`. Recomputed by `fd tag-dates`; cheap, deterministic.
 impact_note`.
 
 `ingest_run` — `run_at, provider, queries, rows_kept, rows_dropped, error` so silent
-provider failures show up as a run with zero rows kept.
+provider failures show up as a run with zero rows kept. `run_at` is `TIMESTAMPTZ` and the
+model refuses a naive datetime.
+
+Decisions from S02 (2026-09-09):
+
+- `flight_numbers` is stored `+`-joined (`QR40+QR620`), not as a DuckDB LIST, because it
+  is part of the primary key and DuckDB cannot index a list column. Models carry
+  `list[str]`; `db.py` joins on write and splits on read.
+- No schema-version table. `db.init_schema` runs a list of `CREATE … IF NOT EXISTS`
+  statements; adding a column is one more `ALTER TABLE … ADD COLUMN IF NOT EXISTS` in
+  that list. Revisit only when a change needs data rewritten.
+- `Money` (and `Multiplier`) reject floats at validation, but accept ints and strings,
+  because providers emit whole euros as ints and Decimal strict mode would reject those.
+- Settings: `FD_DB_PATH`, `FD_SITE_EXPORT_PATH`, `SERPAPI_KEY`, read from the process
+  environment layered over `.env` (path in `FD_DOTENV`). Real env always wins over `.env`.
+  The test `conftest.py` points both `FD_DB_PATH` and `FD_DOTENV` into `tmp_path`, which is
+  what keeps tests away from `data/` and from a developer's real key.
 
 ## The JSON contract (`dashboard.json`)
 

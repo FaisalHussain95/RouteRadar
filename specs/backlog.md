@@ -21,7 +21,7 @@ Python 3.12 + uv, src layout, Typer CLI with `fd version`, pytest/ruff/mypy wire
 - [x] `uv run fd version` prints the version
 
 ## S02 — Domain models and DuckDB schema
-- status: todo
+- status: done
 - size: M
 
 Create `models.py` (Route, Itinerary, FareObservation, CalendarTag, NewsEvent, IngestRun)
@@ -29,10 +29,10 @@ and `db.py` with idempotent schema creation and an upsert for fare observations,
 `specs/architecture.md` § Data model. Add `config.py` with `DB_PATH` (default
 `data/flight_detective.duckdb`) read from env.
 
-- [ ] `fd db init` creates the file and all four tables; running it twice is a no-op
-- [ ] Upserting the same FareObservation twice yields one row with the second price
-- [ ] `price_eur` is `Decimal` end to end; a float price fails validation
-- [ ] Tests use a temporary DB path, never `data/`
+- [x] `fd db init` creates the file and all four tables; running it twice is a no-op
+- [x] Upserting the same FareObservation twice yields one row with the second price
+- [x] `price_eur` is `Decimal` end to end; a float price fails validation
+- [x] Tests use a temporary DB path, never `data/`
 
 ## S03 — Scope filters
 - status: todo
