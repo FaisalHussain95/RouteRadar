@@ -425,7 +425,7 @@ The script is called as `$REPO/deploy/push-data.sh` from `run-pipeline.sh`, with
 the working directory, and must be executable.
 
 ## S17 — News from GDELT Cloud
-- status: todo
+- status: done
 - size: M
 
 The public GDELT DOC API answered HTTP 429 to nearly every request on 2026-09-09, from two
@@ -479,16 +479,66 @@ before writing the client):
   under `/meta`, check `X-Quota-Cost`), then each query once in the mode it will run
   (9 units). Documented in the module docstring.
 
-- [ ] Fixture-based tests for parsing, the relevance guard, paging and the error classes;
+- [x] Fixture-based tests for parsing, the relevance guard, paging and the error classes;
       no network in tests
-- [ ] The recorded fixtures (6 resolutions + 9 queries) are committed under
+- [x] The recorded fixtures (6 resolutions + 9 queries) are committed under
       `tests/fixtures/gdeltcloud/` with the recording command documented in the module docstring
-- [ ] Entity ids for the six carriers committed as data with the name each resolved from
-- [ ] Re-ingesting the same window is idempotent (story id as the key)
-- [ ] `fd news-ingest` on the box (key in `.env`) returns real events for the last 7 days
+- [x] Entity ids for the six carriers committed as data with the name each resolved from
+- [x] Re-ingesting the same window is idempotent (story id as the key)
+- [x] `fd news-ingest` on the box (key in `.env`) returns real events for the last 7 days
       and the run row shows kept/dropped; paste the command output into this entry
-- [ ] `specs/architecture.md` § news updated: source, budget, guard, why DOC API was dropped
-- [ ] `config.py` reads `GDELT_API_KEY`; missing key gives a one-line actionable error
+- [x] `specs/architecture.md` § news updated: source, budget, guard, why DOC API was dropped
+- [x] `config.py` reads `GDELT_API_KEY`; missing key gives a one-line actionable error
+
+### What the build changed about the design above
+
+Three of the design's assumptions did not survive contact with the API, and the corrections
+are the substance of this story. All three are recorded in `specs/architecture.md` § S17.
+
+1. **Semantic queries could not be phrased as `a or b`.** The server *silently truncates* a
+   query containing a conjunction to its first term — HTTP 200, `ignored` empty, the dropped
+   terms mentioned only in a `note`. The three group queries were re-phrased to one concept
+   each and probed until `applied_filters.search` echoed them verbatim.
+2. **`MIN_SEARCH_SCORE = 0.55` was far too high**, and `match_type=name` must not be exempt.
+   The three committed pools are 300 scored rows over **0.2943–0.4303**, so 0.55 keeps *none*
+   of them — it would have read as "no news this week", every day. (It was originally picked
+   against the superseded pre-correction recordings, whose 204 rows ran 0.25–0.62 and of
+   which exactly one cleared 0.55; wrong there too.) Threshold is now 0.20, below the
+   measured floor, with the relevance guard doing the real filtering. `name` rows carry a
+   score like any other and get no exemption.
+3. **The one-keyword relevance guard let through mostly non-aviation news** ("Pakistan
+   tenders for wheat imports"). It became two-axis: a carrier or flying topic passes alone, a
+   place only passes next to an aviation word. 300 recorded rows → 16.
+
+Also settled here: semantic queries are **not** paged (a bounded relevance pool has no end
+worth reaching, and paging it would cost 3 extra units a day), which is what holds the run
+at the budgeted 9 calls. `export/site.py`'s `HISTORY` was decoupled from the news client —
+it had imported the DOC archive length, and GDELT Cloud's `MAX_DAYS` is a per-query cap of
+30 days, not an archive length.
+
+The severity heuristic lost its direction-reading: `REVERSAL_CUES` demoted "EASA lifts its
+ban" from 3 to 1, and `metrics.significance` cannot tell a ban from its lifting. Accepted
+for this story; if the dashboard wants direction it is a signal to add beside severity.
+
+### The run on the box (2026-09-09)
+
+```
+$ uv run fd news-ingest --days 7
+query units: 980 of 1015 left (Explore)
+news for the last 7 days: 9 queries, 10 events kept, 299 dropped
+```
+
+A second identical run left `news_event` at 10 rows, confirming idempotency on the story id.
+Sample of what was stored:
+
+```
+2026-09-08 s1 [regulatory]          PIA seeks new leadership and staff
+                                    1 article (arynews.tv); significance 0.0753; kept on 'pia'
+2026-09-07 s1 [airspace_disruption] Pakistan Air Force chief vows protect air sovereignty
+                                    2 articles (samaa.tv, thefrontierpost.com); significance 0.1193; kept on 'airspace'
+2026-09-06 s1 [airspace_disruption] Cathay Pacific suspends Dubai Riyadh flights
+                                    1 article (asiaone.com); significance 0.0753; kept on 'dubai'
+```
 
 ## S18 — Stale-news signal on the dashboard
 - status: todo
@@ -502,3 +552,24 @@ one-liner) in `dashboard.json` (schema bump), and have the event feed show a mut
 - [ ] Contract field added, schema regenerated, `web/src/types.ts` regenerated
 - [ ] Feed renders the line from the fixture; hidden when news is fresh (tested)
 - [ ] Empty feed with fresh news still reads as "no events this week", not as an error
+
+**What S17 left you.** The `ingest_run` row is already the source for this — provider
+`gdeltcloud`, with `rows_kept` and a newline-separated `error`. `last_success` is the newest
+`run_at` whose run kept rows; `last_error` is the first line of the newest failing run's
+`error`. Two failure shapes are worth distinguishing in the one-liner, because they need
+different actions and S17 already separates them:
+
+- **Quota exhausted.** `error` contains `not issued after quota exhausted` and the run
+  stopped early, so `queries` is well below 9. This is a sizing problem — nothing will work
+  until the month rolls over — and it is the one worth naming on the dashboard.
+- **A dead query or two.** One line per failed query and `rows_kept > 0`. Usually transient.
+
+`NewsIngestResult.units` carries the remaining budget (`QueryUnits.is_low`, threshold 150),
+but note it is *not* persisted anywhere — it is read from the free `/meta/query-units` per
+run and printed. Exporting a "budget is low" warning means storing it, which S18 should
+decide on rather than assume.
+
+Also relevant: a full page of semantic results is the normal shape of a *quiet* week as much
+as a busy one (the pool is bounded and always fills), so "zero events exported" genuinely
+can mean nothing happened. That is exactly why the signal has to come from the run row
+rather than from the event count.

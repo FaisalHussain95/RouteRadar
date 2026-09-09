@@ -46,6 +46,10 @@ elif [ "$rc" -ne 0 ]; then
   exit "$rc"
 fi
 
+# `fd news-ingest` needs GDELT_API_KEY and exits non-zero without it, so a host that never
+# had the key loses the export and the push too, not just the news. That is deliberate —
+# a silently news-less dashboard is worse than a run that stops and says why — but it is
+# the reason the key belongs in `.env` on every pipeline host. See README § Scheduled.
 "$UV" run fd tag-dates \
   && "$UV" run fd news-ingest \
   && "$UV" run fd export-site \

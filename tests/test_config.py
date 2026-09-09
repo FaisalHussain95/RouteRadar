@@ -37,7 +37,33 @@ def test_missing_key_is_none(monkeypatch: pytest.MonkeyPatch) -> None:
     assert load_settings().serpapi_key is None
 
 
+def test_the_gdelt_key_is_read_from_the_dotenv(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """S17: `GDELT_API_KEY` keeps the name GDELT Cloud's own docs use, like `SERPAPI_KEY`,
+    so it can be copied verbatim out of the dashboard."""
+    dotenv = tmp_path / ".env"
+    dotenv.write_text("GDELT_API_KEY=from-dotenv\n")
+    monkeypatch.setenv("FD_DOTENV", str(dotenv))
+    monkeypatch.delenv("GDELT_API_KEY", raising=False)
+    assert load_settings().gdelt_api_key == "from-dotenv"
+
+
+def test_a_missing_gdelt_key_is_none(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("GDELT_API_KEY", raising=False)
+    assert load_settings().gdelt_api_key is None
+
+
+def test_an_empty_gdelt_key_is_none(monkeypatch: pytest.MonkeyPatch) -> None:
+    """An empty `GDELT_API_KEY=` in `.env` is a key nobody filled in, not a key of "".
+    Treating it as absent is what makes `fd news-ingest` say so in one line."""
+    monkeypatch.setenv("GDELT_API_KEY", "")
+    assert load_settings().gdelt_api_key is None
+
+
 def test_settings_is_immutable() -> None:
-    settings = Settings(db_path=Path("a"), serpapi_key=None, site_export_path=Path("b"))
+    settings = Settings(
+        db_path=Path("a"), serpapi_key=None, gdelt_api_key=None, site_export_path=Path("b")
+    )
     with pytest.raises(AttributeError):
         settings.db_path = Path("c")  # type: ignore[misc]

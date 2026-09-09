@@ -1,0 +1,458 @@
+{
+  "query": "Emirates",
+  "data": [
+    {
+      "entity_id": "e_43de478648df2fe0",
+      "spine_id": "e_43de478648df2fe0",
+      "name": "Emirates",
+      "entity_type": "company",
+      "entity_type_raw": "legal entity",
+      "wikipedia_url": null,
+      "image_url": null,
+      "score": 7,
+      "match_score": 7,
+      "match_type": "exact_name",
+      "match_reason": "Exact normalized name match",
+      "coverage_30d": 0,
+      "coverage_status": "measured",
+      "monitorable": true,
+      "sources": {
+        "news": false,
+        "sec": false,
+        "gem": false,
+        "sanctions": false,
+        "china": false,
+        "wiki": false,
+        "epoch": false,
+        "gov": true,
+        "offices": null
+      },
+      "identifiers": {
+        "gleif": [
+          "549300FBEER7HH9EMW45"
+        ],
+        "wiki_searched": [
+          "e_43de478648df2fe0"
+        ]
+      },
+      "source_universes": [
+        "reference"
+      ],
+      "country_iso3": [
+        "ARE"
+      ],
+      "country_evidence": {
+        "basis": "source_association",
+        "note": "Known country association in linked reference evidence. This does not interchangeably establish citizenship, headquarters, or reporting location."
+      },
+      "public_official": {
+        "checked": true,
+        "is_public_official": false,
+        "total": 0,
+        "status": null,
+        "offices": [],
+        "truncated": false
+      }
+    },
+    {
+      "entity_id": "e_8eb7677d51aebda4",
+      "spine_id": "e_8eb7677d51aebda4",
+      "name": "Emirates (airline)",
+      "entity_type": "organization",
+      "entity_type_raw": "organization",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Emirates_(airline)",
+      "image_url": null,
+      "score": 7,
+      "match_score": 7,
+      "match_type": "exact_alias",
+      "match_reason": "Exact normalized name match",
+      "coverage_30d": 16,
+      "coverage_status": "measured",
+      "monitorable": true,
+      "sources": {
+        "news": true,
+        "sec": false,
+        "gem": false,
+        "sanctions": false,
+        "china": false,
+        "wiki": true,
+        "epoch": false,
+        "gov": false,
+        "offices": null
+      },
+      "identifiers": {},
+      "source_universes": [
+        "media"
+      ],
+      "country_iso3": [],
+      "country_evidence": {
+        "basis": null,
+        "note": "No published country association is known for this candidate."
+      },
+      "public_official": {
+        "checked": true,
+        "is_public_official": false,
+        "total": 0,
+        "status": null,
+        "offices": [],
+        "truncated": false
+      }
+    },
+    {
+      "entity_id": "e_9cd084d290fd3190",
+      "spine_id": "e_9cd084d290fd3190",
+      "name": "United Arab Emirates",
+      "entity_type": "place",
+      "entity_type_raw": "place",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/United_Arab_Emirates",
+      "image_url": null,
+      "score": 2.5,
+      "match_score": 2.5,
+      "match_type": "token_typo",
+      "match_reason": "Single query token is a close spelling match to a name token",
+      "coverage_30d": 147,
+      "coverage_status": "measured",
+      "monitorable": true,
+      "sources": {
+        "news": true,
+        "sec": false,
+        "gem": false,
+        "sanctions": false,
+        "china": false,
+        "wiki": true,
+        "epoch": false,
+        "gov": true,
+        "offices": null
+      },
+      "identifiers": {
+        "edgar_name": [
+          "united arab emirates"
+        ]
+      },
+      "source_universes": [
+        "media"
+      ],
+      "country_iso3": [],
+      "country_evidence": {
+        "basis": null,
+        "note": "No published country association is known for this candidate."
+      },
+      "public_official": {
+        "checked": true,
+        "is_public_official": false,
+        "total": 0,
+        "status": null,
+        "offices": [],
+        "truncated": false
+      }
+    },
+    {
+      "entity_id": "e_ebd4a360c22d4721",
+      "spine_id": "e_ebd4a360c22d4721",
+      "name": "Central Bank of the United Arab Emirates",
+      "entity_type": "organization",
+      "entity_type_raw": "organization",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Central_Bank_of_the_United_Arab_Emirates",
+      "image_url": null,
+      "score": 2.5,
+      "match_score": 2.5,
+      "match_type": "token_typo",
+      "match_reason": "Single query token is a close spelling match to a name token",
+      "coverage_30d": 17,
+      "coverage_status": "measured",
+      "monitorable": true,
+      "sources": {
+        "news": true,
+        "sec": false,
+        "gem": false,
+        "sanctions": false,
+        "china": false,
+        "wiki": true,
+        "epoch": false,
+        "gov": false,
+        "offices": null
+      },
+      "identifiers": {},
+      "source_universes": [
+        "media"
+      ],
+      "country_iso3": [],
+      "country_evidence": {
+        "basis": null,
+        "note": "No published country association is known for this candidate."
+      },
+      "public_official": {
+        "checked": true,
+        "is_public_official": false,
+        "total": 0,
+        "status": null,
+        "offices": [],
+        "truncated": false
+      }
+    },
+    {
+      "entity_id": "e_8c54d23a20db32e7",
+      "spine_id": "e_8c54d23a20db32e7",
+      "name": "Emirates News Agency",
+      "entity_type": "organization",
+      "entity_type_raw": "organization",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Emirates_News_Agency",
+      "image_url": null,
+      "score": 2.5,
+      "match_score": 2.5,
+      "match_type": "token_typo",
+      "match_reason": "Single query token is a close spelling match to a name token",
+      "coverage_30d": 12,
+      "coverage_status": "measured",
+      "monitorable": true,
+      "sources": {
+        "news": true,
+        "sec": false,
+        "gem": false,
+        "sanctions": false,
+        "china": false,
+        "wiki": true,
+        "epoch": false,
+        "gov": false,
+        "offices": null
+      },
+      "identifiers": {},
+      "source_universes": [
+        "media"
+      ],
+      "country_iso3": [],
+      "country_evidence": {
+        "basis": null,
+        "note": "No published country association is known for this candidate."
+      },
+      "public_official": {
+        "checked": true,
+        "is_public_official": false,
+        "total": 0,
+        "status": null,
+        "offices": [],
+        "truncated": false
+      }
+    },
+    {
+      "entity_id": "e_af5b85dac683782c",
+      "spine_id": "e_af5b85dac683782c",
+      "name": "Emirates SkyCargo",
+      "entity_type": "organization",
+      "entity_type_raw": "organization",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Emirates_SkyCargo",
+      "image_url": null,
+      "score": 2.5,
+      "match_score": 2.5,
+      "match_type": "token_typo",
+      "match_reason": "Single query token is a close spelling match to a name token",
+      "coverage_30d": 9,
+      "coverage_status": "measured",
+      "monitorable": true,
+      "sources": {
+        "news": true,
+        "sec": false,
+        "gem": false,
+        "sanctions": false,
+        "china": false,
+        "wiki": true,
+        "epoch": false,
+        "gov": false,
+        "offices": null
+      },
+      "identifiers": {},
+      "source_universes": [
+        "media"
+      ],
+      "country_iso3": [],
+      "country_evidence": {
+        "basis": null,
+        "note": "No published country association is known for this candidate."
+      },
+      "public_official": {
+        "checked": true,
+        "is_public_official": false,
+        "total": 0,
+        "status": null,
+        "offices": [],
+        "truncated": false
+      }
+    },
+    {
+      "entity_id": "wiki:85ed42f7f28094dd479b",
+      "spine_id": null,
+      "name": "Ministry of Foreign Affairs (United Arab Emirates)",
+      "entity_type": "organization",
+      "entity_type_raw": "organization",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Ministry_of_Foreign_Affairs_(United_Arab_Emirates)",
+      "image_url": null,
+      "score": 2.5,
+      "match_score": 2.5,
+      "match_type": "token_typo",
+      "match_reason": "Single query token is a close spelling match to a name token",
+      "coverage_30d": 5,
+      "coverage_status": "measured",
+      "monitorable": true,
+      "sources": {
+        "news": true,
+        "sec": false,
+        "gem": false,
+        "sanctions": false,
+        "china": false,
+        "wiki": true,
+        "epoch": false,
+        "gov": false,
+        "offices": null
+      },
+      "identifiers": {},
+      "source_universes": [
+        "media"
+      ],
+      "country_iso3": [],
+      "country_evidence": {
+        "basis": null,
+        "note": "No published country association is known for this candidate."
+      },
+      "public_official": {
+        "checked": false,
+        "is_public_official": null,
+        "status": null,
+        "total": null,
+        "offices": [],
+        "truncated": false
+      }
+    },
+    {
+      "entity_id": "wiki:8a09797fe1583c14076b",
+      "spine_id": null,
+      "name": "Emirates Global Aluminium",
+      "entity_type": "organization",
+      "entity_type_raw": "organization",
+      "wikipedia_url": "https://de.wikipedia.org/wiki/Emirates_Global_Aluminium",
+      "image_url": null,
+      "score": 2.5,
+      "match_score": 2.5,
+      "match_type": "token_typo",
+      "match_reason": "Single query token is a close spelling match to a name token",
+      "coverage_30d": 4,
+      "coverage_status": "measured",
+      "monitorable": true,
+      "sources": {
+        "news": true,
+        "sec": false,
+        "gem": false,
+        "sanctions": false,
+        "china": false,
+        "wiki": true,
+        "epoch": false,
+        "gov": false,
+        "offices": null
+      },
+      "identifiers": {},
+      "source_universes": [
+        "media"
+      ],
+      "country_iso3": [],
+      "country_evidence": {
+        "basis": null,
+        "note": "No published country association is known for this candidate."
+      },
+      "public_official": {
+        "checked": false,
+        "is_public_official": null,
+        "status": null,
+        "total": null,
+        "offices": [],
+        "truncated": false
+      }
+    },
+    {
+      "entity_id": "e_79aef599d11f3d06",
+      "spine_id": "e_79aef599d11f3d06",
+      "name": "United Arab Emirates Armed Forces",
+      "entity_type": "organization",
+      "entity_type_raw": "organization",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/United_Arab_Emirates_Armed_Forces",
+      "image_url": null,
+      "score": 2.5,
+      "match_score": 2.5,
+      "match_type": "token_typo",
+      "match_reason": "Single query token is a close spelling match to a name token",
+      "coverage_30d": 3,
+      "coverage_status": "measured",
+      "monitorable": true,
+      "sources": {
+        "news": true,
+        "sec": false,
+        "gem": false,
+        "sanctions": false,
+        "china": false,
+        "wiki": true,
+        "epoch": false,
+        "gov": true,
+        "offices": null
+      },
+      "identifiers": {},
+      "source_universes": [
+        "media"
+      ],
+      "country_iso3": [],
+      "country_evidence": {
+        "basis": null,
+        "note": "No published country association is known for this candidate."
+      },
+      "public_official": {
+        "checked": true,
+        "is_public_official": false,
+        "total": 0,
+        "status": null,
+        "offices": [],
+        "truncated": false
+      }
+    },
+    {
+      "entity_id": "e_7624d3d62986dab8",
+      "spine_id": "e_7624d3d62986dab8",
+      "name": "United Arab Emirates Space Agency",
+      "entity_type": "organization",
+      "entity_type_raw": "organization",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/United_Arab_Emirates_Space_Agency",
+      "image_url": null,
+      "score": 2.5,
+      "match_score": 2.5,
+      "match_type": "token_typo",
+      "match_reason": "Single query token is a close spelling match to a name token",
+      "coverage_30d": 2,
+      "coverage_status": "measured",
+      "monitorable": true,
+      "sources": {
+        "news": true,
+        "sec": false,
+        "gem": false,
+        "sanctions": false,
+        "china": false,
+        "wiki": true,
+        "epoch": false,
+        "gov": true,
+        "offices": null
+      },
+      "identifiers": {},
+      "source_universes": [
+        "media"
+      ],
+      "country_iso3": [],
+      "country_evidence": {
+        "basis": null,
+        "note": "No published country association is known for this candidate."
+      },
+      "public_official": {
+        "checked": true,
+        "is_public_official": false,
+        "total": 0,
+        "status": null,
+        "offices": [],
+        "truncated": false
+      }
+    }
+  ]
+}

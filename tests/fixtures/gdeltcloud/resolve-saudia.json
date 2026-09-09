@@ -1,0 +1,446 @@
+{
+  "query": "Saudia",
+  "data": [
+    {
+      "entity_id": "e_8d1aef1961310580",
+      "spine_id": "e_8d1aef1961310580",
+      "name": "Saudia",
+      "entity_type": "organization",
+      "entity_type_raw": "organization",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Saudia",
+      "image_url": null,
+      "score": 7,
+      "match_score": 7,
+      "match_type": "exact_alias",
+      "match_reason": "Exact normalized name match",
+      "coverage_30d": 5,
+      "coverage_status": "measured",
+      "monitorable": true,
+      "sources": {
+        "news": true,
+        "sec": false,
+        "gem": false,
+        "sanctions": false,
+        "china": false,
+        "wiki": true,
+        "epoch": false,
+        "gov": false,
+        "offices": null
+      },
+      "identifiers": {},
+      "source_universes": [
+        "media",
+        "reference"
+      ],
+      "country_iso3": [],
+      "country_evidence": {
+        "basis": null,
+        "note": "No published country association is known for this candidate."
+      },
+      "public_official": {
+        "checked": true,
+        "is_public_official": false,
+        "total": 0,
+        "status": null,
+        "offices": [],
+        "truncated": false
+      }
+    },
+    {
+      "entity_id": "wiki:46698a2f22448c12fb50",
+      "spine_id": null,
+      "name": "Saudi Arabia",
+      "entity_type": "place",
+      "entity_type_raw": "place",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Saudi_Arabia",
+      "image_url": null,
+      "score": 2.5,
+      "match_score": 2.5,
+      "match_type": "typo_alias",
+      "match_reason": "Fuzzy typo/name similarity match",
+      "coverage_30d": 117,
+      "coverage_status": "measured",
+      "monitorable": true,
+      "sources": {
+        "news": true,
+        "sec": false,
+        "gem": false,
+        "sanctions": false,
+        "china": false,
+        "wiki": true,
+        "epoch": false,
+        "gov": false,
+        "offices": null
+      },
+      "identifiers": {},
+      "source_universes": [
+        "media"
+      ],
+      "country_iso3": [],
+      "country_evidence": {
+        "basis": null,
+        "note": "No published country association is known for this candidate."
+      },
+      "public_official": {
+        "checked": false,
+        "is_public_official": null,
+        "status": null,
+        "total": null,
+        "offices": [],
+        "truncated": false
+      }
+    },
+    {
+      "entity_id": "e_fbb45cf217c18e7c",
+      "spine_id": "e_fbb45cf217c18e7c",
+      "name": "Ministry of Foreign Affairs (Saudi Arabia)",
+      "entity_type": "organization",
+      "entity_type_raw": "organization",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Ministry_of_Foreign_Affairs_(Saudi_Arabia)",
+      "image_url": null,
+      "score": 2.5,
+      "match_score": 2.5,
+      "match_type": "token_typo",
+      "match_reason": "Single query token is a close spelling match to a name token",
+      "coverage_30d": 33,
+      "coverage_status": "measured",
+      "monitorable": true,
+      "sources": {
+        "news": true,
+        "sec": false,
+        "gem": false,
+        "sanctions": false,
+        "china": false,
+        "wiki": true,
+        "epoch": false,
+        "gov": false,
+        "offices": null
+      },
+      "identifiers": {},
+      "source_universes": [
+        "media"
+      ],
+      "country_iso3": [],
+      "country_evidence": {
+        "basis": null,
+        "note": "No published country association is known for this candidate."
+      },
+      "public_official": {
+        "checked": true,
+        "is_public_official": false,
+        "total": 0,
+        "status": null,
+        "offices": [],
+        "truncated": false
+      }
+    },
+    {
+      "entity_id": "e_17aeb903f72eb2b9",
+      "spine_id": "e_17aeb903f72eb2b9",
+      "name": "Ministry of Interior (Saudi Arabia)",
+      "entity_type": "organization",
+      "entity_type_raw": "organization",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Ministry_of_Interior_(Saudi_Arabia)",
+      "image_url": null,
+      "score": 2.5,
+      "match_score": 2.5,
+      "match_type": "token_typo",
+      "match_reason": "Single query token is a close spelling match to a name token",
+      "coverage_30d": 8,
+      "coverage_status": "measured",
+      "monitorable": true,
+      "sources": {
+        "news": true,
+        "sec": false,
+        "gem": false,
+        "sanctions": false,
+        "china": false,
+        "wiki": true,
+        "epoch": false,
+        "gov": false,
+        "offices": null
+      },
+      "identifiers": {},
+      "source_universes": [
+        "media"
+      ],
+      "country_iso3": [],
+      "country_evidence": {
+        "basis": null,
+        "note": "No published country association is known for this candidate."
+      },
+      "public_official": {
+        "checked": true,
+        "is_public_official": false,
+        "total": 0,
+        "status": null,
+        "offices": [],
+        "truncated": false
+      }
+    },
+    {
+      "entity_id": "wiki:f24b88c117106facaef2",
+      "spine_id": null,
+      "name": "Council of Ministers of Saudi Arabia",
+      "entity_type": "organization",
+      "entity_type_raw": "organization",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Council_of_Ministers_of_Saudi_Arabia",
+      "image_url": null,
+      "score": 2.5,
+      "match_score": 2.5,
+      "match_type": "token_typo",
+      "match_reason": "Single query token is a close spelling match to a name token",
+      "coverage_30d": 6,
+      "coverage_status": "measured",
+      "monitorable": true,
+      "sources": {
+        "news": true,
+        "sec": false,
+        "gem": false,
+        "sanctions": false,
+        "china": false,
+        "wiki": true,
+        "epoch": false,
+        "gov": false,
+        "offices": null
+      },
+      "identifiers": {},
+      "source_universes": [
+        "media"
+      ],
+      "country_iso3": [],
+      "country_evidence": {
+        "basis": null,
+        "note": "No published country association is known for this candidate."
+      },
+      "public_official": {
+        "checked": false,
+        "is_public_official": null,
+        "status": null,
+        "total": null,
+        "offices": [],
+        "truncated": false
+      }
+    },
+    {
+      "entity_id": "e_6a8a7f9688569232",
+      "spine_id": "e_6a8a7f9688569232",
+      "name": "Ministry of Commerce (Saudi Arabia)",
+      "entity_type": "organization",
+      "entity_type_raw": "organization",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Ministry_of_Commerce_(Saudi_Arabia)",
+      "image_url": null,
+      "score": 2.5,
+      "match_score": 2.5,
+      "match_type": "token_typo",
+      "match_reason": "Single query token is a close spelling match to a name token",
+      "coverage_30d": 3,
+      "coverage_status": "measured",
+      "monitorable": true,
+      "sources": {
+        "news": true,
+        "sec": false,
+        "gem": false,
+        "sanctions": false,
+        "china": false,
+        "wiki": true,
+        "epoch": false,
+        "gov": false,
+        "offices": null
+      },
+      "identifiers": {},
+      "source_universes": [
+        "media"
+      ],
+      "country_iso3": [],
+      "country_evidence": {
+        "basis": null,
+        "note": "No published country association is known for this candidate."
+      },
+      "public_official": {
+        "checked": true,
+        "is_public_official": false,
+        "total": 0,
+        "status": null,
+        "offices": [],
+        "truncated": false
+      }
+    },
+    {
+      "entity_id": "e_bb554b486a84d705",
+      "spine_id": "e_bb554b486a84d705",
+      "name": "Ministry of Defense (Saudi Arabia)",
+      "entity_type": "organization",
+      "entity_type_raw": "organization",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Ministry_of_Defense_(Saudi_Arabia)",
+      "image_url": null,
+      "score": 2.5,
+      "match_score": 2.5,
+      "match_type": "token_typo",
+      "match_reason": "Single query token is a close spelling match to a name token",
+      "coverage_30d": 3,
+      "coverage_status": "measured",
+      "monitorable": true,
+      "sources": {
+        "news": true,
+        "sec": false,
+        "gem": false,
+        "sanctions": false,
+        "china": false,
+        "wiki": true,
+        "epoch": false,
+        "gov": false,
+        "offices": null
+      },
+      "identifiers": {},
+      "source_universes": [
+        "media"
+      ],
+      "country_iso3": [],
+      "country_evidence": {
+        "basis": null,
+        "note": "No published country association is known for this candidate."
+      },
+      "public_official": {
+        "checked": true,
+        "is_public_official": false,
+        "total": 0,
+        "status": null,
+        "offices": [],
+        "truncated": false
+      }
+    },
+    {
+      "entity_id": "e_b55f45cdaa176b05",
+      "spine_id": "e_b55f45cdaa176b05",
+      "name": "Capital Market Authority (Saudi Arabia)",
+      "entity_type": "organization",
+      "entity_type_raw": "organization",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Capital_Market_Authority_(Saudi_Arabia)",
+      "image_url": null,
+      "score": 2.5,
+      "match_score": 2.5,
+      "match_type": "token_typo",
+      "match_reason": "Single query token is a close spelling match to a name token",
+      "coverage_30d": 2,
+      "coverage_status": "measured",
+      "monitorable": true,
+      "sources": {
+        "news": true,
+        "sec": false,
+        "gem": false,
+        "sanctions": false,
+        "china": false,
+        "wiki": true,
+        "epoch": false,
+        "gov": false,
+        "offices": null
+      },
+      "identifiers": {},
+      "source_universes": [
+        "media"
+      ],
+      "country_iso3": [],
+      "country_evidence": {
+        "basis": null,
+        "note": "No published country association is known for this candidate."
+      },
+      "public_official": {
+        "checked": true,
+        "is_public_official": false,
+        "total": 0,
+        "status": null,
+        "offices": [],
+        "truncated": false
+      }
+    },
+    {
+      "entity_id": "e_fb9c3874f9115870",
+      "spine_id": "e_fb9c3874f9115870",
+      "name": "Dera Sacha Sauda",
+      "entity_type": "organization",
+      "entity_type_raw": "organization",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Dera_Sacha_Sauda",
+      "image_url": null,
+      "score": 2.5,
+      "match_score": 2.5,
+      "match_type": "token_typo",
+      "match_reason": "Single query token is a close spelling match to a name token",
+      "coverage_30d": 2,
+      "coverage_status": "measured",
+      "monitorable": true,
+      "sources": {
+        "news": true,
+        "sec": false,
+        "gem": false,
+        "sanctions": false,
+        "china": false,
+        "wiki": true,
+        "epoch": false,
+        "gov": false,
+        "offices": null
+      },
+      "identifiers": {},
+      "source_universes": [
+        "media"
+      ],
+      "country_iso3": [],
+      "country_evidence": {
+        "basis": null,
+        "note": "No published country association is known for this candidate."
+      },
+      "public_official": {
+        "checked": true,
+        "is_public_official": false,
+        "total": 0,
+        "status": null,
+        "offices": [],
+        "truncated": false
+      }
+    },
+    {
+      "entity_id": "wiki:340b945370ab9d63dcaa",
+      "spine_id": null,
+      "name": "Ministry of Energy (Saudi Arabia)",
+      "entity_type": "organization",
+      "entity_type_raw": "organization",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Ministry_of_Energy_(Saudi_Arabia)",
+      "image_url": null,
+      "score": 2.5,
+      "match_score": 2.5,
+      "match_type": "token_typo",
+      "match_reason": "Single query token is a close spelling match to a name token",
+      "coverage_30d": 2,
+      "coverage_status": "measured",
+      "monitorable": true,
+      "sources": {
+        "news": true,
+        "sec": false,
+        "gem": false,
+        "sanctions": false,
+        "china": false,
+        "wiki": true,
+        "epoch": false,
+        "gov": false,
+        "offices": null
+      },
+      "identifiers": {},
+      "source_universes": [
+        "media"
+      ],
+      "country_iso3": [],
+      "country_evidence": {
+        "basis": null,
+        "note": "No published country association is known for this candidate."
+      },
+      "public_official": {
+        "checked": false,
+        "is_public_official": null,
+        "status": null,
+        "total": null,
+        "offices": [],
+        "truncated": false
+      }
+    }
+  ]
+}

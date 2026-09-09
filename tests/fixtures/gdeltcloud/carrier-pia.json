@@ -1,0 +1,305 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "47975009fced",
+      "url": "https://gdeltcloud.com/stories/pia-seeks-new-leadership-and-staff-47975009",
+      "title": "PIA seeks new leadership and staff",
+      "story_date": "2026-09-08",
+      "updated_at": "2026-09-08T08:44:16Z",
+      "processed_at": "2026-09-08T08:44:16Z",
+      "category": "Corporate",
+      "category_code": "cameoplus_corporate",
+      "subcategory": null,
+      "geo": {
+        "country": "Pakistan",
+        "region": "South Asia",
+        "continent": "Asia",
+        "admin1": "Sindh",
+        "location": "Karachi",
+        "latitude": 24.8607,
+        "longitude": 67.0011,
+        "geo_precision": null,
+        "geo_precision_label": null
+      },
+      "geo_provenance": {
+        "method": "representative_linked_event",
+        "event_id": "cameoplus_c317187158a81c71"
+      },
+      "geo_context": {
+        "location_country": "Pakistan",
+        "actor_origin_countries": [
+          "Pakistan"
+        ]
+      },
+      "metrics": {
+        "significance": 0.0753,
+        "article_count": 1,
+        "linked_event_count": 1,
+        "max_linked_event_significance": 0.3169,
+        "civilian_targeting_event_count": 0
+      },
+      "has_events": true,
+      "has_fatalities": false,
+      "has_civilian_targeting": false,
+      "fatalities": 0,
+      "linked_events": [
+        {
+          "id": "cameoplus_c317187158a81c71",
+          "title": "PIA begins restructuring and searches for new CEO"
+        }
+      ],
+      "entity_refs": [
+        {
+          "id": "wiki:96b022cd5d6a195efcd6",
+          "id_space": "wikipedia",
+          "name": "Pakistan International Airlines",
+          "type": "organization",
+          "entity_id": "wiki:96b022cd5d6a195efcd6",
+          "spine_id": null,
+          "wikipedia_url": "https://de.wikipedia.org/wiki/Pakistan_International_Airlines",
+          "image_url": null,
+          "avatar_url": null,
+          "public_official": {
+            "checked": false,
+            "is_public_official": null,
+            "status": null,
+            "total": null,
+            "offices": [],
+            "truncated": false
+          }
+        }
+      ],
+      "matched_categories": [
+        {
+          "code": "CORPORATE",
+          "label": "Corporate"
+        }
+      ],
+      "top_articles": [
+        {
+          "url": "https://arynews.tv/restructuring-underway-at-pia-as-airline-seeks-new-talent-and-leadership",
+          "title": "Restructuring Underway at PIA as Airline Seeks New Talent and Leadership",
+          "domain": "arynews.tv",
+          "rank": 1
+        }
+      ],
+      "language_breakdown": [
+        {
+          "language": "en",
+          "count": 1
+        }
+      ],
+      "top_language": "en",
+      "entity_link": {
+        "entity": "wiki:96b022cd5d6a195efcd6",
+        "mode": "coverage",
+        "via": "story",
+        "role": null,
+        "decision": "coverage",
+        "materiality_confidence": null,
+        "resolution_confidence": null,
+        "resolution_method": "media_entities",
+        "evidence": {
+          "story_id": "47975009fced",
+          "story_date": "2026-09-08"
+        },
+        "story_id": "47975009fced",
+        "story_date": "2026-09-08"
+      },
+      "search_score": null,
+      "related": null
+    },
+    {
+      "id": "b135f90b4631",
+      "url": "https://gdeltcloud.com/stories/pakistan-steps-up-privatization-drive-to-boost-private-inves-b135f90b",
+      "title": "Pakistan steps up privatization drive to boost private investment",
+      "story_date": "2026-09-04",
+      "updated_at": "2026-09-04T18:29:57Z",
+      "processed_at": "2026-09-04T18:29:57Z",
+      "category": "Economic",
+      "category_code": "cameoplus_economic",
+      "subcategory": null,
+      "geo": {
+        "country": "Pakistan",
+        "region": "South Asia",
+        "continent": "Asia",
+        "admin1": null,
+        "location": null,
+        "latitude": null,
+        "longitude": null,
+        "geo_precision": null,
+        "geo_precision_label": null
+      },
+      "geo_provenance": null,
+      "geo_context": {
+        "location_country": "Pakistan",
+        "actor_origin_countries": []
+      },
+      "metrics": {
+        "significance": 0.0753,
+        "article_count": 1,
+        "linked_event_count": 0,
+        "max_linked_event_significance": 0,
+        "civilian_targeting_event_count": 0
+      },
+      "has_events": false,
+      "has_fatalities": false,
+      "has_civilian_targeting": false,
+      "fatalities": 0,
+      "linked_events": [],
+      "entity_refs": [
+        {
+          "id": "wiki:96b022cd5d6a195efcd6",
+          "id_space": "wikipedia",
+          "name": "Pakistan International Airlines",
+          "type": "organization",
+          "entity_id": "wiki:96b022cd5d6a195efcd6",
+          "spine_id": null,
+          "wikipedia_url": "https://de.wikipedia.org/wiki/Pakistan_International_Airlines",
+          "image_url": null,
+          "avatar_url": null,
+          "public_official": {
+            "checked": false,
+            "is_public_official": null,
+            "status": null,
+            "total": null,
+            "offices": [],
+            "truncated": false
+          }
+        },
+        {
+          "id": "e_6fe719815f813201",
+          "id_space": "spine",
+          "name": "Muhammad Aurangzeb",
+          "type": "person",
+          "entity_id": "e_6fe719815f813201",
+          "spine_id": "e_6fe719815f813201",
+          "wikipedia_url": "https://en.wikipedia.org/wiki/Muhammad_Aurangzeb",
+          "image_url": null,
+          "avatar_url": null,
+          "public_official": {
+            "checked": false,
+            "is_public_official": null,
+            "status": null,
+            "total": null,
+            "offices": [],
+            "truncated": false
+          }
+        },
+        {
+          "id": "e_9116b01dc50f7f80",
+          "id_space": "spine",
+          "name": "Asian Development Bank (ADB)",
+          "type": "organization",
+          "entity_id": "e_9116b01dc50f7f80",
+          "spine_id": "e_9116b01dc50f7f80",
+          "wikipedia_url": "https://en.wikipedia.org/wiki/Asian_Development_Bank",
+          "image_url": null,
+          "avatar_url": null,
+          "public_official": {
+            "checked": false,
+            "is_public_official": null,
+            "status": null,
+            "total": null,
+            "offices": [],
+            "truncated": false
+          }
+        },
+        {
+          "id": "e_aec04c6f9af876d7",
+          "id_space": "spine",
+          "name": "Muhammad Ali",
+          "type": "person",
+          "entity_id": "e_aec04c6f9af876d7",
+          "spine_id": "e_aec04c6f9af876d7",
+          "wikipedia_url": "https://en.wikipedia.org/wiki/Muhammad_Ali",
+          "image_url": null,
+          "avatar_url": null,
+          "public_official": {
+            "checked": false,
+            "is_public_official": null,
+            "status": null,
+            "total": null,
+            "offices": [],
+            "truncated": false
+          }
+        }
+      ],
+      "matched_categories": [],
+      "top_articles": [
+        {
+          "url": "https://arynews.tv/pakistan-steps-up-privatization-drive-to-boost-private-investment",
+          "title": "Pakistan steps up privatization drive to boost private investment",
+          "domain": "arynews.tv",
+          "rank": 1
+        }
+      ],
+      "language_breakdown": [
+        {
+          "language": "en",
+          "count": 1
+        }
+      ],
+      "top_language": "en",
+      "search_score": null,
+      "related": null
+    }
+  ],
+  "pagination": {
+    "limit": 100,
+    "cursor": null,
+    "next_cursor": null,
+    "duplicates_collapsed": 0
+  },
+  "sort": "recent",
+  "meta": {
+    "row_source": "settled",
+    "settled_at": "2026-09-06 23:09:00",
+    "row_source_reason": "settled",
+    "coverage": {
+      "start": "2026-03-08",
+      "end": "2026-09-09",
+      "note": "First day of continuous story clustering. Clusters are dated by observation, so this is the true minimum.",
+      "warnings": []
+    },
+    "query_window": {
+      "date_start": "2026-09-03",
+      "date_end": "2026-09-09",
+      "date_basis": "story_date",
+      "date_bounds": "inclusive",
+      "observed_start": null,
+      "observed_end": null,
+      "observed_basis": "cluster_updated_at",
+      "observed_end_exclusive": true,
+      "source": "explicit"
+    }
+  },
+  "applied_filters": {
+    "days": "7",
+    "sort": "recent",
+    "country": [],
+    "region": null,
+    "continent": null,
+    "admin1": null,
+    "bbox": null,
+    "story_category": [],
+    "category": [],
+    "subcategory": [],
+    "domain": null,
+    "has_events": null,
+    "has_fatalities": null,
+    "civilian_targeting": null,
+    "article_count_min": null,
+    "article_count_max": null,
+    "search": null,
+    "languages": [
+      "en",
+      "fr"
+    ],
+    "entity": "wiki:96b022cd5d6a195efcd6",
+    "entity_match": "coverage",
+    "entity_family": "expand",
+    "ignored": {}
+  }
+}

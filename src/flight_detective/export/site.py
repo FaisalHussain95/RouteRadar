@@ -27,9 +27,9 @@ band chip, never an input to arithmetic that has to be exact.
 ## The window
 
 The file covers `generated_at - HISTORY` to `generated_at + FORWARD`, and series, bands and
-events are all clipped to it. It reaches *backwards* because news is: GDELT's archive is the
-last 90 days, so every pin the chart can ever draw sits in the past, and a chart that began
-at today would have an event feed whose rows pointed off the left edge. Forward it is the
+events are all clipped to it. It reaches *backwards* because news is: every pin the chart
+can draw sits in the past, and a chart that began at today would have an event feed whose
+rows pointed off the left edge. Forward it is the
 year `fd tag-dates` tags, so no band names a window `calendar_tag` has no rows for.
 """
 
@@ -49,15 +49,19 @@ from flight_detective.calendar_engine.gregorian import BandKind
 from flight_detective.calendar_engine.tags import tags_for_range, window_for
 from flight_detective.ingest import DEFAULT_HORIZONS
 from flight_detective.models import AwareDatetime, CalendarTag
-from flight_detective.news.gdelt import MAX_DAYS
 
 # Bumped whenever a reader would have to change: a removed or renamed field, or a new
 # required one. The site checks it before trusting the rest of the file.
 SCHEMA_VERSION = 1
 
-# How far back the file reaches, and why: GDELT's DOC 2.0 archive is 90 days, so an event
-# older than this cannot be in `news_event` and no pin can sit before it.
-HISTORY = timedelta(days=MAX_DAYS)
+# How far back the file reaches. This used to be `news/gdelt.py`'s `MAX_DAYS` — the DOC 2.0
+# archive length — on the reasoning that no pin could sit before it. That coupling is gone
+# with the DOC client and must not be re-made against GDELT Cloud's `MAX_DAYS`, which is a
+# *per-query* window cap of 30 days, not an archive length: the daily run asks for a week
+# at a time and `news_event` accumulates, so the table holds events far older than any one
+# query could reach. 90 days is now simply the dashboard's chosen depth, hand-copied into
+# `web/src/lib/select.ts` as `HISTORY_DAYS` (see the test that pins the two together).
+HISTORY = timedelta(days=90)
 
 # How far forward: the range `fd tag-dates` tags by default (cli.DEFAULT_TAG_SPAN), which
 # also covers the longest ingest horizon four times over.

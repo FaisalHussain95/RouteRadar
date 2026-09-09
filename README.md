@@ -20,9 +20,16 @@ bash scripts/check.sh     definition of done: both halves, Python and the site
 test/build` in `web/`. It needs `pnpm` on `PATH`; nvm lives in the shell profile, so a
 non-login shell wants `. ~/.nvm/nvm.sh` first.
 
-`SERPAPI_KEY` goes in `.env` (git-ignored) in the repo root. Without it everything still
-works against the fixture-backed fake provider: `uv run fd ingest --provider fake
---observed-on 2026-12-06 --horizons 14`.
+Two keys go in `.env` (git-ignored) in the repo root:
+
+- `SERPAPI_KEY` — the fare provider. Without it everything still works against the
+  fixture-backed fake provider: `uv run fd ingest --provider fake --observed-on 2026-12-06
+  --horizons 14`.
+- `GDELT_API_KEY` — GDELT Cloud, the news source (S17). **`fd news-ingest` exits non-zero
+  without it**, and it sits inside `run-pipeline.sh`'s `&&` chain, so on a host missing this
+  key the export and push never run either — the whole day is lost, not just the news. The
+  plan is metered (~1,030 query units a month, 9 spent per daily run); `fd news-ingest`
+  prints what is left and warns under 150.
 
 ## Scheduled pipeline
 
@@ -37,6 +44,9 @@ half-built is pushed. The ingest itself is the exception: it exits **3** when so
 (route, horizon) cells failed and the rest were stored, and the chain continues, because
 the PRD budgets under 2 % missing cells and a day with a few holes is still worth
 exporting. Exit 1 (nothing was gathered) and exit 2 (`SERPAPI_KEY` is not set) stop it.
+`fd news-ingest` is inside the chain and fails the run only when *every* GDELT Cloud query
+died — or when `GDELT_API_KEY` is missing, which it reports as one line rather than as nine
+identical query failures.
 
 `deploy/flight-detective-pipeline.{service,timer}` run that daily at 06:30 Europe/Paris.
 They are templates — `@REPO@` and `@UV@` are filled in at install time, because systemd

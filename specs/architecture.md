@@ -73,9 +73,8 @@ calendar_engine/
   hijri.py          Ramadan, Eid-ul-Fitr, Eid-ul-Adha/Hajj via hijri-converter
   tags.py           tags_for(date) -> list[CalendarTag] (union of the above)
 news/
-  gdelt.py          GDELT DOC 2.0 client with the taxonomy queries
-  dedupe.py         One row per incident (title similarity + same day)
-  ingest.py         run_news_ingest(): taxonomy queries, dedupe, severity, upsert, log
+  gdeltcloud.py     GDELT Cloud client: carrier entity + semantic queries, relevance guard
+  ingest.py         run_news_ingest(): the nine daily queries, severity, upsert, log
 analytics/
   queries.py        The five F5 questions, plus fare_series for the chart, as records
   explain.py        F6: tags + nearby events for a fare row
@@ -285,7 +284,15 @@ Decisions from S09 (2026-09-09):
 - `install.sh` never sudoes. `loginctl enable-linger` is printed as a hint; on the VPS it
   was run once for root, since nothing else keeps a user manager alive there.
 
-Decisions from S10 (2026-09-09):
+Decisions from S10 (2026-09-09) — **superseded by S17, kept for the reasoning**:
+
+> S17 replaced the DOC 2.0 source entirely. `news/gdelt.py` and `news/dedupe.py` are
+> deleted. What still holds from below is the *shape*: the `news/` split, one query per
+> topical group, `event_date` as a date, the per-query failure bargain, and reusing
+> `ingest_run`. What does not: the taxonomy queries, the title-similarity dedupe, the
+> keyword severity heuristic and its reversal cues, and the 90-day cap. Read the S17
+> section at the end of this file for what replaced each.
+
 
 - The module map's `news/` gained a third file: `news/gdelt.py` is the DOC 2.0 client,
   `news/dedupe.py` the incident grouping, and **`news/ingest.py`** the pipeline
@@ -476,8 +483,10 @@ reader of the file needs.
 
 ## Rules every story follows
 
-- **No network in tests.** Providers and GDELT are called only behind a flag/CLI; tests
-  use fixtures. Recording a new fixture is a manual step documented in the provider file.
+- **No network in tests.** Providers and GDELT Cloud are called only behind a flag/CLI;
+  tests use fixtures. Recording a new fixture is a manual step documented in the client
+  file — and for GDELT Cloud it *spends query units*, so it is not something to re-run
+  casually.
 - **Idempotent writes.** Re-running any `fd` command for the same day must not duplicate
   rows. Use `INSERT … ON CONFLICT DO UPDATE`.
 - **Dates are dates.** `datetime.date` in models; timezone is Europe/Paris only where
@@ -567,11 +576,15 @@ ever spends the SerpApi quota. Everything below applies to whichever host runs i
   the JSON Schema in **serialization** mode and `fd export-schema` writes the committed
   copy; `tests/test_export.py` fails if the committed file has drifted from the model, so
   the site's generated TypeScript can never be a version behind.
-- **The window reaches backwards as well as forwards**: `generated_at - 90 days` (GDELT's
-  archive, so no pin can exist before it) to `generated_at + 365 days` (the range
-  `fd tag-dates` tags, so no band names a window `calendar_tag` has no rows for). Anchoring
-  the chart at today would have put every news pin off the left edge — GDELT only knows the
-  recent past, while the fares are all in the future.
+- **The window reaches backwards as well as forwards**: `generated_at - 90 days` to
+  `generated_at + 365 days` (the range `fd tag-dates` tags, so no band names a window
+  `calendar_tag` has no rows for). Anchoring the chart at today would have put every news
+  pin off the left edge — news is about the recent past, while the fares are all in the
+  future. The 90 was originally the DOC 2.0 archive length, imported from `news/gdelt.py`;
+  S17 cut that import and it is now simply the chosen depth. **Do not re-couple it to
+  `news/gdeltcloud.py`'s `MAX_DAYS`**, which is a per-query window cap of 30 days, not an
+  archive length — `news_event` accumulates across daily runs and holds events far older
+  than any single query could reach.
 - **Three regions never come from the database**: `carriers[]`, `destinations[]` and
   `horizons[]` are reference tables in `site.py`, so the filter bar renders before the
   first ingest. `bands[]` is the same argument one step on: it is built from
@@ -602,10 +615,10 @@ ever spends the SerpApi quota. Everything below applies to whichever host runs i
   than leaving the mapping in the code.
 - **`impact_score` is not exported.** The design derives it from severity (high 0.91, med
   0.64, low 0.22), so it would be a second copy of a field already in the file. `body` is
-  null in v1 for a harder reason: GDELT's DOC 2.0 `artlist` carries titles and URLs, not
-  article text. `impact_text` carries the ingest's own note (how many outlets, which
-  keyword set the severity), which is not the fare-impact estimate the design's drawer
-  labels it as — S15 relabels it.
+  null in v1 for a harder reason: the news source carries titles and URLs, not article
+  text. `impact_text` carries the ingest's own note (how many outlets, the significance,
+  and the keyword the story was kept on), which is not the fare-impact estimate the
+  design's drawer labels it as — S15 relabels it.
 - `analytics/queries.py` gained a sixth function, `fare_series`, for the chart's own shape.
   It is not an F5 question; it lives there because that is where reads of
   `fare_observation` live, and it buckets lead times with the same `_horizon_bucket_sql` as
@@ -715,3 +728,100 @@ ever spends the SerpApi quota. Everything below applies to whichever host runs i
   with no network and no key that exists anywhere. `tests/test_push_data.py` also hand-parses
   `deploy-site.yml`'s `paths:` list rather than adding a YAML dependency to assert on six
   lines we wrote.
+
+## Decisions from S17 (2026-09-09)
+
+**The source changed.** The free GDELT DOC 2.0 endpoint answered HTTP 429 to nearly every
+request on 2026-09-09 — from two hosts, on a one-word query, at 20 s spacing. An
+unauthenticated service that throttles to zero is not a daily pipeline input. The
+replacement is **GDELT Cloud** (`https://gdeltcloud.com/api/v2`, Bearer `GDELT_API_KEY`
+from `.env`, plan "Explore", ~1,030 query units a month, `/meta/*` free and everything
+else 1 unit a call whatever `limit` says). `news/gdelt.py`, `news/dedupe.py`, their tests
+and `tests/fixtures/gdelt/` are deleted — one news source, not two.
+
+- **Two retrieval arms, nine calls a day.** Six **entity** queries, one per PRD carrier,
+  `/stories?entity=<id>`; and three **semantic** queries for the topical groups that are
+  not entities (airspace, pilgrimage, CDG strikes), `/stories?search=<text>`. The entity
+  ids are committed as data in `CARRIERS` with the name each resolved from and a note on
+  why that candidate — resolving at run time would cost a unit per carrier per day and can
+  silently start meaning something else. `coverage_30d` from `/search` is what separates
+  candidates; Emirates is the recorded case where the *first* candidate was wrong (a
+  company with `sources.news=false` and `coverage_30d=0`, versus the airline at 16).
+- **`search` is embedded, not parsed, and a conjunction silently truncates the query.**
+  This is the trap of the whole story. "Hajj and Umrah pilgrimage flight quotas and Saudi
+  transit visa rules" came back HTTP 200, `applied_filters.ignored` empty, having searched
+  `"Hajj"` alone — the other two terms named only in a `note` field nobody has to read.
+  Every `SemanticQuery` is therefore **one concept with no `and`/`or`**, probed until
+  `applied_filters.search` echoed it verbatim. If a group needs two concepts it becomes two
+  entries and two calls, never one string with an `or` in it.
+- **`applied_filters` is asserted on every page, not assumed.** The characteristic failure
+  on this API is a *plausible* 200: an unrecognised or rewritten filter yields a well-formed
+  answer to a different question. `check_applied_filters` raises when a filter we sent is
+  missing, ignored, or echoed with a different value, so "quiet week" and "the query was
+  wrong" cannot be confused. It compares values, not wire forms (`languages=en,fr` comes
+  back as `["en","fr"]`), and tolerates the keys the server adds unasked (`entity_match`,
+  `entity_family`, `linkage`).
+- **Entity queries are paged; semantic queries are not.** An entity's week is a finite set,
+  so its walk follows `next_cursor` to the end (never `len(data)` — the server looks one
+  row past the page, so a full last page reports `None`). A semantic query instead returns a
+  *bounded relevance pool*: the server sets `meta.search.coverage_complete: false` and says
+  "cursor exhaustion ends a bounded relevance pool and does not establish exhaustive
+  matching coverage". All three pools come back full with a cursor set whether or not
+  anything happened, so paging them would spend 3 extra units every day to fetch the tail
+  of a ranking. One page of 100 is the top 100. **This is what holds the run at 9 calls.**
+- **The relevance guard has two axes, and one keyword is not enough.** Measured: a
+  single-word guard let 40 of 300 recorded rows through, mostly not aviation at all
+  ("Pakistan tenders for wheat imports", "Eiffel Tower strike"). Half the list is geography,
+  and a country name appears in every kind of story filed from that country. So a `subject`
+  keyword (a scope carrier, or a flying topic like airspace/Hajj/EASA) is sufficient alone,
+  while a `place` (origin, destination, hub) is only accepted next to an `AVIATION_TERMS`
+  word. That takes the same 300 rows to 16, all aviation. Add a city as a `place` and an
+  airline as a `subject`; promoting a place to subject re-admits the wheat imports.
+- **`MIN_SEARCH_SCORE = 0.20`, set from the fixtures rather than from a docs example.** The
+  three committed pools are 300 scored rows spanning **0.2943–0.4303**; the 0.55 first
+  written here keeps *none* of them, which would have read as "no news this week" every
+  single day. (It was picked against the superseded pre-correction recordings — 204 rows,
+  0.25–0.62, one clearing 0.55 — and was wrong there too.) These are cosine distances within
+  a bounded pool and never approach 1.0, so a threshold picked by intuition cuts everything. The score is a weak rank, not a verdict — the keyword guard is the
+  real filter. `match_type=name` gets **no exemption**: when `cdg-strikes` was still
+  truncated to the token "strike" it returned 100 `name` rows scoring 0.25–0.36, the word
+  matched in stories about football and politics. A `name` row is a lexical hit, not a
+  verified one.
+- **Severity is `metrics.significance`, not keywords.** On the fixtures significance is a
+  clean function of cluster size (`0.0753 * log2(n+1)`), so the bands are the 90th and 75th
+  percentiles of the recorded rows — 3 at ≥0.25 (~9 outlets), 2 at ≥0.15 (~3), 1 otherwise —
+  and `SEVERITY_BANDS` carries the article-count equivalent so an unmeasured `null` can
+  still be scored. **This measures how loudly something was reported, not capacity lost**,
+  which is a real regression against the DOC-era heuristic: that one read direction and
+  demoted "EASA *lifts* its ban" from 3 to 1, and significance cannot — a ban and its
+  lifting are both big news. Accepted in exchange for a number measured across every outlet
+  rather than a keyword list maintained against wire copy in two languages. If the dashboard
+  needs direction, add it *beside* severity; do not go back to scoring headlines by hand.
+- **`dedupe_key` is the story id.** A Story is already a cluster of articles about one
+  development, which is what `news/dedupe.py`'s title-similarity grouping approximated — so
+  that module and its Jaccard threshold are gone, along with the known limitation that a
+  rolling window eventually re-keyed an incident. What remains is cross-*query* dedupe: the
+  nine queries overlap heavily and the first arm to return a story names it. Carriers run
+  first, so an airline's story is filed under its own category rather than under whichever
+  semantic pool also swept it up.
+- **Errors: one 429 is two opposite things.** `RATE_LIMITED` is "slow down" — waited out
+  once using `details.retry_after`, then retried. `QUOTA_EXCEEDED` is "the month is gone" —
+  it raises `GdeltCloudQuotaError`, and `run_news_ingest` **stops the loop** and records the
+  queries it never issued, rather than rediscovering the same answer nine times. Branch on
+  the body's `code`, never on the status. 5xx and transport blips get one retry; 4xx never.
+- **Parse permissively, and that is load-bearing.** Every string field on this API is
+  nullable in practice: 3 of the 100 rows in the recorded `airspace-disruption` body carry
+  an article with `title: null` and `domain: null`, which rejected the *whole page* until a
+  `BeforeValidator` coerced them. A `null` metric means unmeasured, never zero.
+- **`fd news-ingest` prints the budget first**, from the free `/meta/query-units`, and warns
+  under `LOW_QUERY_UNITS` (150, about a fortnight of runway at 9 a day). A failed budget read
+  is `None` and does not stop the run. A missing key is caught before any query and reported
+  as one actionable line, not as nine identical per-query failures.
+- **The fixtures are real recordings, unlike the DOC ones**, because a keyed API returns a
+  stable enough shape to be worth pinning: `tests/fixtures/gdeltcloud/` holds 6 `/search`
+  resolutions plus the 9 daily queries as recorded on 2026-09-09.
+  `python -m flight_detective.news.gdeltcloud (resolve|record)` re-records them and **costs
+  15 query units**, so it is not a casual step. Nothing reads them at run time.
+- Verified on the box: `fd news-ingest --days 7` → 9 queries, 10 events kept, 299 dropped,
+  no errors; re-running left `news_event` at 10 rows.
+

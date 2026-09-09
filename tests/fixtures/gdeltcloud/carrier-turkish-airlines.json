@@ -1,0 +1,528 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "88a19c0204c2",
+      "url": "https://gdeltcloud.com/stories/liverpool-agrees-record-premier-league-shirt-sponsorship-88a19c02",
+      "title": "Liverpool agrees record Premier League shirt sponsorship",
+      "story_date": "2026-09-08",
+      "updated_at": "2026-09-08T19:58:08Z",
+      "processed_at": "2026-09-08T19:58:08Z",
+      "category": "Corporate",
+      "category_code": "cameoplus_corporate",
+      "subcategory": null,
+      "geo": {
+        "country": "United Kingdom",
+        "region": "Europe",
+        "continent": "Europe",
+        "admin1": "England",
+        "location": "Liverpool",
+        "latitude": 53.4084,
+        "longitude": -2.9916,
+        "geo_precision": null,
+        "geo_precision_label": null
+      },
+      "geo_provenance": {
+        "method": "representative_linked_event",
+        "event_id": "cameoplus_0bf4617513b54505"
+      },
+      "geo_context": {
+        "location_country": "United Kingdom",
+        "actor_origin_countries": [
+          "United Kingdom"
+        ]
+      },
+      "metrics": {
+        "significance": 0.1505,
+        "article_count": 3,
+        "linked_event_count": 1,
+        "max_linked_event_significance": 0.2839,
+        "civilian_targeting_event_count": 0
+      },
+      "has_events": true,
+      "has_fatalities": false,
+      "has_civilian_targeting": false,
+      "fatalities": 0,
+      "linked_events": [
+        {
+          "id": "cameoplus_0bf4617513b54505",
+          "title": "Liverpool agrees record Premier League shirt sponsorship"
+        }
+      ],
+      "entity_refs": [
+        {
+          "id": "e_1740955c7709b9b1",
+          "id_space": "spine",
+          "name": "Liverpool Football Club",
+          "type": "organization",
+          "entity_id": "e_1740955c7709b9b1",
+          "spine_id": "e_1740955c7709b9b1",
+          "wikipedia_url": "https://en.wikipedia.org/wiki/Liverpool_F.C.",
+          "image_url": null,
+          "avatar_url": null,
+          "public_official": {
+            "checked": true,
+            "is_public_official": false,
+            "total": 0,
+            "status": null,
+            "offices": [],
+            "truncated": false
+          }
+        },
+        {
+          "id": "wiki:29f91c26ceef9f25b866",
+          "id_space": "wikipedia",
+          "name": "Liverpool F.C.",
+          "type": "organization",
+          "entity_id": "wiki:29f91c26ceef9f25b866",
+          "spine_id": null,
+          "wikipedia_url": "https://en.wikipedia.org/wiki/Liverpool",
+          "image_url": null,
+          "avatar_url": null,
+          "public_official": {
+            "checked": true,
+            "is_public_official": false,
+            "total": 0,
+            "status": null,
+            "offices": [],
+            "truncated": false
+          }
+        },
+        {
+          "id": "e_7345c93580142d43",
+          "id_space": "spine",
+          "name": "Turkish Airlines",
+          "type": "organization",
+          "entity_id": "e_7345c93580142d43",
+          "spine_id": "e_7345c93580142d43",
+          "wikipedia_url": "https://en.wikipedia.org/wiki/Turkish_Airlines",
+          "image_url": null,
+          "avatar_url": null,
+          "public_official": {
+            "checked": true,
+            "is_public_official": false,
+            "total": 0,
+            "status": null,
+            "offices": [],
+            "truncated": false
+          }
+        },
+        {
+          "id": "e_99cad9a6ffc77b88",
+          "id_space": "spine",
+          "name": "Premier League",
+          "type": "organization",
+          "entity_id": "e_99cad9a6ffc77b88",
+          "spine_id": "e_99cad9a6ffc77b88",
+          "wikipedia_url": "https://en.wikipedia.org/wiki/Premier_League",
+          "image_url": null,
+          "avatar_url": null,
+          "public_official": {
+            "checked": true,
+            "is_public_official": false,
+            "total": 0,
+            "status": null,
+            "offices": [],
+            "truncated": false
+          }
+        }
+      ],
+      "matched_categories": [
+        {
+          "code": "CORPORATE",
+          "label": "Corporate"
+        }
+      ],
+      "top_articles": [
+        {
+          "url": "https://abc.com.py/deportes/futbol/internacional/2026/09/08/el-liverpool-firma-un-patrocinio-de-350-millones-con-turkish-airlines/",
+          "title": "El Liverpool firma un patrocinio de 350 millones con Turkish Airlines",
+          "domain": "abc.com.py",
+          "rank": 1
+        },
+        {
+          "url": "https://telegrafi.com/liverpooli-arrin-marreveshje-rekord-per-sponsorizimin-e-fanellave-me-e-madhja-ne-histori-te-liges-premier/",
+          "title": "Liverpooli arrin marrëveshje rekord për sponsorizimin e fanellave – më e madhja në histori të Ligës Premier",
+          "domain": "telegrafi.com",
+          "rank": 2
+        },
+        {
+          "url": "https://www.thebusinessdesk.com/northwest/news/2178635-global-airline-to-become-lfc-main-shirt-sponsor-in-deal-worth-a-reported-300m/",
+          "title": "Global airline to become LFC main shirt sponsor in deal worth a reported £300m",
+          "domain": "thebusinessdesk.com",
+          "rank": 3
+        }
+      ],
+      "language_breakdown": [
+        {
+          "language": "en",
+          "count": 1
+        },
+        {
+          "language": "es",
+          "count": 1
+        },
+        {
+          "language": "sq",
+          "count": 1
+        }
+      ],
+      "top_language": "en",
+      "entity_link": {
+        "entity": "wiki:ecda9426e620604deef2",
+        "mode": "coverage",
+        "via": "story",
+        "role": null,
+        "decision": "coverage",
+        "materiality_confidence": null,
+        "resolution_confidence": null,
+        "resolution_method": "media_entities",
+        "evidence": {
+          "story_id": "88a19c0204c2",
+          "story_date": "2026-09-08"
+        },
+        "story_id": "88a19c0204c2",
+        "story_date": "2026-09-08"
+      },
+      "search_score": null,
+      "related": null
+    },
+    {
+      "id": "ec8823ff77ec",
+      "url": "https://gdeltcloud.com/stories/uae-flights-disrupted-by-iran-tensions-ec8823ff",
+      "title": "UAE flights disrupted by Iran tensions",
+      "story_date": "2026-09-06",
+      "updated_at": "2026-09-06T10:22:32Z",
+      "processed_at": "2026-09-06T10:22:32Z",
+      "category": "Infrastructure",
+      "category_code": "cameoplus_infrastructure",
+      "subcategory": null,
+      "geo": {
+        "country": "United Arab Emirates",
+        "region": "Middle East",
+        "continent": "Asia",
+        "admin1": "Dubai",
+        "location": "Dubai International Airport",
+        "latitude": 25.2532,
+        "longitude": 55.3657,
+        "geo_precision": null,
+        "geo_precision_label": null
+      },
+      "geo_provenance": {
+        "method": "representative_linked_event",
+        "event_id": "cameoplus_03fc9eb110fef041"
+      },
+      "geo_context": {
+        "location_country": "United Arab Emirates",
+        "actor_origin_countries": [
+          "France",
+          "United Arab Emirates"
+        ]
+      },
+      "metrics": {
+        "significance": 0.0753,
+        "article_count": 1,
+        "linked_event_count": 1,
+        "max_linked_event_significance": 0.4285,
+        "civilian_targeting_event_count": 0
+      },
+      "has_events": true,
+      "has_fatalities": false,
+      "has_civilian_targeting": false,
+      "fatalities": 0,
+      "linked_events": [
+        {
+          "id": "cameoplus_03fc9eb110fef041",
+          "title": "Air France suspends Dubai flights amid regional airspace tensions"
+        }
+      ],
+      "entity_refs": [
+        {
+          "id": "e_188236fd75e936b4",
+          "id_space": "spine",
+          "name": "Qatar Airways",
+          "type": "organization",
+          "entity_id": "e_188236fd75e936b4",
+          "spine_id": "e_188236fd75e936b4",
+          "wikipedia_url": "https://en.wikipedia.org/wiki/Qatar_Airways",
+          "image_url": null,
+          "avatar_url": null,
+          "public_official": {
+            "checked": true,
+            "is_public_official": false,
+            "total": 0,
+            "status": null,
+            "offices": [],
+            "truncated": false
+          }
+        },
+        {
+          "id": "e_7345c93580142d43",
+          "id_space": "spine",
+          "name": "Turkish Airlines",
+          "type": "organization",
+          "entity_id": "e_7345c93580142d43",
+          "spine_id": "e_7345c93580142d43",
+          "wikipedia_url": "https://en.wikipedia.org/wiki/Turkish_Airlines",
+          "image_url": null,
+          "avatar_url": null,
+          "public_official": {
+            "checked": true,
+            "is_public_official": false,
+            "total": 0,
+            "status": null,
+            "offices": [],
+            "truncated": false
+          }
+        },
+        {
+          "id": "e_f8545ed3095b994a",
+          "id_space": "spine",
+          "name": "Air India",
+          "type": "organization",
+          "entity_id": "e_f8545ed3095b994a",
+          "spine_id": "e_f8545ed3095b994a",
+          "wikipedia_url": "https://en.wikipedia.org/wiki/Air_India",
+          "image_url": null,
+          "avatar_url": null,
+          "public_official": {
+            "checked": true,
+            "is_public_official": false,
+            "total": 0,
+            "status": null,
+            "offices": [],
+            "truncated": false
+          }
+        },
+        {
+          "id": "e_4a7b0496b4fc81f3",
+          "id_space": "spine",
+          "name": "Air France",
+          "type": "organization",
+          "entity_id": "e_4a7b0496b4fc81f3",
+          "spine_id": "e_4a7b0496b4fc81f3",
+          "wikipedia_url": "https://en.wikipedia.org/wiki/Air_France",
+          "image_url": null,
+          "avatar_url": null,
+          "public_official": {
+            "checked": true,
+            "is_public_official": false,
+            "total": 0,
+            "status": null,
+            "offices": [],
+            "truncated": false
+          }
+        },
+        {
+          "id": "e_bbf155c83bf22323",
+          "id_space": "spine",
+          "name": "Air Arabia",
+          "type": "organization",
+          "entity_id": "e_bbf155c83bf22323",
+          "spine_id": "e_bbf155c83bf22323",
+          "wikipedia_url": "https://en.wikipedia.org/wiki/Air_Arabia",
+          "image_url": null,
+          "avatar_url": null,
+          "public_official": {
+            "checked": true,
+            "is_public_official": false,
+            "total": 0,
+            "status": null,
+            "offices": [],
+            "truncated": false
+          }
+        },
+        {
+          "id": "e_66e58dfcea769206",
+          "id_space": "spine",
+          "name": "Air India Express",
+          "type": "organization",
+          "entity_id": "e_66e58dfcea769206",
+          "spine_id": "e_66e58dfcea769206",
+          "wikipedia_url": "https://en.wikipedia.org/wiki/Air_India_Express",
+          "image_url": null,
+          "avatar_url": null,
+          "public_official": {
+            "checked": true,
+            "is_public_official": false,
+            "total": 0,
+            "status": null,
+            "offices": [],
+            "truncated": false
+          }
+        },
+        {
+          "id": "e_8eb7677d51aebda4",
+          "id_space": "spine",
+          "name": "Emirates",
+          "type": "organization",
+          "entity_id": "e_8eb7677d51aebda4",
+          "spine_id": "e_8eb7677d51aebda4",
+          "wikipedia_url": "https://en.wikipedia.org/wiki/Emirates_(airline)",
+          "image_url": null,
+          "avatar_url": null,
+          "public_official": {
+            "checked": true,
+            "is_public_official": false,
+            "total": 0,
+            "status": null,
+            "offices": [],
+            "truncated": false
+          }
+        },
+        {
+          "id": "e_dd2aa2d7d5c804d4",
+          "id_space": "spine",
+          "name": "IndiGo",
+          "type": "organization",
+          "entity_id": "e_dd2aa2d7d5c804d4",
+          "spine_id": "e_dd2aa2d7d5c804d4",
+          "wikipedia_url": "https://en.wikipedia.org/wiki/IndiGo",
+          "image_url": null,
+          "avatar_url": null,
+          "public_official": {
+            "checked": true,
+            "is_public_official": false,
+            "total": 0,
+            "status": null,
+            "offices": [],
+            "truncated": false
+          }
+        },
+        {
+          "id": "e_1bef9e979a56f815",
+          "id_space": "spine",
+          "name": "Etihad",
+          "type": "organization",
+          "entity_id": "e_1bef9e979a56f815",
+          "spine_id": "e_1bef9e979a56f815",
+          "wikipedia_url": "https://en.wikipedia.org/wiki/Etihad_Airways",
+          "image_url": null,
+          "avatar_url": null,
+          "public_official": {
+            "checked": true,
+            "is_public_official": false,
+            "total": 0,
+            "status": null,
+            "offices": [],
+            "truncated": false
+          }
+        },
+        {
+          "id": "e_c26fc27b7e737e0e",
+          "id_space": "spine",
+          "name": "flydubai",
+          "type": "organization",
+          "entity_id": "e_c26fc27b7e737e0e",
+          "spine_id": "e_c26fc27b7e737e0e",
+          "wikipedia_url": "https://en.wikipedia.org/wiki/Flydubai",
+          "image_url": null,
+          "avatar_url": null,
+          "public_official": {
+            "checked": true,
+            "is_public_official": false,
+            "total": 0,
+            "status": null,
+            "offices": [],
+            "truncated": false
+          }
+        }
+      ],
+      "matched_categories": [
+        {
+          "code": "INFRASTRUCTURE",
+          "label": "Infrastructure"
+        }
+      ],
+      "top_articles": [
+        {
+          "url": "https://gulfnews.com/business/aviation/uae-flights-status-emirates-etihad-air-arabia-flydubai-delays-and-cancellations-indonesia-travel-disrupted-1.500664722",
+          "title": "UAE Flights Update: Emirates, Etihad, flydubai, Air Arabia Delays and Cancellations as Iran Tensions and Indonesia Volcanic Ash Disrupt Travel",
+          "domain": "gulfnews.com",
+          "rank": 1
+        }
+      ],
+      "language_breakdown": [
+        {
+          "language": "en",
+          "count": 1
+        }
+      ],
+      "top_language": "en",
+      "entity_link": {
+        "entity": "wiki:ecda9426e620604deef2",
+        "mode": "coverage",
+        "via": "story",
+        "role": null,
+        "decision": "coverage",
+        "materiality_confidence": null,
+        "resolution_confidence": null,
+        "resolution_method": "media_entities",
+        "evidence": {
+          "story_id": "ec8823ff77ec",
+          "story_date": "2026-09-06"
+        },
+        "story_id": "ec8823ff77ec",
+        "story_date": "2026-09-06"
+      },
+      "search_score": null,
+      "related": null
+    }
+  ],
+  "pagination": {
+    "limit": 100,
+    "cursor": null,
+    "next_cursor": null,
+    "duplicates_collapsed": 0
+  },
+  "sort": "recent",
+  "meta": {
+    "row_source": "settled",
+    "settled_at": "2026-09-06 23:09:00",
+    "row_source_reason": "settled",
+    "coverage": {
+      "start": "2026-03-08",
+      "end": "2026-09-09",
+      "note": "First day of continuous story clustering. Clusters are dated by observation, so this is the true minimum.",
+      "warnings": []
+    },
+    "query_window": {
+      "date_start": "2026-09-03",
+      "date_end": "2026-09-09",
+      "date_basis": "story_date",
+      "date_bounds": "inclusive",
+      "observed_start": null,
+      "observed_end": null,
+      "observed_basis": "cluster_updated_at",
+      "observed_end_exclusive": true,
+      "source": "explicit"
+    }
+  },
+  "applied_filters": {
+    "days": "7",
+    "sort": "recent",
+    "country": [],
+    "region": null,
+    "continent": null,
+    "admin1": null,
+    "bbox": null,
+    "story_category": [],
+    "category": [],
+    "subcategory": [],
+    "domain": null,
+    "has_events": null,
+    "has_fatalities": null,
+    "civilian_targeting": null,
+    "article_count_min": null,
+    "article_count_max": null,
+    "search": null,
+    "languages": [
+      "en",
+      "fr"
+    ],
+    "entity": "e_7345c93580142d43",
+    "entity_match": "coverage",
+    "entity_family": "expand",
+    "ignored": {}
+  }
+}

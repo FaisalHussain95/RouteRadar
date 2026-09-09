@@ -570,11 +570,14 @@ def test_the_site_axis_uses_the_same_window_as_the_export() -> None:
     """The chart's x axis is the export window, and `web/src/lib/select.ts` hand-copies its
     two constants — there is no way to import a Python `timedelta` into TypeScript.
 
-    Nothing else couples them. `HISTORY` follows GDELT's archive length (`news/gdelt.py`'s
-    `MAX_DAYS`), so it moves if GDELT's does, and the site would then draw an axis narrower
-    than the data it is given: `.plot svg` is `overflow: visible`, so the points would render
-    outside the plot rather than disappearing, which is exactly the kind of failure nobody
-    reports. This is the assertion that turns that into a red test."""
+    Nothing else couples them. `HISTORY` used to follow the DOC 2.0 archive length, but S17
+    deleted that client and `HISTORY` is now a plain 90 days — **do not re-couple it to
+    `news/gdeltcloud.py`'s `MAX_DAYS`**, which is a per-query window cap of 30 days rather
+    than an archive length (see `specs/architecture.md` § S17). If `HISTORY` moves for any
+    other reason, the site would draw an axis narrower than the data it is given: `.plot svg`
+    is `overflow: visible`, so the points would render outside the plot rather than
+    disappearing, which is exactly the kind of failure nobody reports. This is the assertion
+    that turns that into a red test."""
     source = Path(__file__).resolve().parents[1].joinpath("web/src/lib/select.ts").read_text()
     assert f"HISTORY_DAYS = {site.HISTORY.days};" in source
     assert f"FORWARD_DAYS = {site.FORWARD.days};" in source

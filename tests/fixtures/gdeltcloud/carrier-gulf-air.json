@@ -1,0 +1,63 @@
+{
+  "success": true,
+  "data": [],
+  "pagination": {
+    "limit": 100,
+    "cursor": null,
+    "next_cursor": null,
+    "duplicates_collapsed": 0
+  },
+  "sort": "recent",
+  "applied_filters": {
+    "days": "7",
+    "sort": "recent",
+    "country": [],
+    "region": null,
+    "continent": null,
+    "admin1": null,
+    "bbox": null,
+    "story_category": [],
+    "category": [],
+    "subcategory": [],
+    "domain": null,
+    "has_events": null,
+    "has_fatalities": null,
+    "civilian_targeting": null,
+    "article_count_min": null,
+    "article_count_max": null,
+    "search": null,
+    "languages": [
+      "en",
+      "fr"
+    ],
+    "entity": "e_f11af3b099743227",
+    "entity_match": "coverage",
+    "entity_family": "expand",
+    "linkage": "none",
+    "linkage_note": "This entity resolves, but nothing in the resolved news layer links to it over the last 30 days — so an empty result here is our coverage of the entity, not a quiet window inside it.",
+    "ignored": {}
+  },
+  "meta": {
+    "row_source": "settled",
+    "settled_at": "2026-09-06 23:09:00",
+    "row_source_reason": "settled",
+    "coverage": {
+      "start": "2026-03-08",
+      "end": "2026-09-09",
+      "note": "First day of continuous story clustering. Clusters are dated by observation, so this is the true minimum.",
+      "warnings": []
+    },
+    "query_window": {
+      "date_start": "2026-09-03",
+      "date_end": "2026-09-09",
+      "date_basis": "story_date",
+      "date_bounds": "inclusive",
+      "observed_start": null,
+      "observed_end": null,
+      "observed_basis": "cluster_updated_at",
+      "observed_end_exclusive": true,
+      "source": "explicit"
+    }
+  },
+  "note": "The requested entity did not resolve to any Stories in this window. Empty means unresolved or no coverage — NOT zero activity."
+}

@@ -1,0 +1,177 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "4bbfec83b63c",
+      "url": "https://gdeltcloud.com/stories/saudi-airline-launches-flights-from-another-city-to-karachi-4bbfec83",
+      "title": "Saudi Airline Launches Flights From Another City to Karachi",
+      "story_date": "2026-09-06",
+      "updated_at": "2026-09-06T15:21:12Z",
+      "processed_at": "2026-09-06T15:21:12Z",
+      "category": "Infrastructure",
+      "category_code": "cameoplus_infrastructure",
+      "subcategory": null,
+      "geo": {
+        "country": null,
+        "region": null,
+        "continent": null,
+        "admin1": null,
+        "location": null,
+        "latitude": null,
+        "longitude": null,
+        "geo_precision": null,
+        "geo_precision_label": null
+      },
+      "geo_provenance": null,
+      "geo_context": {
+        "location_country": null,
+        "actor_origin_countries": []
+      },
+      "metrics": {
+        "significance": 0.0753,
+        "article_count": 1,
+        "linked_event_count": 0,
+        "max_linked_event_significance": 0,
+        "civilian_targeting_event_count": 0
+      },
+      "has_events": false,
+      "has_fatalities": false,
+      "has_civilian_targeting": false,
+      "fatalities": 0,
+      "linked_events": [],
+      "entity_refs": [
+        {
+          "id": "wiki:8a076c9e38b94e5a7e68",
+          "id_space": "wikipedia",
+          "name": "flyadeal",
+          "type": "organization",
+          "entity_id": "wiki:8a076c9e38b94e5a7e68",
+          "spine_id": null,
+          "wikipedia_url": null,
+          "image_url": null,
+          "avatar_url": null,
+          "public_official": {
+            "checked": false,
+            "is_public_official": null,
+            "status": null,
+            "total": null,
+            "offices": [],
+            "truncated": false
+          }
+        },
+        {
+          "id": "e_8d1aef1961310580",
+          "id_space": "spine",
+          "name": "Saudia Group",
+          "type": "organization",
+          "entity_id": "e_8d1aef1961310580",
+          "spine_id": "e_8d1aef1961310580",
+          "wikipedia_url": "https://en.wikipedia.org/wiki/Saudia",
+          "image_url": null,
+          "avatar_url": null,
+          "public_official": {
+            "checked": true,
+            "is_public_official": false,
+            "total": 0,
+            "status": null,
+            "offices": [],
+            "truncated": false
+          }
+        },
+        {
+          "id": "e_02ace31a5b0f9d97",
+          "id_space": "spine",
+          "name": "Airbus",
+          "type": "organization",
+          "entity_id": "e_02ace31a5b0f9d97",
+          "spine_id": "e_02ace31a5b0f9d97",
+          "wikipedia_url": "https://en.wikipedia.org/wiki/Airbus",
+          "image_url": null,
+          "avatar_url": null,
+          "public_official": {
+            "checked": true,
+            "is_public_official": false,
+            "total": 0,
+            "status": null,
+            "offices": [],
+            "truncated": false
+          }
+        }
+      ],
+      "matched_categories": [],
+      "top_articles": [
+        {
+          "url": "https://propakistani.pk/2026/09/06/saudi-airline-launches-flights-from-another-city-to-karachi/",
+          "title": "Saudi Airline Launches Flights From Another City to Karachi",
+          "domain": "propakistani.pk",
+          "rank": 1
+        }
+      ],
+      "language_breakdown": [
+        {
+          "language": "en",
+          "count": 1
+        }
+      ],
+      "top_language": "en",
+      "search_score": null,
+      "related": null
+    }
+  ],
+  "pagination": {
+    "limit": 100,
+    "cursor": null,
+    "next_cursor": null,
+    "duplicates_collapsed": 0
+  },
+  "sort": "recent",
+  "meta": {
+    "row_source": "settled",
+    "settled_at": "2026-09-06 23:09:00",
+    "row_source_reason": "settled",
+    "coverage": {
+      "start": "2026-03-08",
+      "end": "2026-09-09",
+      "note": "First day of continuous story clustering. Clusters are dated by observation, so this is the true minimum.",
+      "warnings": []
+    },
+    "query_window": {
+      "date_start": "2026-09-03",
+      "date_end": "2026-09-09",
+      "date_basis": "story_date",
+      "date_bounds": "inclusive",
+      "observed_start": null,
+      "observed_end": null,
+      "observed_basis": "cluster_updated_at",
+      "observed_end_exclusive": true,
+      "source": "explicit"
+    }
+  },
+  "applied_filters": {
+    "days": "7",
+    "sort": "recent",
+    "country": [],
+    "region": null,
+    "continent": null,
+    "admin1": null,
+    "bbox": null,
+    "story_category": [],
+    "category": [],
+    "subcategory": [],
+    "domain": null,
+    "has_events": null,
+    "has_fatalities": null,
+    "civilian_targeting": null,
+    "article_count_min": null,
+    "article_count_max": null,
+    "search": null,
+    "languages": [
+      "en",
+      "fr"
+    ],
+    "entity": "e_8d1aef1961310580",
+    "entity_match": "coverage",
+    "entity_family": "expand",
+    "ignored": {}
+  }
+}

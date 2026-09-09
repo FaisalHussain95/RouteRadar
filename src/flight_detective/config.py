@@ -6,8 +6,8 @@ file. There is no `python-dotenv` dependency: the parser below handles the three
 `.env` on this box will ever contain (`KEY=value`, `export KEY=value`, quoted values) and
 nothing more.
 
-Every knob is `FD_`-prefixed except `SERPAPI_KEY`, which keeps the name the provider's
-own docs use so it can be copied verbatim.
+Every knob is `FD_`-prefixed except `SERPAPI_KEY` and `GDELT_API_KEY`, which keep the
+names their own docs use so they can be copied verbatim.
 """
 
 import os
@@ -24,6 +24,7 @@ DEFAULT_DOTENV = Path(".env")
 class Settings:
     db_path: Path
     serpapi_key: str | None
+    gdelt_api_key: str | None
     site_export_path: Path
 
 
@@ -58,5 +59,6 @@ def load_settings(env: Mapping[str, str] | None = None) -> Settings:
     return Settings(
         db_path=Path(merged.get("FD_DB_PATH", DEFAULT_DB_PATH)),
         serpapi_key=merged.get("SERPAPI_KEY") or None,
+        gdelt_api_key=merged.get("GDELT_API_KEY") or None,
         site_export_path=Path(merged.get("FD_SITE_EXPORT_PATH", DEFAULT_SITE_EXPORT_PATH)),
     )

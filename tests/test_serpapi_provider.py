@@ -249,7 +249,9 @@ def test_non_json_and_non_object_replies_are_invalid() -> None:
 
 
 def test_from_settings_without_a_key_names_the_variable_and_the_file() -> None:
-    settings = Settings(db_path=Path("x.duckdb"), serpapi_key=None, site_export_path=Path("x"))
+    settings = Settings(
+        db_path=Path("x.duckdb"), serpapi_key=None, gdelt_api_key=None, site_export_path=Path("x")
+    )
     with pytest.raises(SerpApiKeyMissing) as excinfo:
         SerpApiFareProvider.from_settings(settings)
     assert "SERPAPI_KEY" in str(excinfo.value)
@@ -442,7 +444,9 @@ def test_recording_cli_reports_a_missing_key_on_stderr(
 ) -> None:
     # Pinned to keyless settings rather than relying on conftest hiding `.env`: with a
     # real key this call would spend a search and overwrite the shipped fixture.
-    keyless = Settings(db_path=Path("x.duckdb"), serpapi_key=None, site_export_path=Path("x"))
+    keyless = Settings(
+        db_path=Path("x.duckdb"), serpapi_key=None, gdelt_api_key=None, site_export_path=Path("x")
+    )
     monkeypatch.setattr(serpapi, "load_settings", lambda: keyless)
     assert _main(["CDG", "ISB", "2026-12-20"]) == 1
     assert "SERPAPI_KEY" in capsys.readouterr().err

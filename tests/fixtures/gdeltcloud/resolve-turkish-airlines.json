@@ -1,0 +1,50 @@
+{
+  "query": "Turkish Airlines",
+  "data": [
+    {
+      "entity_id": "e_7345c93580142d43",
+      "spine_id": "e_7345c93580142d43",
+      "name": "Turkish Airlines",
+      "entity_type": "organization",
+      "entity_type_raw": "organization",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Turkish_Airlines",
+      "image_url": null,
+      "score": 7,
+      "match_score": 7,
+      "match_type": "exact_alias",
+      "match_reason": "Exact normalized name match",
+      "coverage_30d": 15,
+      "coverage_status": "measured",
+      "monitorable": true,
+      "sources": {
+        "news": true,
+        "sec": false,
+        "gem": false,
+        "sanctions": false,
+        "china": false,
+        "wiki": true,
+        "epoch": false,
+        "gov": true,
+        "offices": null
+      },
+      "identifiers": {},
+      "source_universes": [
+        "media",
+        "reference"
+      ],
+      "country_iso3": [],
+      "country_evidence": {
+        "basis": null,
+        "note": "No published country association is known for this candidate."
+      },
+      "public_official": {
+        "checked": true,
+        "is_public_official": false,
+        "total": 0,
+        "status": null,
+        "offices": [],
+        "truncated": false
+      }
+    }
+  ]
+}

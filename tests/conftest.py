@@ -14,7 +14,7 @@ from flight_detective import db
 from flight_detective.calendar_engine.tags import tags_for_range
 from flight_detective.models import FareObservation
 
-GDELT_FIXTURES = Path(__file__).parent / "fixtures" / "gdelt"
+GDELT_FIXTURES = Path(__file__).parent / "fixtures" / "gdeltcloud"
 ANALYTICS_FARES = Path(__file__).parent / "fixtures" / "analytics" / "fares.json"
 
 
@@ -28,7 +28,10 @@ def isolated_db_path(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 
 
 def load_gdelt_body(slug: str) -> dict[str, Any]:
-    """One recorded GDELT response body, by taxonomy slug."""
+    """One recorded GDELT Cloud response body, by query slug.
+
+    Slugs are `carrier-<name>` for the six entity queries and the `SemanticQuery.slug` for
+    the three search queries — the names `news/gdeltcloud.py`'s recorder writes."""
     body = json.loads((GDELT_FIXTURES / f"{slug}.json").read_text())
     assert isinstance(body, dict)
     return body
@@ -36,8 +39,8 @@ def load_gdelt_body(slug: str) -> dict[str, Any]:
 
 @pytest.fixture
 def gdelt_body() -> Callable[[str], dict[str, Any]]:
-    """`gdelt_body("airspace-disruption")` -> that fixture's JSON. Shared by the client,
-    dedupe and pipeline tests, which all answer from the same four files."""
+    """`gdelt_body("airspace-disruption")` -> that fixture's JSON. Shared by the client and
+    pipeline tests, which answer from the same nine recorded files."""
     return load_gdelt_body
 
 
