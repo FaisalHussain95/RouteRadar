@@ -178,14 +178,14 @@ plus `fd report <question>` printing a table. Seed a test DB from fixtures.
 - [x] Carrier efficiency index (EUR per hour of total duration)
 
 ## S12 — Explanation layer
-- status: todo
+- status: done
 - size: S
 
 `analytics/explain.py`: for a fare row, its calendar tags and news events within ±7 days,
 as a structured object and a one-line sentence.
 
-- [ ] Returns tags and events; empty lists, not None, when nothing applies
-- [ ] Sentence reads naturally for 0, 1 and many reasons (tested)
+- [x] Returns tags and events; empty lists, not None, when nothing applies
+- [x] Sentence reads naturally for 0, 1 and many reasons (tested)
 
 ## S13 — UX: reconcile the RouteRadar design
 - status: todo
@@ -218,6 +218,16 @@ writing atomically (`tmp` + `os.replace`). `export/schema.py` + `fd export-schem
       output written via rename)
 - [ ] `fd export-site` on an empty DB produces a valid file with empty series and a
       `generated_at`, so the site can build before the first ingest
+
+Note from S12: `analytics.explain.explain(conn, observation)` answers for **one** fare row
+with two queries (its departure date's `calendar_tag` rows, and `news_event` in ±7 days), so
+calling it per series point would be thousands of queries per export. Either fetch the whole
+range's tags and events once and assemble the per-point reasons in Python, or export the
+`bands[]`/`events[]` arrays the design actually consumes and let the page pair them up by
+date — the design's hover card does the pairing client-side already. If the export does keep
+a per-point sentence, pass `window_days=5`: the PRD's ±7 is the default, but the design's
+hover card says ±5. `calendar_engine.tags.label_for(tag)` is the tag → band label map the
+`bands[]` array needs, and it falls back to the raw tag rather than raising.
 
 ## S15 — Static dashboard (`web/`)
 - status: todo

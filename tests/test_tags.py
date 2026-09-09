@@ -6,7 +6,9 @@ from datetime import date, timedelta
 import pytest
 
 from flight_detective.calendar_engine import tags
-from flight_detective.calendar_engine.tags import tags_for, tags_for_range
+from flight_detective.calendar_engine.gregorian import WINDOWS
+from flight_detective.calendar_engine.hijri import HIJRI_WINDOWS
+from flight_detective.calendar_engine.tags import label_for, tags_for, tags_for_range
 from flight_detective.models import CalendarTag
 
 
@@ -54,3 +56,17 @@ def test_range_is_inclusive_and_in_date_order() -> None:
 
 def test_empty_range_yields_nothing() -> None:
     assert list(tags_for_range(date(2026, 3, 20), date(2026, 3, 19))) == []
+
+
+def test_every_window_has_its_own_label() -> None:
+    # `label_for` is a dict across both calendars, so a tag shared between them would
+    # silently drop one window's label. The tags are disjoint today; this keeps them so.
+    windows = (*WINDOWS, *HIJRI_WINDOWS)
+    assert len({w.tag for w in windows}) == len(windows)
+    for window in windows:
+        assert label_for(window.tag) == window.label
+
+
+def test_an_unknown_tag_is_its_own_label() -> None:
+    # A tag stored by a window since retired still has to render somewhere.
+    assert label_for("mango_season") == "mango_season"

@@ -11,9 +11,14 @@ failing on a duplicate `(date, tag)`.
 from collections.abc import Iterator
 from datetime import date, timedelta
 
-from flight_detective.calendar_engine.gregorian import gregorian_tags
-from flight_detective.calendar_engine.hijri import hijri_tags
+from flight_detective.calendar_engine.gregorian import WINDOWS, gregorian_tags
+from flight_detective.calendar_engine.hijri import HIJRI_WINDOWS, hijri_tags
 from flight_detective.models import CalendarTag
+
+# Both calendars keep the human label beside the stored tag; this is the one map across
+# them, so a reader of `calendar_tag` (the explainer, the export) does not have to know
+# which file a window came from.
+_LABELS: dict[str, str] = {w.tag: w.label for w in (*WINDOWS, *HIJRI_WINDOWS)}
 
 
 def tags_for(day: date) -> list[CalendarTag]:
@@ -31,3 +36,12 @@ def tags_for_range(start: date, end: date) -> Iterator[CalendarTag]:
     while day <= end:
         yield from tags_for(day)
         day += timedelta(days=1)
+
+
+def label_for(tag: str) -> str:
+    """The dashboard label for a stored tag, or the tag itself if no window owns it.
+
+    Falling back rather than raising is deliberate: `calendar_tag` holds whatever the
+    engine wrote on the day it ran, so a window retired since then would otherwise turn
+    a tooltip into a KeyError."""
+    return _LABELS.get(tag, tag)

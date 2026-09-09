@@ -419,6 +419,39 @@ Decisions from S11 (2026-09-09):
   agrees with itself. Calendar tags come from the real engine, so a window moving in
   `calendar_engine` surfaces as a failing analytics test. S12 and S14 should seed from it too.
 
+Decisions from S12 (2026-09-09):
+
+- `analytics/explain.py` is one read: `explain(conn, observation, window_days=7)` returns a
+  frozen `Explanation` (the fare row, `tags`, `events`, `window_days`) whose `.sentence`
+  renders the same thing as one line. Same shape as `queries.py` — dataclasses, no writes,
+  no re-running of the calendar or the severity heuristic. It composes `db.fetch_calendar_tags`
+  and `db.fetch_news_events` rather than issuing its own SQL.
+- **Both halves are anchored on the departure date, not on `observed_on`.** PRD F6 says
+  "within ±7 days of the observation" and a fare row carries two dates; a window and an
+  airspace closure are properties of the journey, not of the day the market was asked. It
+  is also the axis the chart draws bands and pins on, so a tooltip lines up with the pins
+  beside it instead of drifting by the booking horizon.
+- **Tags are read from `calendar_tag`, not recomputed with `tags_for()`.** The engine would
+  answer for dates `fd tag-dates` has not reached, and the chart shades its bands from the
+  table, so an engine-computed explanation could name a window the chart does not draw. An
+  explanation with no tags on a date that should have some is a true report that the
+  pipeline has not tagged it yet.
+- **±7 is a parameter, because the PRD and the design disagree**: F6 says ±7, the design's
+  hover card says ±5 (`design-system.md` § Page anatomy). Both are display choices, so the
+  caller passes one. `window_days=0` means same-day only; a negative one raises rather than
+  quietly returning nothing.
+- Events come back **most severe first, then nearest** (`dedupe_key` breaks the last tie),
+  which is the order the sentence truncates from. The sentence names at most
+  `MAX_EVENTS_IN_SENTENCE` (3) and counts the rest ("A, B, C and 2 more") so a tooltip stays
+  one line; the structured list keeps them all for the drawer.
+- `tags.label_for(tag)` (in `calendar_engine/tags.py`) is the one map from a stored tag to
+  its dashboard label across both calendars. It **falls back to the tag itself** rather than
+  raising: `calendar_tag` holds whatever the engine wrote on the day it ran, and a window
+  retired since then must not turn a tooltip into a `KeyError`.
+- `Explanation.tags` and `.events` are always lists. Nothing applying is an answer — the
+  fare is off-peak and uneventful — not a missing value, and a renderer should never have to
+  tell `None` from `[]`.
+
 ## The JSON contract (`dashboard.json`)
 
 Shaped by what the design's component consumes (see `specs/ux/design-system.md` § Data
