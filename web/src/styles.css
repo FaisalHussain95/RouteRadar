@@ -513,6 +513,26 @@ a:hover {
   font-size: 15px;
   font-weight: 500;
 }
+/* Muted, not the header banner's amber: a dead news step is a gap in one region, and
+   shouting about it next to a chart of real fares would misplace the alarm. */
+.feed-stale {
+  margin: 0 0 var(--space-3);
+  padding: 8px 9px;
+  border-radius: var(--radius-md);
+  background: rgba(233, 233, 237, 0.04);
+  color: var(--text-muted-55);
+  font-size: 12px;
+  line-height: 1.35;
+  text-wrap: pretty;
+}
+.feed-stale-detail {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--text-muted-45);
+  margin-top: 3px;
+}
+
 .feed-list {
   display: flex;
   flex-direction: column;

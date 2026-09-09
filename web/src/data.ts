@@ -3,7 +3,7 @@ import raw from "@dashboard-data";
 import type { DashboardData } from "./types";
 
 /** The version `src/types.ts` was generated from. */
-export const SUPPORTED_SCHEMA_VERSION = 1;
+export const SUPPORTED_SCHEMA_VERSION = 2;
 
 /** The file, checked far enough to know the generated types describe it.
  *

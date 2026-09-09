@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any
 
 import duckdb
+import httpx
 import jsonschema
 import pytest
 from typer.testing import CliRunner
@@ -26,7 +27,9 @@ from flight_detective.calendar_engine.hijri import HIJRI_WINDOWS
 from flight_detective.cli import DEFAULT_TAG_SPAN, app
 from flight_detective.export import schema as schema_module
 from flight_detective.export import site
-from flight_detective.models import NewsEvent
+from flight_detective.models import IngestRun, NewsEvent
+from flight_detective.news.gdeltcloud import CARRIERS, GdeltCloudClient
+from flight_detective.news.ingest import run_news_ingest
 
 runner = CliRunner()
 
@@ -525,6 +528,7 @@ def test_the_schema_allows_the_regions_an_incomplete_database_cannot_fill(
         "series": [],
         "bands": [],
         "events": [],
+        "news_status": {"last_success": None, "last_error": None},
         "arbitrage": None,
         "efficiency": [],
         "seasonal_gauge": None,
@@ -581,3 +585,182 @@ def test_the_site_axis_uses_the_same_window_as_the_export() -> None:
     source = Path(__file__).resolve().parents[1].joinpath("web/src/lib/select.ts").read_text()
     assert f"HISTORY_DAYS = {site.HISTORY.days};" in source
     assert f"FORWARD_DAYS = {site.FORWARD.days};" in source
+
+
+# -- news status ----------------------------------------------------------------------------
+def _news_run(
+    conn: duckdb.DuckDBPyConnection,
+    *,
+    at: datetime,
+    queries: int = 9,
+    rows_kept: int = 10,
+    rows_dropped: int = 299,
+    error: str | None = None,
+    provider: str = site.NEWS_PROVIDER,
+) -> None:
+    db.insert_ingest_run(
+        conn,
+        IngestRun(
+            run_at=at,
+            provider=provider,
+            queries=queries,
+            rows_kept=rows_kept,
+            rows_dropped=rows_dropped,
+            error=error,
+        ),
+    )
+
+
+def test_the_news_provider_is_the_client_that_writes_those_runs() -> None:
+    """`NEWS_PROVIDER` is a literal so the export does not import the HTTP client; this is
+    what stops the two names drifting if the client is ever renamed."""
+    assert GdeltCloudClient.name == site.NEWS_PROVIDER
+
+
+def test_news_status_is_null_before_the_news_step_has_ever_run(
+    analytics_conn: duckdb.DuckDBPyConnection,
+) -> None:
+    assert _exported(analytics_conn)["news_status"] == {"last_success": None, "last_error": None}
+
+
+def test_a_clean_run_dates_the_last_success_in_paris(
+    analytics_conn: duckdb.DuckDBPyConnection,
+) -> None:
+    """`run_at` is stored as TIMESTAMPTZ and comes back in whatever zone DuckDB hands over;
+    the dashboard prints a day, so the day has to be the Paris one. 00:30+02:00 is 22:30 UTC
+    the day before, which is the case that catches a naive `.date()`."""
+    _news_run(analytics_conn, at=datetime.fromisoformat("2026-09-09T00:30:00+02:00"))
+    assert _exported(analytics_conn)["news_status"]["last_success"] == "2026-09-09"
+
+
+def test_a_run_that_kept_nothing_but_failed_nothing_is_still_a_success(
+    analytics_conn: duckdb.DuckDBPyConnection,
+) -> None:
+    """The quiet week. The relevance guard drops nearly everything it is shown, so zero
+    kept rows is a normal day — reading it as a failure would put "News unavailable" on the
+    page for exactly the case the feed exists to state plainly."""
+    _news_run(
+        analytics_conn,
+        at=datetime.fromisoformat("2026-09-09T06:35:00+02:00"),
+        rows_kept=0,
+        rows_dropped=300,
+    )
+    status = _exported(analytics_conn)["news_status"]
+    assert status == {"last_success": "2026-09-09", "last_error": None}
+
+
+def test_a_run_where_every_query_died_is_not_a_success(
+    analytics_conn: duckdb.DuckDBPyConnection,
+) -> None:
+    _news_run(
+        analytics_conn,
+        at=datetime.fromisoformat("2026-09-06T06:35:00+02:00"),
+    )
+    _news_run(
+        analytics_conn,
+        at=datetime.fromisoformat("2026-09-09T06:35:00+02:00"),
+        rows_kept=0,
+        rows_dropped=0,
+        error="pia: GDELT Cloud HTTP 503: upstream unavailable\nqatar-airways: timed out",
+    )
+    status = _exported(analytics_conn)["news_status"]
+    assert status["last_success"] == "2026-09-06"
+    assert status["last_error"] == "pia: GDELT Cloud HTTP 503: upstream unavailable (+1 more)"
+
+
+def test_quota_exhaustion_is_named_rather_than_quoted(
+    analytics_conn: duckdb.DuckDBPyConnection,
+) -> None:
+    """The one failure worth naming: no retry clears it before the month rolls over.
+
+    The whole error is replaced rather than quoted, which is what separates this from the
+    dead-query case above — the `not issued after quota exhausted:` line naming the queries
+    that never ran is dropped, not counted as "+1 more"."""
+    _news_run(
+        analytics_conn,
+        at=datetime.fromisoformat("2026-09-09T06:35:00+02:00"),
+        queries=2,
+        rows_kept=0,
+        rows_dropped=0,
+        error=(
+            "pia: GDELT Cloud query units exhausted: QUOTA_EXCEEDED\n"
+            "not issued after quota exhausted: qatar-airways, emirates"
+        ),
+    )
+    status = _exported(analytics_conn)["news_status"]
+    assert status["last_error"] == "GDELT Cloud query units exhausted after 2 queries"
+    assert status["last_success"] is None
+
+
+def test_an_old_failure_survives_a_later_recovery(
+    analytics_conn: duckdb.DuckDBPyConnection,
+) -> None:
+    """Both fields are answered independently. The page only shows the error beside a stale
+    `last_success`, so suppressing it here would lose the reason on the day it matters."""
+    _news_run(
+        analytics_conn,
+        at=datetime.fromisoformat("2026-09-07T06:35:00+02:00"),
+        rows_kept=0,
+        rows_dropped=0,
+        error="airspace-disruption: timed out",
+    )
+    _news_run(analytics_conn, at=datetime.fromisoformat("2026-09-09T06:35:00+02:00"))
+    assert _exported(analytics_conn)["news_status"] == {
+        "last_success": "2026-09-09",
+        "last_error": "airspace-disruption: timed out",
+    }
+
+
+def test_a_partial_run_is_both_a_success_and_the_newest_error(
+    analytics_conn: duckdb.DuckDBPyConnection,
+) -> None:
+    """One dead query out of nine: news is working, and the query is still worth naming if
+    the feed ever does go stale."""
+    _news_run(
+        analytics_conn,
+        at=datetime.fromisoformat("2026-09-09T06:35:00+02:00"),
+        error="cdg-strikes: timed out",
+    )
+    assert _exported(analytics_conn)["news_status"] == {
+        "last_success": "2026-09-09",
+        "last_error": "cdg-strikes: timed out",
+    }
+
+
+def test_the_fare_ingest_runs_do_not_answer_for_the_news_feed(
+    analytics_conn: duckdb.DuckDBPyConnection,
+) -> None:
+    """`ingest_run` is one log for both halves of the pipeline. A healthy fare ingest must
+    not make a dead news step look alive."""
+    _news_run(
+        analytics_conn,
+        at=datetime.fromisoformat("2026-09-09T06:30:00+02:00"),
+        provider="serpapi",
+    )
+    assert _exported(analytics_conn)["news_status"] == {"last_success": None, "last_error": None}
+
+
+def test_the_quota_marker_is_the_wording_a_real_exhausted_run_writes(
+    analytics_conn: duckdb.DuckDBPyConnection,
+) -> None:
+    """`_QUOTA_MARKER` is a string agreed across three modules — the client raises it, the
+    ingest flattens it into `ingest_run.error`, the export reads it back — so it is pinned
+    here through all three rather than restated as a literal in a unit test.
+
+    Deliberately one carrier and no semantic queries: with nothing left to skip,
+    `run_news_ingest` writes no "not issued after quota exhausted" line at all. Matching on
+    *that* line instead would leave a run whose last query exhausted the month unnamed on
+    the page, which is the one failure the story wanted named."""
+    responses = httpx.MockTransport(
+        lambda _r: httpx.Response(
+            429, json={"error": {"code": "QUOTA_EXCEEDED", "message": "gone"}}
+        )
+    )
+    client = GdeltCloudClient(
+        "test-key", client=httpx.Client(transport=responses), sleep=lambda _s: None
+    )
+    run_news_ingest(analytics_conn, client, carriers=CARRIERS[:1], semantic=(), interval=0)
+
+    status = _exported(analytics_conn)["news_status"]
+    assert status["last_error"] == "GDELT Cloud query units exhausted after 1 query"
+    assert status["last_success"] is None

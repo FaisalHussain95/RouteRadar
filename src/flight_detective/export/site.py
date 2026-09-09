@@ -16,6 +16,10 @@ Everything else is a query. `arbitrage` and `seasonal_gauge` are **nullable** an
 `series`/`events`/`efficiency` may be empty: a partial database cannot answer them, and a
 card that prints `€0` or `+0%` because it has no data is worse than one that says so.
 
+`news_status` is the exception that proves the rule. An empty `events` list is ambiguous —
+it is what a quiet week and a week of failed queries both look like — so the region that
+would otherwise be read as "no news" carries the run log's own answer beside it.
+
 ## Money, dates and floats
 
 Prices are whole euros, as integers: every provider seen quotes whole euros, `Decimal`
@@ -39,6 +43,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
 from typing import Literal
 from urllib.parse import urlsplit
+from zoneinfo import ZoneInfo
 
 import duckdb
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field
@@ -48,11 +53,11 @@ from flight_detective.analytics import queries
 from flight_detective.calendar_engine.gregorian import BandKind
 from flight_detective.calendar_engine.tags import tags_for_range, window_for
 from flight_detective.ingest import DEFAULT_HORIZONS
-from flight_detective.models import AwareDatetime, CalendarTag
+from flight_detective.models import AwareDatetime, CalendarTag, IngestRun
 
 # Bumped whenever a reader would have to change: a removed or renamed field, or a new
 # required one. The site checks it before trusting the rest of the file.
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 # How far back the file reaches. This used to be `news/gdelt.py`'s `MAX_DAYS` — the DOC 2.0
 # archive length — on the reasoning that no pin could sit before it. That coupling is gone
@@ -75,6 +80,24 @@ GROUND_TIME = "4h 10m"
 # average vs February baseline"; the query behind it is the wedding premium, and the page
 # should not have to know that from the code.
 GAUGE_METHOD = "Wedding-window departures against the February/March baseline"
+
+PARIS = ZoneInfo("Europe/Paris")
+
+# Whose `ingest_run` rows answer "is the news half still working". One news source by
+# decision (`specs/architecture.md` § news), so this is a literal rather than a max() over
+# providers; `tests/test_export.py` pins it to the client's own `name`.
+NEWS_PROVIDER = "gdeltcloud"
+
+# How a quota failure is recognised in `ingest_run.error`. It is the one failure worth
+# naming on the page — nothing retries its way out of it before the month rolls over —
+# hence the special case in `_news_error_line`.
+#
+# Matched against `GdeltCloudQuotaError`'s own words, which are on the failing query's line.
+# **Not** against the `not issued after quota exhausted:` line `run_news_ingest` appends
+# after it: that one is written only `if skipped`, so quota dying on the last query of the
+# run would leave it out and the failure would go unnamed. `test_export.py` pins this to the
+# real error text through the real ingest, since it is a string agreed across two modules.
+_QUOTA_MARKER = "query units exhausted"
 
 Severity = Literal["high", "med", "low"]
 
@@ -181,6 +204,24 @@ class Efficiency(ExportModel):
     transit_minutes: int
 
 
+class NewsStatus(ExportModel):
+    """Whether the news half of the pipeline is still working, regardless of what it found.
+
+    A week in which nothing happened and a week in which every query failed both export an
+    empty `events` list, and the run log is the only thing that tells them apart — so the
+    feed reads its health from here rather than from its own row count."""
+
+    last_success: date | None = Field(
+        description="Europe/Paris day of the newest news run whose queries answered; null "
+        "before the news step has ever succeeded"
+    )
+    last_error: str | None = Field(
+        description="One line naming why the newest failing news run failed; null if none "
+        "has ever failed. Exported even when a later run recovered — the page shows it only "
+        "beside a stale last_success, and dropping it here would lose the reason."
+    )
+
+
 class SeasonalGauge(ExportModel):
     current_avg_eur: int
     baseline_avg_eur: int
@@ -200,6 +241,7 @@ class DashboardData(ExportModel):
     series: list[CarrierSeries]
     bands: list[Band]
     events: list[Event]
+    news_status: NewsStatus
     arbitrage: Arbitrage | None
     efficiency: list[Efficiency]
     seasonal_gauge: SeasonalGauge | None
@@ -362,6 +404,50 @@ def _events(conn: duckdb.DuckDBPyConnection, start: date, end: date) -> list[Eve
     ]
 
 
+def _news_succeeded(run: IngestRun) -> bool:
+    """Did this run's queries actually reach GDELT Cloud?
+
+    Not `rows_kept > 0`, which is the obvious reading and the wrong one: the relevance
+    guard throws away nearly everything it is shown — 300 rows down to 16 on S17's recorded
+    week — so a real day can keep nothing while all nine queries answered perfectly. Scoring
+    that as a failure would put "News unavailable" on the page for precisely the quiet week
+    the feed is supposed to state plainly. A run counts when it kept rows (proof the calls
+    landed) or when it issued queries and recorded no failure at all."""
+    return run.queries > 0 and (run.rows_kept > 0 or run.error is None)
+
+
+def _news_error_line(run: IngestRun) -> str:
+    """The newest failure as one line, saying which of the two shapes it is.
+
+    Quota exhaustion is a sizing problem that lasts until the month rolls over and is worth
+    naming; a dead query or two is usually transient, so its own first line is quoted and
+    the rest are counted rather than spilled onto a dashboard."""
+    lines = (run.error or "").splitlines()
+    if any(_QUOTA_MARKER in line for line in lines):
+        count = run.queries
+        return f"GDELT Cloud query units exhausted after {count} quer{'y' if count == 1 else 'ies'}"
+    if not lines:
+        return "the news run failed without saying why"
+    extra = f" (+{len(lines) - 1} more)" if len(lines) > 1 else ""
+    return f"{lines[0]}{extra}"
+
+
+def _news_status(conn: duckdb.DuckDBPyConnection) -> NewsStatus:
+    """The news half's health, read out of the `ingest_run` log.
+
+    The two fields are answered independently of each other, so a run that failed a query
+    but still kept rows sets both: the query is worth naming if the feed ever goes stale,
+    and the run is still a success today."""
+    runs = [run for run in db.fetch_ingest_runs(conn) if run.provider == NEWS_PROVIDER]
+    successes = [run for run in runs if _news_succeeded(run)]
+    failures = [run for run in runs if run.error]
+    # `fetch_ingest_runs` orders oldest first, so the newest of each is the last one.
+    return NewsStatus(
+        last_success=successes[-1].run_at.astimezone(PARIS).date() if successes else None,
+        last_error=_news_error_line(failures[-1]) if failures else None,
+    )
+
+
 def _arbitrage(
     conn: duckdb.DuckDBPyConnection, observed_on: date | None, break_even_eur: Decimal
 ) -> Arbitrage | None:
@@ -449,6 +535,7 @@ def build_dashboard(
         series=_series(conn, start, end, horizons),
         bands=_bands(start, end),
         events=_events(conn, start, end),
+        news_status=_news_status(conn),
         arbitrage=_arbitrage(conn, observed_on, break_even_eur),
         efficiency=_efficiency(conn),
         seasonal_gauge=_seasonal_gauge(conn),

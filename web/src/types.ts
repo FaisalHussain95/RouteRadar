@@ -17,6 +17,7 @@ export interface DashboardData {
   series: CarrierSeries[];
   bands: Band[];
   events: Event[];
+  news_status: NewsStatus;
   arbitrage: Arbitrage | null;
   efficiency: Efficiency[];
   seasonal_gauge: SeasonalGauge | null;
@@ -91,6 +92,23 @@ export interface Event {
    * Always null in v1: GDELT's DOC 2.0 artlist carries titles and URLs, not article text.
    */
   body: string | null;
+}
+/**
+ * Whether the news half of the pipeline is still working, regardless of what it found.
+ *
+ * A week in which nothing happened and a week in which every query failed both export an
+ * empty `events` list, and the run log is the only thing that tells them apart — so the
+ * feed reads its health from here rather than from its own row count.
+ */
+export interface NewsStatus {
+  /**
+   * Europe/Paris day of the newest news run whose queries answered; null before the news step has ever succeeded
+   */
+  last_success: string | null;
+  /**
+   * One line naming why the newest failing news run failed; null if none has ever failed. Exported even when a later run recovered — the page shows it only beside a stale last_success, and dropping it here would lose the reason.
+   */
+  last_error: string | null;
 }
 /**
  * Lahore against Sialkot on one departure date, with the ground transfer priced in.

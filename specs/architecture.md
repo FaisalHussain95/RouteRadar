@@ -476,7 +476,8 @@ Decisions from S12 (2026-09-09):
 Shaped by what the design's component consumes (see `specs/ux/design-system.md` § Data
 the page needs). Top level: `schema_version`, `generated_at`, `observed_on`, `carriers[]`,
 `destinations[]`, `horizons[]`, `series[]` (per destination × horizon × carrier: `{date,
-price_eur}` points), `bands[]`, `events[]`, `arbitrage`, `efficiency[]`, `seasonal_gauge`.
+price_eur}` points), `bands[]`, `events[]`, `news_status`, `arbitrage`, `efficiency[]`,
+`seasonal_gauge`.
 Written with `tmp + os.replace` so a reader never sees a partial file. The generated
 schema is `specs/dashboard-data.schema.json`; see § Decisions from S14 for the details a
 reader of the file needs.
@@ -825,3 +826,51 @@ and `tests/fixtures/gdelt/` are deleted — one news source, not two.
 - Verified on the box: `fd news-ingest --days 7` → 9 queries, 10 events kept, 299 dropped,
   no errors; re-running left `news_event` at 10 rows.
 
+## Decisions from S18 (2026-09-09)
+
+**`schema_version` is 2.** `news_status` is a new required region, so every reader has to
+move: `web/src/data.ts`'s `SUPPORTED_SCHEMA_VERSION` and the committed
+`data/site/dashboard.json` were both bumped with it. A schema bump means regenerating that
+file too — the site refuses a version it was not generated against, so leaving yesterday's
+export in place breaks the deployed page rather than degrading it.
+
+- **An empty `events[]` is ambiguous, and only the run log resolves it.** A quiet week and a
+  week in which every GDELT Cloud query died export the identical empty list. `news_status`
+  (`last_success`, `last_error`) is read from `ingest_run` rows whose provider is
+  `NEWS_PROVIDER`, so the feed can tell the two apart without guessing from its own row
+  count. `NEWS_PROVIDER` is a literal `"gdeltcloud"` rather than an import of
+  `GdeltCloudClient`, to keep the HTTP client out of the export's import graph; a test pins
+  the two together.
+- **A run that kept nothing is still a success.** S18's brief defined `last_success` as the
+  newest run with `rows_kept > 0`; that is wrong and was corrected here. The relevance guard
+  drops nearly everything it is shown — 300 rows to 16 on S17's recorded week — so a real
+  day routinely keeps zero, and scoring that as a failure would print "News unavailable" for
+  exactly the quiet week the feed exists to state plainly. `_news_succeeded` is
+  `queries > 0 and (rows_kept > 0 or error is None)`: it kept rows, so the calls landed, or
+  it issued queries and nothing failed.
+- **`last_error` is answered independently of `last_success`.** S17 logs one line per dead
+  query even on a run that kept rows, so a healthy feed routinely exports an error. It is
+  the *reason*, never the trigger: the page shows it only beside a stale `last_success`.
+  Suppressing it in the export instead would lose the reason on the one day it matters.
+- **Quota exhaustion is named, not quoted.** `_news_error_line` looks for
+  `query units exhausted` on any line and rewrites the lot as "GDELT Cloud query units
+  exhausted after N queries". Nothing retries its way out of that before the month rolls
+  over, and S20 is the story that fixes it. Any other failure quotes its own first line and
+  counts the rest. The marker is `GdeltCloudQuotaError`'s own wording, which lands on the
+  failing *query's* line, and deliberately **not** the `not issued after quota exhausted:`
+  line `run_news_ingest` appends after it — that one is written only `if skipped`, so a run
+  whose last query exhausted the month would go unnamed. It is a string agreed across three
+  modules, so `test_the_quota_marker_is_the_wording_a_real_exhausted_run_writes` pins it
+  through all three rather than restating it.
+- **The staleness threshold lives on the site, anchored on `generated_at`.**
+  `NEWS_STALE_AFTER_DAYS = 2` in `web/src/lib/staleness.ts`, compared against the file's own
+  `generated_at` rather than the reader's clock — against the clock it would restate the
+  header's "data is N days old" banner, whereas the case worth a separate line is fares
+  still arriving while news stopped. Two days of silence is one bad night plus its retry;
+  three is a pattern. The line is muted and sits *above* the rows, not instead of them: what
+  the last working run wrote is old, not wrong.
+- **The budget reading is deliberately not exported.** `NewsIngestResult.units` is read per
+  run from the free `/meta/query-units` and printed, never persisted, and S18 left the
+  decision open. Storing it would need a column and a migration to put a "budget is low"
+  warning on a page that has no action to offer for it. S20 owns the budget — it adds the
+  throttle and decides what has to persist — so this stays a journal line until then.

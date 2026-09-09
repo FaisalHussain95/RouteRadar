@@ -6,14 +6,20 @@ import { App } from "./App";
 import {
   beforeFirstIngest,
   FIXTURE,
+  newsStale,
   NOW_12H_LATER,
   NOW_40H_LATER,
+  quietWeek,
   withoutModules,
 } from "./test/fixtures";
 import type { DashboardData } from "./types";
 
 function show(data: DashboardData = FIXTURE, now: Date = NOW_12H_LATER) {
   return render(<App data={data} now={now} />);
+}
+
+function feedAside(): HTMLElement {
+  return screen.getByRole("heading", { name: "Event feed" }).closest("aside")!;
 }
 
 let fetchSpy: ReturnType<typeof vi.spyOn>;
@@ -286,5 +292,47 @@ describe("hover, on a pointer and on a finger", () => {
     await user.keyboard("{Escape}");
     expect(screen.queryByRole("dialog")).toBeNull();
     expect(screen.getByTestId("hairline")).toBeInTheDocument();
+  });
+});
+
+describe("the stale-news line above the feed", () => {
+  it("stays out of the way while the news step is keeping up", () => {
+    // The committed fixture's `news_status` is the healthy case, so this is the default.
+    show();
+    expect(screen.queryByTestId("feed-stale")).toBeNull();
+  });
+
+  it("says since when, and why, once the queries stopped landing", () => {
+    show(newsStale("GDELT Cloud query units exhausted after 2 queries"));
+
+    const line = screen.getByTestId("feed-stale");
+    expect(line).toHaveTextContent("News unavailable since 2 Sep 2026");
+    expect(line).toHaveTextContent("GDELT Cloud query units exhausted after 2 queries");
+    // Above the rows, not instead of them: what the last working run wrote is still real.
+    expect(within(feedAside()).getAllByRole("button")).toHaveLength(FIXTURE.events.length);
+  });
+
+  it("still says it with nothing to blame it on", () => {
+    show(newsStale(null));
+    expect(screen.getByTestId("feed-stale")).toHaveTextContent("News unavailable since 2 Sep 2026");
+  });
+
+  it("reads an empty feed as a quiet week, not as a failure", () => {
+    show(quietWeek());
+
+    expect(screen.getByTestId("feed-empty")).toHaveTextContent("No news events in the last 90 days");
+    expect(screen.queryByTestId("feed-stale")).toBeNull();
+    const text = document.body.textContent ?? "";
+    expect(text).not.toContain("News unavailable");
+    expect(text).not.toContain("Waiting for the first ingest");
+  });
+
+  it("does not blame the news step on a database nothing has ever been written to", () => {
+    // `beforeFirstIngest` clears the rows but keeps the fixture's `news_status`; the page
+    // has one sentence for "nothing has run yet" and this must not be a second.
+    show({ ...beforeFirstIngest(), news_status: { last_success: null, last_error: null } });
+
+    expect(screen.queryByTestId("feed-stale")).toBeNull();
+    expect(screen.getByTestId("feed-empty")).toHaveTextContent("Waiting for the first ingest");
   });
 });

@@ -541,7 +541,7 @@ Sample of what was stored:
 ```
 
 ## S18 — Stale-news signal on the dashboard
-- status: todo
+- status: done
 - size: S
 
 If every news call fails, the pipeline still exits 0 and exports zero events, and the
@@ -549,9 +549,9 @@ feed looks like a quiet week. Export `news_status` (`last_success` date, `last_e
 one-liner) in `dashboard.json` (schema bump), and have the event feed show a muted
 "News unavailable since <date>" line when `last_success` is older than 2 days.
 
-- [ ] Contract field added, schema regenerated, `web/src/types.ts` regenerated
-- [ ] Feed renders the line from the fixture; hidden when news is fresh (tested)
-- [ ] Empty feed with fresh news still reads as "no events this week", not as an error
+- [x] Contract field added, schema regenerated, `web/src/types.ts` regenerated
+- [x] Feed renders the line from the fixture; hidden when news is fresh (tested)
+- [x] Empty feed with fresh news still reads as "no events this week", not as an error
 
 **What S17 left you.** The `ingest_run` row is already the source for this — provider
 `gdeltcloud`, with `rows_kept` and a newline-separated `error`. `last_success` is the newest
@@ -573,6 +573,33 @@ Also relevant: a full page of semantic results is the normal shape of a *quiet* 
 as a busy one (the pool is bounded and always fills), so "zero events exported" genuinely
 can mean nothing happened. That is exactly why the signal has to come from the run row
 rather than from the event count.
+
+### What the build changed about the brief above
+
+Both are written up in `specs/architecture.md` § Decisions from S18.
+
+1. **`last_success` is not "the newest run whose run kept rows".** That definition, taken
+   literally, prints "News unavailable" for the quiet week — the case this signal exists to
+   distinguish. The guard drops 300 rows to 16 on S17's own recorded week, so a real day
+   keeps zero often enough that a three-day gap needs no failure at all. `_news_succeeded`
+   is `queries > 0 and (rows_kept > 0 or error is None)`: rows kept, so the calls landed, or
+   queries issued and nothing failed.
+2. **The budget reading is not exported, and that is the answer to the open question above.**
+   Persisting `units` would need a column and a migration to show a warning the reader has
+   no action for. S20 owns the budget and the throttle; it decides what has to persist. Until
+   then it stays the journal line `fd news-ingest` already prints.
+
+Also settled: the threshold is on the site (`NEWS_STALE_AFTER_DAYS = 2` in
+`web/src/lib/staleness.ts`) and compares against the file's `generated_at`, not the reader's
+clock — against the clock it would restate the header banner instead of saying the thing only
+this signal can say, that fares kept arriving while news stopped.
+
+The schema bump to 2 forced two readers to move with it: `web/src/data.ts`'s
+`SUPPORTED_SCHEMA_VERSION`, and the committed `data/site/dashboard.json`, which is tracked
+(`.gitignore` un-ignores it for `push-data.sh`) and would otherwise leave the deployed page
+throwing "schema_version 1, this build reads 2". It was regenerated with `fd export-site`
+against the box's real database, which is where the run rows verifying `news_status` came
+from.
 
 ## S19 — SerpApi within the free plan
 - status: todo
@@ -615,4 +642,13 @@ and deliver by signed webhook.
       --from-inbox` reading it, monitors enabled, API calls dropped to zero.
       If no: the throttle stays and this box is documented as the ceiling.
 - [ ] README § What it costs updated with the measured monthly units either way
+
+Note from S18 (done): the budget reading is still not persisted — S18 decided that
+deliberately and left it to this story, since the throttle is what gives a "budget is low"
+warning something to act on. If `--budget` needs the remaining units across runs, that is
+the column to add here. S18 also exports `news_status.last_error`, which already names quota
+exhaustion in one line on the dashboard (`GDELT Cloud query units exhausted after N
+queries`); a throttle that *declines* to call should record something equally readable in
+`ingest_run.error` rather than leaving the day silent, or the feed will read as stale after
+three throttled days.
 

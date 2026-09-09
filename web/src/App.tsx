@@ -16,7 +16,7 @@ import {
   seriesFor,
   type Filters,
 } from "./lib/select";
-import { staleness } from "./lib/staleness";
+import { newsFreshness, staleness } from "./lib/staleness";
 import type { DashboardData, Event } from "./types";
 
 /** The line every region shows before the pipeline has ever run. One sentence, one place:
@@ -45,6 +45,10 @@ export function App({ data, now }: { data: DashboardData; now?: Date }) {
   const plotRef = useRef<HTMLDivElement>(null);
 
   const freshness = staleness(data.generated_at, now ?? new Date());
+  // Anchored on `generated_at`, not on `now`: see `newsFreshness`. The two signals are
+  // deliberately separate — the header's banner is about the file, this one is about the
+  // news half of the pipeline having stopped while the fares kept arriving.
+  const news = newsFreshness(data.news_status, data.generated_at);
   const range = useMemo(() => exportWindow(data), [data]);
   const series = useMemo(() => seriesFor(data, filters), [data, filters]);
   const days = useMemo(() => hoverDates(series), [series]);
@@ -100,6 +104,7 @@ export function App({ data, now }: { data: DashboardData; now?: Date }) {
         <EventFeed
           events={data.events}
           emptyLine={noDataYet ? WAITING : "No news events in the last 90 days"}
+          news={news}
           onOpen={(event, opener) => setOpen({ event, opener })}
         />
       </div>

@@ -1,6 +1,7 @@
 import { formatDay, parseDay } from "../lib/dates";
 import { eventKey } from "../lib/events";
 import { SEVERITY_COLOR } from "../lib/severity";
+import type { NewsFreshness } from "../lib/staleness";
 import type { Event } from "../types";
 
 /** The feed line is `date · source · severity`.
@@ -8,14 +9,21 @@ import type { Event } from "../types";
  * The design printed an impact score there, derived from severity (high 0.91 / med 0.64 /
  * low 0.22). The export deliberately does not carry it — it would be a second copy of a
  * field already in the file — so the row names the severity it was derived from instead of
- * inventing a number that looks measured. */
+ * inventing a number that looks measured.
+ *
+ * `news` is the one thing the rows cannot say for themselves. An empty feed is a quiet week
+ * and a dead news step alike, so when the run log says the queries stopped landing the list
+ * gets a muted line above it — above rather than instead of, because the rows below it are
+ * still real, just old. */
 export function EventFeed({
   events,
   emptyLine,
+  news,
   onOpen,
 }: {
   events: Event[];
   emptyLine: string;
+  news: NewsFreshness;
   onOpen: (event: Event, opener: HTMLElement) => void;
 }) {
   return (
@@ -27,6 +35,12 @@ export function EventFeed({
           GDELT
         </span>
       </div>
+      {news.message !== null && (
+        <p className="feed-stale" role="status" data-testid="feed-stale">
+          {news.message}
+          {news.detail !== null && <span className="feed-stale-detail">{news.detail}</span>}
+        </p>
+      )}
       {events.length === 0 ? (
         <p className="empty-line" data-testid="feed-empty">
           {emptyLine}

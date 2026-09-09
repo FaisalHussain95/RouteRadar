@@ -316,6 +316,43 @@
       "title": "Event",
       "type": "object"
     },
+    "NewsStatus": {
+      "additionalProperties": false,
+      "description": "Whether the news half of the pipeline is still working, regardless of what it found.\n\nA week in which nothing happened and a week in which every query failed both export an\nempty `events` list, and the run log is the only thing that tells them apart \u2014 so the\nfeed reads its health from here rather than from its own row count.",
+      "properties": {
+        "last_success": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Europe/Paris day of the newest news run whose queries answered; null before the news step has ever succeeded",
+          "title": "Last Success"
+        },
+        "last_error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "One line naming why the newest failing news run failed; null if none has ever failed. Exported even when a later run recovered \u2014 the page shows it only beside a stale last_success, and dropping it here would lose the reason.",
+          "title": "Last Error"
+        }
+      },
+      "required": [
+        "last_success",
+        "last_error"
+      ],
+      "title": "NewsStatus",
+      "type": "object"
+    },
     "SeasonalGauge": {
       "additionalProperties": false,
       "properties": {
@@ -432,6 +469,9 @@
       "title": "Events",
       "type": "array"
     },
+    "news_status": {
+      "$ref": "#/$defs/NewsStatus"
+    },
     "arbitrage": {
       "anyOf": [
         {
@@ -470,11 +510,12 @@
     "series",
     "bands",
     "events",
+    "news_status",
     "arbitrage",
     "efficiency",
     "seasonal_gauge"
   ],
-  "title": "Flight Detective dashboard data (schema_version 1)",
+  "title": "Flight Detective dashboard data (schema_version 2)",
   "type": "object",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/flight-detective/dashboard-data.schema.json"

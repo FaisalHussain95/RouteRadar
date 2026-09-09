@@ -9,7 +9,7 @@ describe("parseDashboard", () => {
   });
 
   it("refuses a file this build's types were not generated from", () => {
-    expect(() => parseDashboard({ ...FIXTURE, schema_version: 2 })).toThrow(/schema_version 2/);
+    expect(() => parseDashboard({ ...FIXTURE, schema_version: 3 })).toThrow(/schema_version 3/);
     expect(() => parseDashboard(null)).toThrow(/not an object/);
   });
 

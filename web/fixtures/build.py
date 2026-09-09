@@ -19,6 +19,10 @@ Two departures from the S14 recipe:
   hand-written in the shape `news/ingest.py` writes: dates inside GDELT's 90-day archive
   (which is why every pin sits left of `generated_at`), one per severity, and an
   `impact_note` that is the ingest's own note about the row rather than a fare estimate.
+  `NEWS_RUN` goes in for the same reason: without an `ingest_run` row the export's
+  `news_status` is "never succeeded", and the fallback data would open on the failure
+  banner. It is the healthy case, on the morning `generated_at` names — the stale one is
+  built from this file in the Vitest suite, like the other unhappy paths.
 """
 
 import sys
@@ -34,7 +38,7 @@ from conftest import seed_analytics_db  # noqa: E402
 
 from flight_detective import db  # noqa: E402
 from flight_detective.export import site  # noqa: E402
-from flight_detective.models import NewsEvent  # noqa: E402
+from flight_detective.models import IngestRun, NewsEvent  # noqa: E402
 
 GENERATED_AT = datetime.fromisoformat("2026-09-09T06:35:00+02:00")
 
@@ -87,10 +91,22 @@ EVENTS = (
 )
 
 
+# What S17's own run on the box printed: nine queries, ten kept, the rest dropped by the
+# relevance guard.
+NEWS_RUN = IngestRun(
+    run_at=GENERATED_AT,
+    provider="gdeltcloud",
+    queries=9,
+    rows_kept=10,
+    rows_dropped=299,
+)
+
+
 def main() -> None:
     conn = duckdb.connect(":memory:")
     seed_analytics_db(conn)
     db.upsert_news_events(conn, EVENTS)
+    db.insert_ingest_run(conn, NEWS_RUN)
     out = REPO / "web" / "fixtures" / "dashboard.json"
     site.write_dashboard(site.build_dashboard(conn, generated_at=GENERATED_AT), out)
     print(f"wrote {out.relative_to(REPO)}")

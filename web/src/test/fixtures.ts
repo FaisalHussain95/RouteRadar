@@ -29,3 +29,17 @@ export function beforeFirstIngest(): DashboardData {
 export function withoutModules(): DashboardData {
   return { ...FIXTURE, events: [], efficiency: [], arbitrage: null, seasonal_gauge: null };
 }
+
+/** The news half of the pipeline has been dead for a week while the fares kept arriving.
+ * `events` still carries the rows the last working run wrote — they are old, not wrong. */
+export function newsStale(
+  last_error: string | null = "cdg-strikes: timed out (+8 more)",
+): DashboardData {
+  return { ...FIXTURE, news_status: { last_success: "2026-09-02", last_error } };
+}
+
+/** News is working and there simply was nothing to report. The case the muted line must
+ * stay out of, because it is the answer rather than a fault. */
+export function quietWeek(): DashboardData {
+  return { ...FIXTURE, events: [] };
+}
