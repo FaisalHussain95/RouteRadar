@@ -8,6 +8,18 @@
 #
 # Usage: bash scripts/run-loop.sh [max_stories]   (default 20)
 # Log:   .loop-state/run-loop.log
+#
+# Start it detached as a transient user unit, not in tmux/screen from a login shell:
+#
+#   systemd-run --user --unit=flight-loop --collect \
+#     -p WorkingDirectory=$PWD --setenv=PATH="$PATH" --setenv=HOME="$HOME" \
+#     bash scripts/run-loop.sh 5
+#   journalctl --user -u flight-loop -f        # or tail the log file
+#   systemctl --user stop flight-loop          # stop between or during stories
+#
+# A tmux session inherits the login session's scope, and logind kills that scope when
+# the session ends, tmux and the running story with it (this happened on 2026-09-09 at
+# 13:48; the story was left `doing` and resumed cleanly). A user unit outlives logouts.
 set -uo pipefail
 cd "$(dirname "$0")/.."
 max=${1:-20}
