@@ -1,0 +1,846 @@
+/* Page CSS. Every colour and step is a token from tokens.css; the design's inline styles
+   are translated into classes here so the media queries the phone rules need exist at all
+   (`specs/ux/design-system.md` § Responsive and § Phone behaviour). */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 15px;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-neutral-800);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+a {
+  color: var(--color-accent-400);
+}
+a:hover {
+  color: var(--color-accent-300);
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+.muted {
+  color: var(--text-muted-55);
+}
+
+.kicker {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: var(--space-3);
+}
+
+/* Touch targets. The design's pins, chips and Close button are 20–28px tall; the rule from
+   § Responsive is to pad the *hit area* and leave the glyph alone, which is what this
+   pseudo-element does — it grows the clickable box to 44px without moving a pixel of paint. */
+.hit44 {
+  position: relative;
+}
+.hit44::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 44px;
+  min-height: 44px;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── header ─────────────────────────────────────────────────────────────────────────── */
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  padding: var(--space-4) var(--space-8);
+  border-bottom: 1px solid var(--color-divider);
+  position: sticky;
+  top: 0;
+  background: rgba(22, 24, 38, 0.92);
+  backdrop-filter: blur(8px);
+  z-index: 30;
+  flex-wrap: wrap;
+}
+
+.brand-mark {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-accent);
+  box-shadow: 0 0 12px rgba(145, 132, 217, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.brand-mark span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+.brand-name {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  font-size: 16px;
+}
+.route-tag {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-accent);
+  letter-spacing: 0.04em;
+}
+.constraint-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--color-divider);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--text-muted-72);
+  white-space: nowrap;
+}
+.constraint-pill .glyph {
+  color: var(--color-accent);
+}
+.status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--text-muted-55);
+}
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-ok);
+  box-shadow: 0 0 8px var(--color-ok);
+}
+.status-dot.stale {
+  background: var(--sev-med);
+  box-shadow: 0 0 8px var(--sev-med);
+}
+
+.stale-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-8);
+  background: rgba(214, 166, 60, 0.14);
+  border-bottom: 1px solid var(--sev-med);
+  color: var(--sev-med);
+  font-size: 12.5px;
+}
+
+/* ── filter bar ─────────────────────────────────────────────────────────────────────── */
+
+/* The design set flex-wrap and overflow-x on the same element; a wrapping container never
+   overflows, so the scroll was dead code. The bar wraps and only the chip strip scrolls. */
+.filter-bar {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-8);
+  padding: var(--space-6) var(--space-8);
+  border-bottom: 1px solid var(--color-divider);
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  min-width: 0;
+}
+.filter-label {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted-45);
+  margin-bottom: 6px;
+}
+
+.origin-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+.origin-box .note {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-muted-45);
+}
+
+.segmented {
+  display: flex;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.segmented button {
+  padding: 7px 14px;
+  border: 0;
+  cursor: pointer;
+  background: transparent;
+  color: var(--text-muted-55);
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+.segmented button:hover {
+  background: rgba(233, 233, 237, 0.07);
+}
+.segmented button[aria-pressed="true"] {
+  background: rgba(145, 132, 217, 0.16);
+  color: var(--color-accent-300);
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+}
+
+/* The only group whose width grows with the data, so the only one that scrolls. */
+.chip-strip {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  min-width: 0;
+  padding-bottom: 2px;
+}
+.chip-strip.has-overflow {
+  mask-image: linear-gradient(to right, #000 calc(100% - 16px), transparent);
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  padding: 6px 11px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: 12.5px;
+  font-family: var(--font-body);
+  background: transparent;
+  color: var(--text-muted-40);
+  border: 1px solid rgba(233, 233, 237, 0.08);
+}
+.chip[aria-pressed="true"] {
+  background: rgba(233, 233, 237, 0.05);
+  color: var(--color-text);
+  border-color: var(--color-divider);
+}
+.chip .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: rgba(233, 233, 237, 0.25);
+}
+
+/* ── layout ─────────────────────────────────────────────────────────────────────────── */
+
+.main-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: var(--space-6);
+  padding: var(--space-6) var(--space-8);
+  align-items: start;
+}
+
+.card {
+  border-radius: var(--radius-md);
+  background: var(--color-card);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-6);
+  min-width: 0;
+}
+
+.chart-card {
+  padding: var(--space-6) var(--space-6) var(--space-3);
+}
+.chart-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-4);
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+.chart-head h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 500;
+}
+.chart-head .spacer {
+  flex: 1;
+}
+.chart-note {
+  font-size: 11.5px;
+  color: var(--text-muted-45);
+}
+
+.scroll-wrap {
+  overflow-x: auto;
+  overflow-y: hidden;
+  margin: 0 -2px;
+  padding: 0 2px 4px;
+}
+.plot-frame {
+  position: relative;
+  margin: var(--space-8) 0 0 44px;
+}
+.plot {
+  position: relative;
+  height: 340px;
+  cursor: crosshair;
+}
+.plot:focus-visible {
+  outline: 1px solid var(--color-accent);
+  outline-offset: 4px;
+}
+.plot svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.band {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+.band-label {
+  position: absolute;
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0.85;
+}
+.grid-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(233, 233, 237, 0.06);
+}
+.y-tick {
+  position: absolute;
+  right: 100%;
+  margin-right: 8px;
+  transform: translateY(-50%);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--text-muted-40);
+}
+.x-axis {
+  position: relative;
+  height: 18px;
+  margin-top: var(--space-6);
+}
+.x-tick {
+  position: absolute;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--text-muted-40);
+}
+
+.pin-guide {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  pointer-events: none;
+}
+.pin {
+  position: absolute;
+  bottom: -11px;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  background: var(--color-bg);
+  padding: 0;
+}
+
+.hairline {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(233, 233, 237, 0.45);
+  pointer-events: none;
+}
+
+/* pointer-events:none so a tap that lands on the card falls through to the plot and moves
+   the hairline instead of being swallowed (§ Phone behaviour). */
+.hover-card {
+  position: absolute;
+  top: 14px;
+  /* Placed by a layout effect once its own width is known; hidden until then rather than
+     flashed at the left edge for one frame. */
+  visibility: hidden;
+  width: 290px;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: rgba(35, 37, 50, 0.97);
+  box-shadow: var(--shadow-md);
+  pointer-events: none;
+  z-index: 6;
+}
+.hover-row {
+  display: grid;
+  grid-template-columns: 14px 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 3px 0;
+  opacity: 0.72;
+}
+.hover-row.cheapest {
+  opacity: 1;
+}
+.hover-row .swatch {
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+}
+.hover-news {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(233, 233, 237, 0.12);
+  font-size: 11.5px;
+  color: var(--text-muted-72);
+}
+
+.legend {
+  display: flex;
+  gap: var(--space-6);
+  flex-wrap: wrap;
+  padding: var(--space-4) 0 var(--space-3);
+  border-top: 1px solid rgba(233, 233, 237, 0.1);
+  margin-top: var(--space-3);
+  font-size: 11.5px;
+  color: var(--text-muted-55);
+}
+.legend .key {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.legend .line {
+  display: inline-block;
+  width: 18px;
+  height: 0;
+  border-top: 2px solid currentcolor;
+}
+.legend .band-key {
+  display: inline-block;
+  width: 18px;
+  height: 9px;
+  border-radius: 2px;
+}
+.legend .pin-key {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 1px solid var(--sev-high);
+}
+
+.empty-line {
+  color: var(--text-muted-55);
+  font-size: 12.5px;
+  text-align: center;
+  text-wrap: pretty;
+}
+.chart-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--space-6);
+  pointer-events: none;
+}
+
+/* ── event feed ─────────────────────────────────────────────────────────────────────── */
+
+.feed-aside {
+  position: sticky;
+  top: 74px;
+}
+.feed-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: var(--space-4);
+}
+.feed-head h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+}
+.feed-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 430px;
+  overflow-y: auto;
+}
+.feed-row {
+  display: flex;
+  gap: 9px;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-md);
+  padding: 9px;
+  cursor: pointer;
+  color: var(--color-text);
+  font-family: var(--font-body);
+}
+.feed-row:hover {
+  background: rgba(233, 233, 237, 0.05);
+}
+.sev-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-top: 6px;
+  flex: none;
+}
+.feed-headline {
+  display: block;
+  font-size: 12.5px;
+  line-height: 1.35;
+  text-wrap: pretty;
+}
+.feed-meta {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--text-muted-45);
+  margin-top: 3px;
+}
+.feed-impact {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-accent-400);
+  margin-top: 2px;
+}
+
+/* ── modules ────────────────────────────────────────────────────────────────────────── */
+
+.modules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-6);
+  padding: 0 var(--space-8) 33.6px;
+}
+.module h3 {
+  margin: 0 0 var(--space-4);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.arb-grid {
+  display: grid;
+  grid-template-columns: 52px 1fr auto;
+  gap: 8px var(--space-4);
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+}
+.arb-track {
+  height: 7px;
+  background: rgba(233, 233, 237, 0.06);
+  border-radius: 3px;
+}
+.arb-bar {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+}
+.arb-bar.lhe {
+  background: linear-gradient(90deg, var(--color-accent-700), var(--color-accent));
+}
+.arb-bar.skt {
+  background: linear-gradient(90deg, var(--color-accent-800), var(--color-accent-600));
+}
+.arb-foot {
+  margin-top: 14px;
+  padding-top: var(--space-4);
+  border-top: 1px solid rgba(233, 233, 237, 0.1);
+}
+.arb-spread {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  color: var(--color-accent-300);
+}
+.verdict-pill {
+  margin-top: 9px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 10px;
+  border-radius: var(--radius-md);
+  background: rgba(145, 132, 217, 0.12);
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+  font-size: 12.5px;
+  color: var(--color-accent-300);
+}
+
+.scatter {
+  position: relative;
+  height: 190px;
+  margin-left: 34px;
+  border-left: 1px solid rgba(233, 233, 237, 0.14);
+  border-bottom: 1px solid rgba(233, 233, 237, 0.14);
+}
+.scatter .wash {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top right, rgba(63, 174, 109, 0.1), transparent 55%);
+  pointer-events: none;
+}
+.scatter .quadrant {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 50%;
+  height: 50%;
+  border-right: 1px dashed rgba(233, 233, 237, 0.12);
+  border-top: 1px dashed rgba(233, 233, 237, 0.12);
+  pointer-events: none;
+}
+.scatter .sweet {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(63, 174, 109, 0.85);
+}
+.scatter .dot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+}
+.scatter .dot-label {
+  position: absolute;
+  transform: translateY(-50%);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  white-space: nowrap;
+}
+.scatter-y {
+  position: absolute;
+  left: -34px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted-40);
+}
+.scatter-x {
+  display: flex;
+  justify-content: space-between;
+  margin-left: 34px;
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted-40);
+}
+
+.gauge-pct {
+  font-family: var(--font-mono);
+  font-size: 44px;
+  line-height: 1;
+  color: var(--band-wedding);
+}
+.gauge-track {
+  height: 9px;
+  background: rgba(233, 233, 237, 0.06);
+  border-radius: 999px;
+  margin: 14px 0 var(--space-4);
+}
+.gauge-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--band-wedding), var(--sev-high));
+  border-radius: 999px;
+}
+.gauge-row {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+}
+.gauge-row .unit {
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  color: rgba(233, 233, 237, 0.5);
+}
+.gauge-method {
+  margin-top: 14px;
+  padding-top: var(--space-4);
+  border-top: 1px solid rgba(233, 233, 237, 0.1);
+  font-size: 12px;
+  color: rgba(233, 233, 237, 0.6);
+  text-wrap: pretty;
+}
+
+/* ── drawer ─────────────────────────────────────────────────────────────────────────── */
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 11, 18, 0.6);
+  backdrop-filter: blur(2px);
+  z-index: 60;
+  border: 0;
+  padding: 0;
+}
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(430px, 92vw);
+  background: var(--color-card);
+  box-shadow: var(--shadow-lg);
+  z-index: 61;
+  padding: var(--space-8);
+  overflow-y: auto;
+}
+.drawer h2 {
+  margin: 0 0 var(--space-4);
+  font-size: 22px;
+  font-weight: 500;
+  text-wrap: pretty;
+}
+.drawer h2:focus-visible {
+  outline: 1px solid var(--color-accent);
+  outline-offset: 4px;
+}
+.drawer-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+.sev-badge {
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+.drawer-close {
+  padding: 4px 10px;
+  font-size: 13px;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text);
+  border: 1px solid var(--color-neutral-700);
+  cursor: pointer;
+}
+.drawer-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px var(--space-6);
+  margin-top: var(--space-6);
+  padding-top: 14px;
+  border-top: 1px solid rgba(233, 233, 237, 0.12);
+  font-size: 12.5px;
+}
+.drawer-grid dt {
+  color: rgba(233, 233, 237, 0.5);
+}
+.drawer-grid dd {
+  margin: 0;
+}
+
+/* ── responsive ─────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 899px) {
+  .main-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .feed-aside {
+    position: static;
+  }
+  .feed-list {
+    max-height: 300px;
+  }
+  /* Below 900px the plot is a fixed 760px frame inside .scroll-wrap, so a horizontal drag
+     pans it — which is why § Phone behaviour rules out drag-to-scrub on the hairline. */
+  .plot-frame {
+    min-width: 760px;
+  }
+}
+
+@media (max-width: 619px) {
+  .header,
+  .filter-bar,
+  .stale-banner {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .main-grid,
+  .modules-grid {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .chart-card {
+    padding: 12px 12px 6px;
+  }
+  .hover-card {
+    width: 250px;
+  }
+  .modules-grid {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  }
+  /* Origin is display-only and the header's route tag already says CDG → PK-NORTH. */
+  .filter-group.origin {
+    display: none;
+  }
+  /* A full-screen blur is the most expensive thing on the page for the least effect here. */
+  .backdrop {
+    backdrop-filter: none;
+  }
+}

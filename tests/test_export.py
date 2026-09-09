@@ -564,3 +564,17 @@ def test_every_window_has_a_short_label() -> None:
     for window in (*WINDOWS, *HIJRI_WINDOWS):
         assert window.short_label
         assert len(window.short_label) <= 18, window.tag
+
+
+def test_the_site_axis_uses_the_same_window_as_the_export() -> None:
+    """The chart's x axis is the export window, and `web/src/lib/select.ts` hand-copies its
+    two constants — there is no way to import a Python `timedelta` into TypeScript.
+
+    Nothing else couples them. `HISTORY` follows GDELT's archive length (`news/gdelt.py`'s
+    `MAX_DAYS`), so it moves if GDELT's does, and the site would then draw an axis narrower
+    than the data it is given: `.plot svg` is `overflow: visible`, so the points would render
+    outside the plot rather than disappearing, which is exactly the kind of failure nobody
+    reports. This is the assertion that turns that into a red test."""
+    source = Path(__file__).resolve().parents[1].joinpath("web/src/lib/select.ts").read_text()
+    assert f"HISTORY_DAYS = {site.HISTORY.days};" in source
+    assert f"FORWARD_DAYS = {site.FORWARD.days};" in source

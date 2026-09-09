@@ -1,0 +1,450 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-09T06:35:00+02:00",
+  "observed_on": "2026-09-09",
+  "carriers": [
+    {
+      "code": "PK",
+      "name": "PIA",
+      "color": "#53a000",
+      "hub": null,
+      "direct": true,
+      "typical_transit_minutes": 486
+    },
+    {
+      "code": "QR",
+      "name": "Qatar",
+      "color": "#f33a87",
+      "hub": "DOH",
+      "direct": false,
+      "typical_transit_minutes": 744
+    },
+    {
+      "code": "EK",
+      "name": "Emirates",
+      "color": "#b44900",
+      "hub": "DXB",
+      "direct": false,
+      "typical_transit_minutes": 834
+    },
+    {
+      "code": "GF",
+      "name": "Gulf Air",
+      "color": "#9d3ebf",
+      "hub": "BAH",
+      "direct": false,
+      "typical_transit_minutes": 936
+    },
+    {
+      "code": "TK",
+      "name": "Turkish",
+      "color": "#0565fc",
+      "hub": "IST",
+      "direct": false,
+      "typical_transit_minutes": 672
+    },
+    {
+      "code": "SV",
+      "name": "Saudia",
+      "color": "#1d93a6",
+      "hub": "JED",
+      "direct": false,
+      "typical_transit_minutes": 888
+    }
+  ],
+  "destinations": [
+    {
+      "code": "ISB",
+      "label": "Islamabad"
+    },
+    {
+      "code": "LHE",
+      "label": "Lahore"
+    },
+    {
+      "code": "SKT",
+      "label": "Sialkot"
+    }
+  ],
+  "horizons": [
+    14,
+    30,
+    60,
+    90,
+    120,
+    180
+  ],
+  "series": [
+    {
+      "destination": "ISB",
+      "horizon_days": 14,
+      "carrier": "PK",
+      "points": [
+        {
+          "departure_date": "2026-09-23",
+          "price_eur": 600
+        }
+      ]
+    },
+    {
+      "destination": "ISB",
+      "horizon_days": 14,
+      "carrier": "QR",
+      "points": [
+        {
+          "departure_date": "2026-09-23",
+          "price_eur": 700
+        }
+      ]
+    },
+    {
+      "destination": "ISB",
+      "horizon_days": 30,
+      "carrier": "QR",
+      "points": [
+        {
+          "departure_date": "2026-10-09",
+          "price_eur": 660
+        },
+        {
+          "departure_date": "2026-10-11",
+          "price_eur": 700
+        }
+      ]
+    },
+    {
+      "destination": "ISB",
+      "horizon_days": 90,
+      "carrier": "PK",
+      "points": [
+        {
+          "departure_date": "2026-12-08",
+          "price_eur": 900
+        }
+      ]
+    },
+    {
+      "destination": "ISB",
+      "horizon_days": 90,
+      "carrier": "QR",
+      "points": [
+        {
+          "departure_date": "2026-12-08",
+          "price_eur": 980
+        },
+        {
+          "departure_date": "2026-12-20",
+          "price_eur": 1150
+        }
+      ]
+    },
+    {
+      "destination": "ISB",
+      "horizon_days": 90,
+      "carrier": "TK",
+      "points": [
+        {
+          "departure_date": "2026-12-08",
+          "price_eur": 870
+        }
+      ]
+    },
+    {
+      "destination": "ISB",
+      "horizon_days": 120,
+      "carrier": "EK",
+      "points": [
+        {
+          "departure_date": "2027-01-07",
+          "price_eur": 1020
+        }
+      ]
+    },
+    {
+      "destination": "ISB",
+      "horizon_days": 120,
+      "carrier": "QR",
+      "points": [
+        {
+          "departure_date": "2027-01-07",
+          "price_eur": 1100
+        }
+      ]
+    },
+    {
+      "destination": "ISB",
+      "horizon_days": 180,
+      "carrier": "PK",
+      "points": [
+        {
+          "departure_date": "2027-03-01",
+          "price_eur": 560
+        }
+      ]
+    },
+    {
+      "destination": "ISB",
+      "horizon_days": 180,
+      "carrier": "QR",
+      "points": [
+        {
+          "departure_date": "2027-02-01",
+          "price_eur": 620
+        },
+        {
+          "departure_date": "2027-03-01",
+          "price_eur": 640
+        }
+      ]
+    },
+    {
+      "destination": "LHE",
+      "horizon_days": 14,
+      "carrier": "GF",
+      "points": [
+        {
+          "departure_date": "2026-09-23",
+          "price_eur": 520
+        }
+      ]
+    },
+    {
+      "destination": "LHE",
+      "horizon_days": 30,
+      "carrier": "GF",
+      "points": [
+        {
+          "departure_date": "2026-10-09",
+          "price_eur": 500
+        }
+      ]
+    },
+    {
+      "destination": "LHE",
+      "horizon_days": 90,
+      "carrier": "GF",
+      "points": [
+        {
+          "departure_date": "2026-12-08",
+          "price_eur": 940
+        }
+      ]
+    },
+    {
+      "destination": "LHE",
+      "horizon_days": 180,
+      "carrier": "GF",
+      "points": [
+        {
+          "departure_date": "2027-03-01",
+          "price_eur": 480
+        }
+      ]
+    },
+    {
+      "destination": "SKT",
+      "horizon_days": 14,
+      "carrier": "GF",
+      "points": [
+        {
+          "departure_date": "2026-09-23",
+          "price_eur": 610
+        }
+      ]
+    },
+    {
+      "destination": "SKT",
+      "horizon_days": 30,
+      "carrier": "GF",
+      "points": [
+        {
+          "departure_date": "2026-10-09",
+          "price_eur": 480
+        }
+      ]
+    },
+    {
+      "destination": "SKT",
+      "horizon_days": 90,
+      "carrier": "GF",
+      "points": [
+        {
+          "departure_date": "2026-12-08",
+          "price_eur": 800
+        }
+      ]
+    }
+  ],
+  "bands": [
+    {
+      "tag": "french_summer",
+      "label": "French summer",
+      "short_label": "FR summer peak",
+      "kind": "french",
+      "from": "2026-07-01",
+      "to": "2026-08-31",
+      "multiplier_low": 1.15,
+      "multiplier_high": 1.35
+    },
+    {
+      "tag": "french_toussaint",
+      "label": "French Toussaint",
+      "short_label": "FR school holiday",
+      "kind": "french",
+      "from": "2026-10-17",
+      "to": "2026-11-02",
+      "multiplier_low": 1.05,
+      "multiplier_high": 1.15
+    },
+    {
+      "tag": "wedding_rush",
+      "label": "Desi wedding season",
+      "short_label": "Wedding peak",
+      "kind": "wedding",
+      "from": "2026-11-15",
+      "to": "2027-01-15",
+      "multiplier_low": 1.4,
+      "multiplier_high": 1.8
+    },
+    {
+      "tag": "christmas_new_year",
+      "label": "Christmas / New Year",
+      "short_label": "Christmas",
+      "kind": "wedding",
+      "from": "2026-12-18",
+      "to": "2027-01-05",
+      "multiplier_low": 1.6,
+      "multiplier_high": 2.0
+    },
+    {
+      "tag": "ramadan_phase1",
+      "label": "Ramadan (first half)",
+      "short_label": "Ramadan",
+      "kind": "religious",
+      "from": "2027-02-08",
+      "to": "2027-02-22",
+      "multiplier_low": 0.85,
+      "multiplier_high": 0.95
+    },
+    {
+      "tag": "eid_ul_fitr",
+      "label": "Chaand Raat / Eid-ul-Fitr",
+      "short_label": "Eid-ul-Fitr",
+      "kind": "religious",
+      "from": "2027-03-05",
+      "to": "2027-03-11",
+      "multiplier_low": 1.2,
+      "multiplier_high": 1.6
+    },
+    {
+      "tag": "hajj_eid_ul_adha",
+      "label": "Hajj / Eid-ul-Adha",
+      "short_label": "Hajj corridor",
+      "kind": "religious",
+      "from": "2027-05-07",
+      "to": "2027-05-19",
+      "multiplier_low": 1.1,
+      "multiplier_high": 1.3
+    },
+    {
+      "tag": "french_summer",
+      "label": "French summer",
+      "short_label": "FR summer peak",
+      "kind": "french",
+      "from": "2027-07-01",
+      "to": "2027-08-31",
+      "multiplier_low": 1.15,
+      "multiplier_high": 1.35
+    }
+  ],
+  "events": [
+    {
+      "date": "2026-06-24",
+      "severity": "high",
+      "headline": "Middle East airspace restriction extended through the summer",
+      "source": "avherald.com",
+      "source_url": "https://avherald.com/h?article=51f2a0c1",
+      "impact_text": "4 outlets · severity 3 from 'airspace closed'",
+      "body": null
+    },
+    {
+      "date": "2026-07-12",
+      "severity": "low",
+      "headline": "EASA publishes routine airworthiness directive review for EU operations",
+      "source": "easa.europa.eu",
+      "source_url": "https://www.easa.europa.eu/en/newsroom/ad-review-2026",
+      "impact_text": "1 outlet · severity 1, no restriction keyword matched",
+      "body": null
+    },
+    {
+      "date": "2026-08-03",
+      "severity": "med",
+      "headline": "Umrah quota raised for European pilgrims ahead of the winter season",
+      "source": "arabnews.com",
+      "source_url": "https://www.arabnews.com/node/2026-umrah-quota",
+      "impact_text": "3 outlets · severity 2 from 'quota'",
+      "body": null
+    },
+    {
+      "date": "2026-08-27",
+      "severity": "high",
+      "headline": "French ATC strike notice covers a 48-hour window at CDG",
+      "source": "dgac.fr",
+      "source_url": "https://www.dgac.fr/fr/preavis-de-greve-2026",
+      "impact_text": "6 outlets · severity 3 from 'strike'",
+      "body": null
+    },
+    {
+      "date": "2026-09-02",
+      "severity": "med",
+      "headline": "PIA adds a third weekly CDG-ISB direct for the wedding peak",
+      "source": "reuters.com",
+      "source_url": "https://www.reuters.com/business/aerospace-defense/pia-cdg-isb",
+      "impact_text": "2 outlets · severity 2 from 'capacity'",
+      "body": null
+    }
+  ],
+  "arbitrage": {
+    "departure_date": "2026-09-23",
+    "lhe_eur": 520,
+    "skt_eur": 610,
+    "isb_eur": 600,
+    "spread_eur": -90,
+    "ground_transfer_eur": 34,
+    "ground_time": "4h 10m",
+    "verdict": "lhe"
+  },
+  "efficiency": [
+    {
+      "carrier": "GF",
+      "price_eur": 619,
+      "transit_minutes": 900
+    },
+    {
+      "carrier": "QR",
+      "price_eur": 808,
+      "transit_minutes": 840
+    },
+    {
+      "carrier": "TK",
+      "price_eur": 870,
+      "transit_minutes": 890
+    },
+    {
+      "carrier": "PK",
+      "price_eur": 687,
+      "transit_minutes": 540
+    },
+    {
+      "carrier": "EK",
+      "price_eur": 1020,
+      "transit_minutes": 780
+    }
+  ],
+  "seasonal_gauge": {
+    "current_avg_eur": 970,
+    "baseline_avg_eur": 575,
+    "pct": 69,
+    "method": "Wedding-window departures against the February/March baseline"
+  }
+}

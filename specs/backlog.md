@@ -239,7 +239,7 @@ hover card says ±5. `calendar_engine.tags.label_for(tag)` is the tag → band l
 `bands[]` array needs, and it falls back to the raw tag rather than raising.
 
 ## S15 — Static dashboard (`web/`)
-- status: todo
+- status: done
 - size: L
 
 Vite + React + TypeScript in `web/`, implementing `specs/ux/routeradar/RouteRadar.dc.html`
@@ -250,46 +250,57 @@ region by region using the tokens in `design-system.md`. `src/types.ts` generate
 `pnpm build` emits hashed static files to `web/dist/`; no runtime fetch anywhere. Extend
 `scripts/check.sh` with `pnpm lint && pnpm typecheck && pnpm test && pnpm build`.
 
-- [ ] Header, filter bar, fare chart (bands, series, pins, hover card), event feed,
+- [x] Header, filter bar, fare chart (bands, series, pins, hover card), event feed,
       three modules, event drawer all render from the fixture and match the design
-- [ ] Filters (destination, carriers, horizon) work client-side with no fetch
-- [ ] **Carrier legend** (from S13): the legend row under the plot gains six line keys —
+- [x] Filters (destination, carriers, horizon) work client-side with no fetch
+- [x] **Carrier legend** (from S13): the legend row under the plot gains six line keys —
       a short stroke in `--carrier-<code>` plus the IATA code — before the existing band and
       news-pin keys. The design's row names no carrier, so without this the only
       colour→carrier key is the filter chips, which scroll out of view on a phone
-- [ ] Touch behaviour per `design-system.md` § Phone behaviour: tap-to-stick hover with
+- [x] Touch behaviour per `design-system.md` § Phone behaviour: tap-to-stick hover with
       `Escape`/tap-outside to clear, a modal drawer (scroll lock, focus trap, `Escape`),
       and a filter bar whose carrier chip strip is the only part that scrolls
-- [ ] **Stale-data banner** (from S13): when `generated_at` is more than 36 h old the
+- [x] **Stale-data banner** (from S13): when `generated_at` is more than 36 h old the
       header's `● Updated …` status turns into a `--sev-med` banner directly under the
       header reading `Data is <N> days old — the daily ingest has not run since <date>`,
       and the status dot goes from `--color-ok` to `--sev-med`. 36 h, not 24 h, so a timer
       that fires late or a slow ingest does not cry wolf; the pipeline runs at 06:30 daily.
       Tested with a fixture whose `generated_at` is 40 h old and one 12 h old
-- [ ] **"No data yet" empty state** (from S13): when `series` is empty across every
+- [x] **"No data yet" empty state** (from S13): when `series` is empty across every
       destination and horizon the page has never been fed. The chart card, the three
       modules and the feed each collapse to one centred `--text-muted-55` line — the chart
       says `No fares ingested yet · the first run is scheduled for 06:30 CET`, the modules
       and feed say `Waiting for the first ingest`. Calendar bands still draw, because
       `bands[]` comes from the calendar engine and is populated before any fare is. The
       filter bar renders and stays interactive
-- [ ] **"No data for this combination" empty state** (from S13): distinct from the above —
+- [x] **"No data for this combination" empty state** (from S13): distinct from the above —
       `series` is non-empty but the active destination × horizon × carrier filter selects
       nothing. The chart keeps its axes, bands and pins and shows `No fares for
       <dest> at <horizon>d — try another horizon`; with every carrier chip toggled off it
       shows `All carriers hidden` instead. The two messages must not be interchangeable:
       one is a gap in the data, the other is the reader's own filter
-- [ ] **Per-region empty states** (from S13): a null `arbitrage`, `seasonal_gauge`, or an
+- [x] **Per-region empty states** (from S13): a null `arbitrage`, `seasonal_gauge`, or an
       empty `efficiency[]`/`events[]` renders that card's or the feed's own muted line and
       never a zero, a `€0`, an `NaN` or a `+0%` gauge
-- [ ] Every empty state and the stale banner is covered by a Vitest case driving the
+- [x] Every empty state and the stale banner is covered by a Vitest case driving the
       component from a hand-made fixture, not by eyeballing the page
-- [ ] Every emitted asset except `index.html` is content-hashed (inspect `web/dist`)
-- [ ] `vite.config.ts` sets `base` from `VITE_BASE` so the Pages project path
+- [x] Every emitted asset except `index.html` is content-hashed (inspect `web/dist`)
+- [x] `vite.config.ts` sets `base` from `VITE_BASE` so the Pages project path
       (`/flight-detective/`) and a root deploy both work
-- [ ] `web/package.json` defines `gen`, `lint`, `typecheck`, `test`, `build` exactly as
+- [x] `web/package.json` defines `gen`, `lint`, `typecheck`, `test`, `build` exactly as
       `.github/workflows/deploy-site.yml` calls them
-- [ ] `scripts/check.sh` runs the web checks and stays green
+- [x] `scripts/check.sh` runs the web checks and stays green
+
+Left undone in S15, deliberately, for whoever is next in `web/`: the chart's route tag reads
+`CDG → ALL` when the "All · compare" segment is selected, which is what the design does
+(`destLabel`) but reads worse than `CDG → ISB/LHE/SKT` would. Cosmetic; not S16's work.
+
+Note for S16: the site is in and `pnpm install --frozen-lockfile` in `deploy-site.yml` is
+satisfied by the committed `web/pnpm-lock.yaml`. `web/dist/` and `web/node_modules/` are
+git-ignored, so a JSON-only commit from `push-data.sh` stays JSON-only. The Pages project
+path is baked in as `vite.config.ts`'s default `base` (`/flight-detective/`) — the workflow
+sets no `VITE_BASE` — so if the repo is ever renamed or deployed at a root, that default
+moves with it or every asset 404s.
 
 Note from S14: the contract is `specs/dashboard-data.schema.json` (generated; regenerate
 with `fd export-schema`). Things S15 has to know that the design does not show:
