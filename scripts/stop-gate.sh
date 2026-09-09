@@ -10,6 +10,15 @@ cd "$(dirname "$0")/.."
 input="$(cat)"
 session="$(printf '%s' "$input" | python3 -c 'import sys,json; print(json.load(sys.stdin).get("session_id","nosession"))' 2>/dev/null || echo nosession)"
 state_dir=".loop-state"; mkdir -p "$state_dir"
+
+# The dev loop and an interactive session share this working tree. While a loop story is
+# in flight the tree is legitimately red with its half-written files, and that is not the
+# interactive session's to fix. run-loop.sh publishes its session id; any other session
+# is waved through while that file exists and the loop's process is alive.
+if [ -f "$state_dir/active-session" ] && [ "$(cat "$state_dir/active-session")" != "$session" ] \
+   && pgrep -f '^claude -p' >/dev/null 2>&1; then
+  exit 0
+fi
 counter="$state_dir/stop-gate.$session"
 n=$(cat "$counter" 2>/dev/null || echo 0)
 
