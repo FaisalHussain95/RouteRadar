@@ -25,6 +25,17 @@ INGEST_PARTIAL=3
 
 log() { printf '%s run-pipeline: %s\n' "$(date -Is)" "$*"; }
 
+# Code moves on main between runs (merges, docs) while this checkout only ever gains its
+# own data commits, so without a fast-forward first the day's push would be a
+# non-fast-forward that push-data.sh refuses. Sync the env too, in case a dependency
+# changed. Skipped where there is no origin (the test harness runs a copy outside git),
+# and fatal otherwise: a run that cannot publish is not worth its SerpApi searches.
+if git remote get-url origin >/dev/null 2>&1; then
+  if ! git pull --ff-only --quiet origin main || ! "$UV" sync --quiet; then
+    log "checkout could not fast-forward to origin/main or sync; aborting before the ingest"
+    exit 1
+  fi
+fi
 log "ingest --provider $PROVIDER --horizons $HORIZONS"
 "$UV" run fd ingest --provider "$PROVIDER" --horizons "$HORIZONS"
 rc=$?
