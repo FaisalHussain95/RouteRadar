@@ -477,7 +477,14 @@ Written with `tmp + os.replace` so a reader never sees a partial file.
 - **The site reads only `dashboard.json`.** No fetches, no env-dependent URLs. If the
   page needs something, the export grows and the schema version bumps.
 - **Colours and spacing in `web/` come from tokens** in `specs/ux/design-system.md`, never
-  ad-hoc hex values.
+  ad-hoc hex values. `specs/ux/routeradar/RouteRadar.dc.html` is a read-only pull from the
+  Claude Design project and still carries the pre-S13 carrier hexes; where the two disagree
+  the design-system file wins.
+- **The carrier palette is computed, not chosen.** Its six hues are gated by the `dataviz`
+  skill's checks and `tests/test_design_system.py` re-runs them against the spec's tokens,
+  so changing a carrier colour by hand fails `scripts/check.sh`. See
+  `specs/ux/design-system.md` § Carrier palette for the rule and § Decisions from S13 below
+  for why the thresholds differ per role.
 
 ## Operational
 
@@ -497,3 +504,33 @@ Written with `tmp + os.replace` so a reader never sees a partial file.
   specs. The site build has no secrets at all; the deploy key is on the box only.
 - `data/site/dashboard.json` is the **one tracked file under `data/`**; `.gitignore`
   keeps the DuckDB file and everything else out.
+
+## Decisions from S13 (2026-09-09)
+
+- **All six carrier hues were replaced**, not just the ones the story expected. The
+  original palette's collisions went further than the two literal ones: PIA's `#3fae6d` sat
+  ΔE 4.4 from `--band-religious` and 3.3 from `--color-ok`, and Saudia's `#37a894` sat 2.4
+  from `--band-religious`. "Keep PIA green, Qatar pink, Saudia teal" survives only as hue
+  families; every value moved.
+- **The carrier ↔ carrier gate is the `dataviz` skill's, unmodified** (all-pairs
+  ΔE ≥ 8 protan/deutan, ≥ 15 normal vision, OKLCH L in 0.48–0.67, C ≥ 0.10, contrast ≥ 3:1
+  on `--color-card`). All-pairs rather than the default adjacent list, because the fare
+  chart overlaps six paths and the efficiency matrix is a scatter.
+- **Carrier ↔ role thresholds are lower and differ by rendering channel** (15 for
+  `--color-accent`, 10 for bands, severity and `--color-ok`). A uniform ΔE ≥ 15 gate is
+  *achievable* — do not repeat the claim that it is not — but it buys nothing and costs two
+  things: the best such set sits exactly on both dataviz floors (8.1 protan, 15.0 normal, vs
+  the shipped 8.2 and 18.9), and it gives up Saudia's hue — the cyan arc is boxed in by
+  `--band-religious` and `--band-french`, and only clears ΔE 15 past H ≈ 226, which is a
+  cyan-blue rather than a teal (`--carrier-SV` is at H 212, where the ceiling is 12.8). Both
+  of those are measured; the per-hue table is in `design-system.md`. So the
+  binding constraint is brand fidelity plus margin, not feasibility. The channels justify the
+  lower numbers — bands are 13–21 % alpha washes, severity pins carry a glyph — and the table
+  is in `design-system.md` § The rule, by rendering channel.
+- **Six carriers is the ceiling.** A seventh is not a palette change; it is "Other", or a
+  facet. Any future carrier addition must re-run the validator before it ships.
+- **Not changed, deliberately:** `--sev-med` and `--band-wedding` are still the same
+  `#d6a63c`, and `--band-french` `#6f8fd6` is ΔE 0.5 from `--color-accent` under
+  deuteranopia. Both are outside S13's scope (it owns the carrier hues) and neither is a
+  data-identity channel — a gold pin carries `▲` and sits on the baseline, a band is a wash.
+  Worth revisiting if S15 finds them confusable on the real page.

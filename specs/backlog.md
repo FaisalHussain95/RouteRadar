@@ -188,18 +188,18 @@ as a structured object and a one-line sentence.
 - [x] Sentence reads naturally for 0, 1 and many reasons (tested)
 
 ## S13 — UX: reconcile the RouteRadar design
-- status: todo
+- status: done
 - size: S
 
 The design exists (`specs/ux/routeradar/`, spec in `specs/ux/design-system.md`). This story
 closes its gaps. No app code.
 
-- [ ] Carrier palette fixed: six distinguishable hues, none equal to a band or severity
+- [x] Carrier palette fixed: six distinguishable hues, none equal to a band or severity
       colour, validated colour-blind safe with the `dataviz` skill; new values written into
       `design-system.md` § Tokens with a one-line rationale each
-- [ ] Phone behaviour specified for hover (tap-to-stick), the drawer, and the filter bar
+- [x] Phone behaviour specified for hover (tap-to-stick), the drawer, and the filter bar
       overflow, as a short section in `design-system.md`
-- [ ] Anything the JSON contract needs that the design implies but does not show (empty
+- [x] Anything the JSON contract needs that the design implies but does not show (empty
       states, "no data yet" before the first ingest, stale-data banner when
       `generated_at` is > 36 h old) written up as acceptance criteria on S15
 
@@ -218,6 +218,15 @@ writing atomically (`tmp` + `os.replace`). `export/schema.py` + `fd export-schem
       output written via rename)
 - [ ] `fd export-site` on an empty DB produces a valid file with empty series and a
       `generated_at`, so the site can build before the first ingest
+
+Note from S13: the empty and stale states S15 now lists need the contract to say so.
+`arbitrage` and `seasonal_gauge` must be **nullable** (both need fares that an empty or
+partial DB does not have: arbitrage needs LHE *and* SKT, the gauge needs a Feb/Mar
+baseline), and `series[]`, `events[]`, `efficiency[]` must be allowed to be empty arrays.
+`bands[]` is the exception — it comes from `calendar_engine`, not from fares, so it is
+populated even before the first ingest and the page draws bands on an empty chart. Emit all
+of that in `specs/dashboard-data.schema.json` so S15's types carry the nulls rather than
+discovering them at runtime.
 
 Note from S12: `analytics.explain.explain(conn, observation)` answers for **one** fare row
 with two queries (its departure date's `calendar_tag` rows, and `news_event` in ±7 days), so
@@ -244,13 +253,49 @@ region by region using the tokens in `design-system.md`. `src/types.ts` generate
 - [ ] Header, filter bar, fare chart (bands, series, pins, hover card), event feed,
       three modules, event drawer all render from the fixture and match the design
 - [ ] Filters (destination, carriers, horizon) work client-side with no fetch
-- [ ] Empty-state and stale-data banner per S13
+- [ ] **Carrier legend** (from S13): the legend row under the plot gains six line keys —
+      a short stroke in `--carrier-<code>` plus the IATA code — before the existing band and
+      news-pin keys. The design's row names no carrier, so without this the only
+      colour→carrier key is the filter chips, which scroll out of view on a phone
+- [ ] Touch behaviour per `design-system.md` § Phone behaviour: tap-to-stick hover with
+      `Escape`/tap-outside to clear, a modal drawer (scroll lock, focus trap, `Escape`),
+      and a filter bar whose carrier chip strip is the only part that scrolls
+- [ ] **Stale-data banner** (from S13): when `generated_at` is more than 36 h old the
+      header's `● Updated …` status turns into a `--sev-med` banner directly under the
+      header reading `Data is <N> days old — the daily ingest has not run since <date>`,
+      and the status dot goes from `--color-ok` to `--sev-med`. 36 h, not 24 h, so a timer
+      that fires late or a slow ingest does not cry wolf; the pipeline runs at 06:30 daily.
+      Tested with a fixture whose `generated_at` is 40 h old and one 12 h old
+- [ ] **"No data yet" empty state** (from S13): when `series` is empty across every
+      destination and horizon the page has never been fed. The chart card, the three
+      modules and the feed each collapse to one centred `--text-muted-55` line — the chart
+      says `No fares ingested yet · the first run is scheduled for 06:30 CET`, the modules
+      and feed say `Waiting for the first ingest`. Calendar bands still draw, because
+      `bands[]` comes from the calendar engine and is populated before any fare is. The
+      filter bar renders and stays interactive
+- [ ] **"No data for this combination" empty state** (from S13): distinct from the above —
+      `series` is non-empty but the active destination × horizon × carrier filter selects
+      nothing. The chart keeps its axes, bands and pins and shows `No fares for
+      <dest> at <horizon>d — try another horizon`; with every carrier chip toggled off it
+      shows `All carriers hidden` instead. The two messages must not be interchangeable:
+      one is a gap in the data, the other is the reader's own filter
+- [ ] **Per-region empty states** (from S13): a null `arbitrage`, `seasonal_gauge`, or an
+      empty `efficiency[]`/`events[]` renders that card's or the feed's own muted line and
+      never a zero, a `€0`, an `NaN` or a `+0%` gauge
+- [ ] Every empty state and the stale banner is covered by a Vitest case driving the
+      component from a hand-made fixture, not by eyeballing the page
 - [ ] Every emitted asset except `index.html` is content-hashed (inspect `web/dist`)
 - [ ] `vite.config.ts` sets `base` from `VITE_BASE` so the Pages project path
       (`/flight-detective/`) and a root deploy both work
 - [ ] `web/package.json` defines `gen`, `lint`, `typecheck`, `test`, `build` exactly as
       `.github/workflows/deploy-site.yml` calls them
 - [ ] `scripts/check.sh` runs the web checks and stays green
+
+Note from S13: `tests/test_design_system.py` vendors the `dataviz` skill's thresholds and
+Machado matrices, because the skill lives outside the repo. They matched exactly on
+2026-09-09, but nothing detects drift if the skill's floors move. Before touching
+`web/src/tokens.css`, invoke the `dataviz` skill and re-run the real
+`scripts/validate_palette.js` rather than trusting the copy.
 
 ## S16 — Data push and Pages deploy
 - status: todo
