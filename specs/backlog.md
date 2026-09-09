@@ -352,7 +352,7 @@ Machado matrices, because the skill lives outside the repo. They matched exactly
 `scripts/validate_palette.js` rather than trusting the copy.
 
 ## S16 — Data push and Pages deploy
-- status: doing
+- status: blocked  (GitHub Actions has never run on this repo; set back to `doing` once the repo's Actions permissions are enabled — see ### Blocked below)
 - size: S
 
 The workflows already exist (`.github/workflows/ci.yml`, `deploy-site.yml`). This story
