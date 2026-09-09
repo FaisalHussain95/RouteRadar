@@ -439,32 +439,51 @@ markdown: `https://docs.gdeltcloud.com/llms.txt` (index),
 `…/api-keys.md`. The `gdelt-cloud` Claude Code plugin is installed at user scope and
 carries the same docs as skills.
 
-Design:
+Design (checked against the plugin's `building-with-the-api` skill on 2026-09-09; load
+`gdelt-cloud:getting-started`, `gdelt-cloud:core-api` and `gdelt-cloud:building-with-the-api`
+before writing the client):
 
 - `news/gdeltcloud.py` replaces `news/gdelt.py` (delete the old client, its fixtures and
-  tests; one news source, per architecture). `GET /api/v2/stories` with `search=<taxonomy
-  query>`, `days=7`, `sort=recent`, `limit=50`, `languages=en,fr`, following `next_cursor`
-  within the window. Errors: 401 → `GdeltCloudAuthError`; 402/429 → `GdeltCloudQuotaError`
-  (never retried); 5xx/transport → one retry. `X-Quota-Cost` is logged per call.
-- **Relevance guard.** Semantic search is fuzzy: the regulatory query returned Iranian
-  airline sanctions and Ryanair border stories. Record real responses for all four
-  taxonomy queries in both `search_mode=semantic` and `lexical` (8 units, once), keep the
-  mode that scores better on the fixtures, and in either case drop a story unless its
-  title or a top article mentions one of a documented keyword list (Pakistan, PIA,
-  Islamabad, Lahore, Sialkot, Paris, CDG, the six carriers, their hubs, EASA, Hajj, Umrah,
-  airspace). The list lives in code as data with the reason for each entry.
-- Stories are already clusters: `dedupe_key` is the GDELT Cloud story `id`, so
-  `news/dedupe.py`'s title-similarity grouping goes away. `NewsEvent` maps `story_date` →
-  `event_date`, `title` → `headline`, `top_articles[0].url` → `source_url`, taxonomy group
-  → `category`; severity from `metrics.significance` with thresholds written next to the
+  tests; one news source, per architecture). Two kinds of daily query, both on
+  `GET /api/v2/stories` with `days=7`, `sort=recent`, `limit=100` (a call costs 1 unit
+  whatever the limit, so never page smaller), `languages=en,fr`, walking `next_cursor`
+  until it is `null` (row count is not a truncation signal) with a cap of 300 rows:
+  1. **Entity queries** for the six carriers: resolve each name once with
+     `GET /api/v2/search?q=<name>&country_match=strict`, inspect the candidates, and commit
+     the chosen ids as data in code with the name each resolved from. Then
+     `/stories?entity=<id>` — precise coverage of that airline, no semantic fuzz. Category
+     `regulatory` unless the guard below reclassifies.
+  2. **Semantic queries** for the topical groups (airspace/disruption, pilgrimage/visas,
+     strikes at CDG): `search=<query>`, keep rows with `match_type=semantic` and
+     `search_score >= 0.55` (threshold as data, with the fixture evidence for it) or
+     `match_type=name`.
+  Assert `applied_filters` echoes every filter sent and that `applied_filters.ignored` is
+  empty; a filter the server did not apply is an error, not an empty week.
+- **Relevance guard** on top of both: drop a story unless its title or a top article
+  mentions one of a documented keyword list (Pakistan, PIA, Islamabad, Lahore, Sialkot,
+  Paris, CDG, the six carriers, their hubs, EASA, Hajj, Umrah, airspace). The list is data
+  in code with the reason for each entry.
+- Errors: 401 → `GdeltCloudAuthError`; 429 branches on the body's `code`:
+  `RATE_LIMITED` waits `details.retry_after` and retries once, `QUOTA_EXCEEDED` raises
+  `GdeltCloudQuotaError` and the run stops calling; 5xx/transport → one retry. Parse
+  permissively (new fields ship without notice). `X-Quota-Cost` logged per call.
+- Stories are already clusters: `dedupe_key` is the story `id`, so `news/dedupe.py`'s
+  title-similarity grouping goes away. `NewsEvent` maps `story_date` → `event_date`,
+  `title` → `headline`, `top_articles[0].url` → `source_url`, taxonomy group →
+  `category`; severity from `metrics.significance` with thresholds written next to the
   data, tie-broken by `article_count`.
-- `fd news-ingest` logs `usage.remaining` from `/meta/query-units` at the start of each
-  run and warns below 100. Budget: 4 calls/day ≈ 120 units/month.
+- `fd news-ingest` logs `usage.remaining` from `/meta/query-units` (free) at the start of
+  each run and warns below 150. Budget: 6 entity + 3 semantic = 9 calls/day plus paging
+  ≈ 300 units/month of 1,048.
+- Recording fixtures: one `search` resolution per carrier (6 units, free if `/search` is
+  under `/meta`, check `X-Quota-Cost`), then each query once in the mode it will run
+  (9 units). Documented in the module docstring.
 
 - [ ] Fixture-based tests for parsing, the relevance guard, paging and the error classes;
       no network in tests
-- [ ] The eight recorded fixtures are committed under `tests/fixtures/gdeltcloud/` with the
-      recording command documented in the module docstring
+- [ ] The recorded fixtures (6 resolutions + 9 queries) are committed under
+      `tests/fixtures/gdeltcloud/` with the recording command documented in the module docstring
+- [ ] Entity ids for the six carriers committed as data with the name each resolved from
 - [ ] Re-ingesting the same window is idempotent (story id as the key)
 - [ ] `fd news-ingest` on the box (key in `.env`) returns real events for the last 7 days
       and the run row shows kept/dropped; paste the command output into this entry
