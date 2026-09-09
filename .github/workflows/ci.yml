@@ -21,8 +21,6 @@ jobs:
         if: hashFiles('web/package.json') != ''
         with:
           node-version: 24
-          cache: pnpm
-          cache-dependency-path: web/pnpm-lock.yaml
       # tests/test_deploy.py runs `systemd-analyze --user verify` on the pipeline units. A
       # runner has no login session, so XDG_RUNTIME_DIR is unset and systemd-analyze fails
       # to initialise its user manager before it ever reads the unit; any short existing
