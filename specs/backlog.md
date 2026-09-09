@@ -107,16 +107,16 @@ record, and `fare_observation`'s primary key has no cabin column, so filter **be
 upserting or the two collide and one silently overwrites the other.
 
 ## S08 — SerpApi Google Flights provider
-- status: todo
+- status: done
 - size: M
 
 `providers/serpapi.py`: real provider behind `SERPAPI_KEY`, locale `fr`, currency EUR,
 mapping the response into `Itinerary`. Record one real response as a fixture (manual
 step, documented in the module docstring) and test the mapping against it.
 
-- [ ] Mapping test passes on the recorded fixture; no network in tests
-- [ ] Missing key gives a one-line actionable error from `fd ingest --provider serpapi`
-- [ ] Rate/quota errors are surfaced, not swallowed
+- [x] Mapping test passes on the recorded fixture; no network in tests
+- [x] Missing key gives a one-line actionable error from `fd ingest --provider serpapi`
+- [x] Rate/quota errors are surfaced, not swallowed
 
 ## S09 — Scheduled pipeline on the host
 - status: todo
@@ -131,6 +131,14 @@ Commands that do not exist yet are fine to list: the unit is validated, not run,
 - [ ] Service pins the absolute `uv` path (systemd does not source the shell profile)
 - [ ] A failing step stops the chain (`&&`), so nothing is pushed after a failed ingest
 - [ ] README section on `journalctl --user -u flight-detective-pipeline`
+
+Note from S08: `fd ingest --provider serpapi` reads `SERPAPI_KEY` from the process
+environment or from `.env` in the working directory, so the unit needs `WorkingDirectory=`
+set to the repo (or `EnvironmentFile=`). Without it the ingest exits 2 with `error:
+SERPAPI_KEY is not set` before anything is written. Also: the default grid is 36
+searches a day, about 1 100 a month, above SerpApi's free tier (a few hundred a month; see
+https://serpapi.com/pricing), so a daily timer needs a paid plan or fewer horizons; decide
+which here and put the number in the README.
 
 Note from S07: `fd ingest` exits 1 whenever *any* route × horizon query failed, even though
 the queries that answered were stored. Chained as `fd ingest && fd tag-dates && …`, one

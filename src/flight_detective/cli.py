@@ -12,8 +12,9 @@ from flight_detective import __version__, db
 from flight_detective.calendar_engine.tags import tags_for_range
 from flight_detective.config import load_settings
 from flight_detective.ingest import DEFAULT_HORIZONS, run_ingest
-from flight_detective.providers.base import FareProvider
+from flight_detective.providers.base import FareProvider, ProviderError
 from flight_detective.providers.fake import FakeFareProvider
+from flight_detective.providers.serpapi import SerpApiFareProvider
 
 PARIS = ZoneInfo("Europe/Paris")
 
@@ -21,10 +22,11 @@ PARIS = ZoneInfo("Europe/Paris")
 # with room to spare, and re-tagging a year is milliseconds.
 DEFAULT_TAG_SPAN = timedelta(days=365)
 
-# `--provider` names. S08 adds "serpapi" here; the constructor is called only when the
-# command runs, so a provider that needs a key can fail with its own message then.
+# `--provider` names. The constructor is called only when the command runs, so a provider
+# that needs a key fails then, with its own message, rather than at import time.
 PROVIDERS: dict[str, Callable[[], FareProvider]] = {
     "fake": FakeFareProvider,
+    "serpapi": lambda: SerpApiFareProvider.from_settings(load_settings()),
 }
 
 DbPathOption = Annotated[
@@ -158,6 +160,11 @@ def ingest(
         fare_provider = _make_provider(provider)
     except typer.BadParameter as exc:
         raise typer.BadParameter(str(exc), param_hint="--provider") from None
+    except ProviderError as exc:
+        # A provider that cannot even be constructed (no API key) is a configuration
+        # error, not a failed query: one line on stderr, no traceback, nothing written.
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(code=2) from None
     day = observed_on.date() if observed_on is not None else datetime.now(PARIS).date()
     with db.connect(_db_path(path)) as conn:
         db.init_schema(conn)

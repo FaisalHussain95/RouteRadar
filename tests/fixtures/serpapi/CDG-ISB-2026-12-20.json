@@ -1,0 +1,590 @@
+{
+  "search_metadata": {
+    "id": "6aa0a67073bf59e675609d77",
+    "status": "Success",
+    "created_at": "2026-09-09 00:21:04 UTC",
+    "processed_at": "2026-09-09 00:21:04 UTC",
+    "google_flights_url": "https://www.google.com/travel/flights?hl=fr&gl=fr&curr=EUR&tfs=CBwQAhoeEgoyMDI2LTEyLTIwagcIARIDQ0RHcgcIARIDSVNCQAFIAXABmAEC&tfu=EgIIAQ",
+    "total_time_taken": 1.32
+  },
+  "search_parameters": {
+    "engine": "google_flights",
+    "hl": "fr",
+    "gl": "fr",
+    "type": "2",
+    "departure_id": "CDG",
+    "arrival_id": "ISB",
+    "outbound_date": "2026-12-20",
+    "travel_class": 1,
+    "adults": 1,
+    "currency": "EUR"
+  },
+  "other_flights": [
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Aéroport de Paris-Charles de Gaulle",
+            "id": "CDG",
+            "time": "2026-12-20 18:30"
+          },
+          "arrival_airport": {
+            "name": "Islamabad International Airport",
+            "id": "ISB",
+            "time": "2026-12-21 06:15"
+          },
+          "duration": 465,
+          "airplane": "Boeing 777",
+          "airline": "Pakistan International Airlines",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/PK.png",
+          "travel_class": "Economy",
+          "flight_number": "PK 750",
+          "legroom": "76 cm",
+          "extensions": [
+            "Average legroom (76 cm)",
+            "Stream media to your device",
+            "Carbon emissions estimate: 351 kg"
+          ],
+          "overnight": true
+        }
+      ],
+      "total_duration": 465,
+      "carbon_emissions": {
+        "this_flight": 352000,
+        "typical_for_this_route": 509000,
+        "difference_percent": -31
+      },
+      "price": 609,
+      "type": "One way",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/PK.png",
+      "extensions": [
+        "1 checked bag up to 20 kg included",
+        "Full refund for cancellations",
+        "Free change, possible fare difference"
+      ],
+      "booking_token": "WyJDalJJTFUxWmVIZDJTMWhSVTFGQlFta3RNV2RDUnkwdExTMHRMUzB0TFMxNWJHOXlOVUZCUVVGQlIzRm5jRzVCVGtoc1EwVkJFZ1ZRU3pjMU1Cb0xDS0hiQXhBQ0dnTkZWVkk0SEhEaHFBUT0iLFtbIkNERyIsIjIwMjYtMTItMjAiLCJJU0IiLG51bGwsIlBLIiwiNzUwIl1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Aéroport de Paris-Charles de Gaulle",
+            "id": "CDG",
+            "time": "2026-12-20 10:55"
+          },
+          "arrival_airport": {
+            "name": "Bakou Airport",
+            "id": "GYD",
+            "time": "2026-12-20 19:05"
+          },
+          "duration": 310,
+          "airplane": "Airbus A320neo",
+          "airline": "Azerbaijan Airlines",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/J2.png",
+          "travel_class": "Economy",
+          "flight_number": "J2 74",
+          "legroom": "76 cm",
+          "extensions": [
+            "Average legroom (76 cm)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "Stream media to your device",
+            "Carbon emissions estimate: 333 kg"
+          ]
+        },
+        {
+          "departure_airport": {
+            "name": "Bakou Airport",
+            "id": "GYD",
+            "time": "2026-12-20 21:35"
+          },
+          "arrival_airport": {
+            "name": "Islamabad International Airport",
+            "id": "ISB",
+            "time": "2026-12-21 01:40"
+          },
+          "duration": 185,
+          "airplane": "Airbus A319",
+          "airline": "Azerbaijan Airlines",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/J2.png",
+          "travel_class": "Economy",
+          "flight_number": "J2 143",
+          "legroom": "76 cm",
+          "extensions": [
+            "Average legroom (76 cm)",
+            "Stream media to your device",
+            "Carbon emissions estimate: 232 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 150,
+          "name": "Bakou Airport",
+          "id": "GYD"
+        }
+      ],
+      "total_duration": 645,
+      "carbon_emissions": {
+        "this_flight": 567000,
+        "typical_for_this_route": 509000,
+        "difference_percent": 11
+      },
+      "price": 638,
+      "type": "One way",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/J2.png",
+      "extensions": [
+        "Checked baggage not included in price",
+        "Full refund for cancellations",
+        "Free change, possible fare difference"
+      ],
+      "booking_token": "WyJDalJJTFUxWmVIZDJTMWhSVTFGQlFta3RNV2RDUnkwdExTMHRMUzB0TFMxNWJHOXlOVUZCUVVGQlIzRm5jRzVCVGtoc1EwVkJFZ3BLTWpjMGZFb3lNVFF6R2dzSWhQSURFQUlhQTBWVlVqZ2NjSi9EQkE9PSIsW1siQ0RHIiwiMjAyNi0xMi0yMCIsIkdZRCIsbnVsbCwiSjIiLCI3NCJdLFsiR1lEIiwiMjAyNi0xMi0yMCIsIklTQiIsbnVsbCwiSjIiLCIxNDMiXV1d"
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Aéroport de Paris-Charles de Gaulle",
+            "id": "CDG",
+            "time": "2026-12-20 13:45"
+          },
+          "arrival_airport": {
+            "name": "Istanbul Airport",
+            "id": "IST",
+            "time": "2026-12-20 19:25"
+          },
+          "duration": 220,
+          "airplane": "Airbus A330",
+          "airline": "Turkish Airlines",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/TK.png",
+          "travel_class": "Economy",
+          "flight_number": "TK 1824",
+          "legroom": "79 cm",
+          "extensions": [
+            "Average legroom (79 cm)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 146 kg"
+          ]
+        },
+        {
+          "departure_airport": {
+            "name": "Istanbul Airport",
+            "id": "IST",
+            "time": "2026-12-20 21:25"
+          },
+          "arrival_airport": {
+            "name": "Islamabad International Airport",
+            "id": "ISB",
+            "time": "2026-12-21 04:45"
+          },
+          "duration": 320,
+          "airplane": "Airbus A330",
+          "airline": "Turkish Airlines",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/TK.png",
+          "travel_class": "Economy",
+          "flight_number": "TK 710",
+          "legroom": "79 cm",
+          "extensions": [
+            "Average legroom (79 cm)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 246 kg"
+          ],
+          "overnight": true
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 120,
+          "name": "Istanbul Airport",
+          "id": "IST"
+        }
+      ],
+      "total_duration": 660,
+      "carbon_emissions": {
+        "this_flight": 393000,
+        "typical_for_this_route": 509000,
+        "difference_percent": -23
+      },
+      "price": 639,
+      "type": "One way",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/TK.png",
+      "extensions": [
+        "1 checked bag up to 20 kg included",
+        "Full refund for cancellations",
+        "Free change, possible fare difference"
+      ],
+      "booking_token": "WyJDalJJTFUxWmVIZDJTMWhSVTFGQlFta3RNV2RDUnkwdExTMHRMUzB0TFMxNWJHOXlOVUZCUVVGQlIzRm5jRzVCVGtoc1EwVkJFZ3hVU3pFNE1qUjhWRXMzTVRBYUN3amo4Z01RQWhvRFJWVlNPQnh3amNRRSIsW1siQ0RHIiwiMjAyNi0xMi0yMCIsIklTVCIsbnVsbCwiVEsiLCIxODI0Il0sWyJJU1QiLCIyMDI2LTEyLTIwIiwiSVNCIixudWxsLCJUSyIsIjcxMCJdXV0="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Aéroport de Paris-Charles de Gaulle",
+            "id": "CDG",
+            "time": "2026-12-20 17:40"
+          },
+          "arrival_airport": {
+            "name": "Istanbul Airport",
+            "id": "IST",
+            "time": "2026-12-20 23:10"
+          },
+          "duration": 210,
+          "airplane": "Airbus A330",
+          "airline": "Turkish Airlines",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/TK.png",
+          "travel_class": "Economy",
+          "flight_number": "TK 1834",
+          "legroom": "79 cm",
+          "extensions": [
+            "Average legroom (79 cm)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 146 kg"
+          ]
+        },
+        {
+          "departure_airport": {
+            "name": "Istanbul Airport",
+            "id": "IST",
+            "time": "2026-12-21 01:20"
+          },
+          "arrival_airport": {
+            "name": "Islamabad International Airport",
+            "id": "ISB",
+            "time": "2026-12-21 08:40"
+          },
+          "duration": 320,
+          "airplane": "Airbus A330",
+          "airline": "Turkish Airlines",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/TK.png",
+          "travel_class": "Economy",
+          "flight_number": "TK 750",
+          "legroom": "79 cm",
+          "extensions": [
+            "Average legroom (79 cm)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 246 kg"
+          ],
+          "overnight": true
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 130,
+          "name": "Istanbul Airport",
+          "id": "IST"
+        }
+      ],
+      "total_duration": 660,
+      "carbon_emissions": {
+        "this_flight": 393000,
+        "typical_for_this_route": 509000,
+        "difference_percent": -23
+      },
+      "price": 639,
+      "type": "One way",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/TK.png",
+      "extensions": [
+        "1 checked bag up to 20 kg included",
+        "Full refund for cancellations",
+        "Free change, possible fare difference"
+      ],
+      "booking_token": "WyJDalJJTFUxWmVIZDJTMWhSVTFGQlFta3RNV2RDUnkwdExTMHRMUzB0TFMxNWJHOXlOVUZCUVVGQlIzRm5jRzVCVGtoc1EwVkJFZ3hVU3pFNE16UjhWRXMzTlRBYUN3amo4Z01RQWhvRFJWVlNPQnh3amNRRSIsW1siQ0RHIiwiMjAyNi0xMi0yMCIsIklTVCIsbnVsbCwiVEsiLCIxODM0Il0sWyJJU1QiLCIyMDI2LTEyLTIxIiwiSVNCIixudWxsLCJUSyIsIjc1MCJdXV0="
+    }
+  ],
+  "price_insights": {
+    "lowest_price": 609,
+    "price_level": "typical",
+    "typical_price_range": [
+      385,
+      780
+    ],
+    "price_history": [
+      [
+        1783634400,
+        584
+      ],
+      [
+        1783720800,
+        584
+      ],
+      [
+        1783807200,
+        584
+      ],
+      [
+        1783893600,
+        584
+      ],
+      [
+        1783980000,
+        584
+      ],
+      [
+        1784066400,
+        584
+      ],
+      [
+        1784152800,
+        584
+      ],
+      [
+        1784239200,
+        584
+      ],
+      [
+        1784325600,
+        584
+      ],
+      [
+        1784412000,
+        584
+      ],
+      [
+        1784498400,
+        584
+      ],
+      [
+        1784584800,
+        584
+      ],
+      [
+        1784671200,
+        584
+      ],
+      [
+        1784757600,
+        610
+      ],
+      [
+        1784844000,
+        473
+      ],
+      [
+        1784930400,
+        473
+      ],
+      [
+        1785016800,
+        473
+      ],
+      [
+        1785103200,
+        473
+      ],
+      [
+        1785189600,
+        454
+      ],
+      [
+        1785276000,
+        453
+      ],
+      [
+        1785362400,
+        453
+      ],
+      [
+        1785448800,
+        453
+      ],
+      [
+        1785535200,
+        452
+      ],
+      [
+        1785621600,
+        452
+      ],
+      [
+        1785708000,
+        452
+      ],
+      [
+        1785794400,
+        451
+      ],
+      [
+        1785880800,
+        451
+      ],
+      [
+        1785967200,
+        452
+      ],
+      [
+        1786053600,
+        451
+      ],
+      [
+        1786140000,
+        451
+      ],
+      [
+        1786226400,
+        451
+      ],
+      [
+        1786312800,
+        511
+      ],
+      [
+        1786399200,
+        451
+      ],
+      [
+        1786485600,
+        451
+      ],
+      [
+        1786572000,
+        451
+      ],
+      [
+        1786658400,
+        451
+      ],
+      [
+        1786744800,
+        451
+      ],
+      [
+        1786831200,
+        452
+      ],
+      [
+        1786917600,
+        452
+      ],
+      [
+        1787004000,
+        451
+      ],
+      [
+        1787090400,
+        451
+      ],
+      [
+        1787176800,
+        451
+      ],
+      [
+        1787263200,
+        470
+      ],
+      [
+        1787349600,
+        570
+      ],
+      [
+        1787436000,
+        570
+      ],
+      [
+        1787522400,
+        570
+      ],
+      [
+        1787608800,
+        570
+      ],
+      [
+        1787695200,
+        570
+      ],
+      [
+        1787781600,
+        570
+      ],
+      [
+        1787868000,
+        570
+      ],
+      [
+        1787954400,
+        570
+      ],
+      [
+        1788040800,
+        570
+      ],
+      [
+        1788127200,
+        570
+      ],
+      [
+        1788213600,
+        570
+      ],
+      [
+        1788300000,
+        570
+      ],
+      [
+        1788386400,
+        570
+      ],
+      [
+        1788472800,
+        570
+      ],
+      [
+        1788559200,
+        570
+      ],
+      [
+        1788645600,
+        570
+      ],
+      [
+        1788732000,
+        609
+      ],
+      [
+        1788818400,
+        609
+      ],
+      [
+        1788904800,
+        609
+      ]
+    ]
+  },
+  "airports": [
+    {
+      "departure": [
+        {
+          "airport": {
+            "id": "CDG",
+            "name": "Aéroport de Paris-Charles de Gaulle"
+          },
+          "city": "Paris",
+          "country": "France",
+          "country_code": "FR",
+          "image": "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcQGx8ii2KbSDdbdzfKye5oDN2bwBA6audqI7XUEf2iMRZezpn_ZbQe1ZIuvUSH-8XOMe958umDwSsAF1w",
+          "thumbnail": "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcSyQJ-woNs0iO22mPSkmRUM5gcsTbbYeypQ6BBTeFxXr90mqTxZl57Fdq2CDuLn4w7cKZ8TT9_zZhOpF57rIpA7yWKQnqKvkKIf9Y-qJDo"
+        }
+      ],
+      "arrival": [
+        {
+          "airport": {
+            "id": "ISB",
+            "name": "Islamabad International Airport"
+          },
+          "city": "Islamabad",
+          "country": "Pakistan",
+          "country_code": "PK",
+          "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQG861qzBl-A06nO4Xo-qVjWFRB85XWP7DNSfHCaQWsBxkrSgtXbaDnZ9zQnvb8KujujhQgRx-NnJ4GMQ",
+          "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSltu7_2UNO0TrSKzIWhbNTvTPw6E-mR5jeCIwxetgrGYtsLWJPSwUY3teDoYTWBfscBje-_2SaGkC0mH_oN0Jnoq8r5INwd-8wf7R4qgs"
+        }
+      ]
+    }
+  ]
+}

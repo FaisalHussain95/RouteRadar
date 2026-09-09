@@ -218,6 +218,34 @@ Decisions from S07 (2026-09-09):
 - `pytz` is a runtime dependency: DuckDB refuses to return a `TIMESTAMPTZ` column to
   Python without it (`Required module 'pytz' failed to import`). Nothing imports it.
 
+Decisions from S08 (2026-09-09):
+
+- `providers/serpapi.py` is one SerpApi `google_flights` request per query, one-way,
+  economy, pinned to `hl=fr` / `gl=fr` / `currency=EUR`, no `stops` filter (the pipeline
+  filters). `carrier` and `flight_numbers` are parsed from `flight_number` ("PK 750"):
+  `airline` is display text and `hl=fr` localizes inconsistently (airport names French,
+  `travel_class` English), so nothing matches on display strings. `cabin` is the class
+  asked for. `raw_ref` is `serpapi:<search_metadata.id>#<best|other>:<index>`.
+- Errors: 401 → `SerpApiAuthError`, 429 or SerpApi's "run out of searches" text →
+  `SerpApiQuotaError`, connection/timeout → `SerpApiTransportError`, unparseable →
+  `SerpApiResponseInvalid`; all `ProviderError`s, so `run_ingest` records them per cell.
+  Google's "hasn't returned any results" is `[]`, not an error. 5xx and transport errors
+  are retried exactly once after 2 s; 4xx never. An option with no `price` is skipped.
+- A missing `SERPAPI_KEY` is a configuration error, not a failed query: `fd ingest
+  --provider serpapi` prints one `error: SERPAPI_KEY is not set …` line on stderr, exits
+  2 and writes nothing. `cli.PROVIDERS` entries are constructors so this happens at run
+  time, after option parsing, and `fd --help` never needs a key.
+- The key is redacted (`***`) from every error message and from recorded fixtures, and
+  `record_fixture` drops SerpApi's account-scoped archive URLs (`json_endpoint`,
+  `raw_html_file`, …) from `search_metadata`; only `id` is read from it.
+- `tests/fixtures/serpapi/CDG-ISB-2026-12-20.json` is a **real recording** (search id
+  `6aa0a67073bf59e675609d77`, 2026-09-09) made with `python -m
+  flight_detective.providers.serpapi CDG ISB 2026-12-20`. Its `search_parameters` block is
+  asserted equal to what `query_params` sends, so changing the request parameters means
+  re-recording. Recording costs one search. The default grid is 36 searches a day, about
+  1 100 a month, well above SerpApi's free tier (a few hundred; see
+  https://serpapi.com/pricing), so the timer (S09) needs a paid plan or fewer horizons.
+
 ## The JSON contract (`dashboard.json`)
 
 Shaped by what the design's component consumes (see `specs/ux/design-system.md` § Data
