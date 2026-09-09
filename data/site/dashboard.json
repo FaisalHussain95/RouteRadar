@@ -1,0 +1,689 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-09T13:05:09.885250+02:00",
+  "observed_on": "2026-09-09",
+  "carriers": [
+    {
+      "code": "PK",
+      "name": "PIA",
+      "color": "#53a000",
+      "hub": null,
+      "direct": true,
+      "typical_transit_minutes": 486
+    },
+    {
+      "code": "QR",
+      "name": "Qatar",
+      "color": "#f33a87",
+      "hub": "DOH",
+      "direct": false,
+      "typical_transit_minutes": 744
+    },
+    {
+      "code": "EK",
+      "name": "Emirates",
+      "color": "#b44900",
+      "hub": "DXB",
+      "direct": false,
+      "typical_transit_minutes": 834
+    },
+    {
+      "code": "GF",
+      "name": "Gulf Air",
+      "color": "#9d3ebf",
+      "hub": "BAH",
+      "direct": false,
+      "typical_transit_minutes": 936
+    },
+    {
+      "code": "TK",
+      "name": "Turkish",
+      "color": "#0565fc",
+      "hub": "IST",
+      "direct": false,
+      "typical_transit_minutes": 672
+    },
+    {
+      "code": "SV",
+      "name": "Saudia",
+      "color": "#1d93a6",
+      "hub": "JED",
+      "direct": false,
+      "typical_transit_minutes": 888
+    }
+  ],
+  "destinations": [
+    {
+      "code": "ISB",
+      "label": "Islamabad"
+    },
+    {
+      "code": "LHE",
+      "label": "Lahore"
+    },
+    {
+      "code": "SKT",
+      "label": "Sialkot"
+    }
+  ],
+  "horizons": [
+    14,
+    30,
+    60,
+    90,
+    120,
+    180
+  ],
+  "series": [
+    {
+      "destination": "ISB",
+      "horizon_days": 14,
+      "carrier": "EK",
+      "points": [
+        {
+          "departure_date": "2026-09-23",
+          "price_eur": 763
+        }
+      ]
+    },
+    {
+      "destination": "ISB",
+      "horizon_days": 14,
+      "carrier": "QR",
+      "points": [
+        {
+          "departure_date": "2026-09-23",
+          "price_eur": 387
+        }
+      ]
+    },
+    {
+      "destination": "ISB",
+      "horizon_days": 14,
+      "carrier": "TK",
+      "points": [
+        {
+          "departure_date": "2026-09-23",
+          "price_eur": 590
+        }
+      ]
+    },
+    {
+      "destination": "ISB",
+      "horizon_days": 30,
+      "carrier": "EK",
+      "points": [
+        {
+          "departure_date": "2026-10-09",
+          "price_eur": 788
+        }
+      ]
+    },
+    {
+      "destination": "ISB",
+      "horizon_days": 30,
+      "carrier": "PK",
+      "points": [
+        {
+          "departure_date": "2026-10-09",
+          "price_eur": 451
+        }
+      ]
+    },
+    {
+      "destination": "ISB",
+      "horizon_days": 30,
+      "carrier": "QR",
+      "points": [
+        {
+          "departure_date": "2026-10-09",
+          "price_eur": 400
+        }
+      ]
+    },
+    {
+      "destination": "ISB",
+      "horizon_days": 30,
+      "carrier": "TK",
+      "points": [
+        {
+          "departure_date": "2026-10-09",
+          "price_eur": 590
+        }
+      ]
+    },
+    {
+      "destination": "ISB",
+      "horizon_days": 60,
+      "carrier": "PK",
+      "points": [
+        {
+          "departure_date": "2026-11-08",
+          "price_eur": 451
+        }
+      ]
+    },
+    {
+      "destination": "ISB",
+      "horizon_days": 60,
+      "carrier": "QR",
+      "points": [
+        {
+          "departure_date": "2026-11-08",
+          "price_eur": 400
+        }
+      ]
+    },
+    {
+      "destination": "ISB",
+      "horizon_days": 60,
+      "carrier": "TK",
+      "points": [
+        {
+          "departure_date": "2026-11-08",
+          "price_eur": 590
+        }
+      ]
+    },
+    {
+      "destination": "ISB",
+      "horizon_days": 90,
+      "carrier": "QR",
+      "points": [
+        {
+          "departure_date": "2026-12-08",
+          "price_eur": 387
+        }
+      ]
+    },
+    {
+      "destination": "ISB",
+      "horizon_days": 90,
+      "carrier": "TK",
+      "points": [
+        {
+          "departure_date": "2026-12-08",
+          "price_eur": 570
+        }
+      ]
+    },
+    {
+      "destination": "ISB",
+      "horizon_days": 120,
+      "carrier": "QR",
+      "points": [
+        {
+          "departure_date": "2027-01-07",
+          "price_eur": 715
+        }
+      ]
+    },
+    {
+      "destination": "ISB",
+      "horizon_days": 120,
+      "carrier": "SV",
+      "points": [
+        {
+          "departure_date": "2027-01-07",
+          "price_eur": 1561
+        }
+      ]
+    },
+    {
+      "destination": "ISB",
+      "horizon_days": 120,
+      "carrier": "TK",
+      "points": [
+        {
+          "departure_date": "2027-01-07",
+          "price_eur": 570
+        }
+      ]
+    },
+    {
+      "destination": "ISB",
+      "horizon_days": 180,
+      "carrier": "EK",
+      "points": [
+        {
+          "departure_date": "2027-03-08",
+          "price_eur": 763
+        }
+      ]
+    },
+    {
+      "destination": "ISB",
+      "horizon_days": 180,
+      "carrier": "QR",
+      "points": [
+        {
+          "departure_date": "2027-03-08",
+          "price_eur": 765
+        }
+      ]
+    },
+    {
+      "destination": "ISB",
+      "horizon_days": 180,
+      "carrier": "TK",
+      "points": [
+        {
+          "departure_date": "2027-03-08",
+          "price_eur": 570
+        }
+      ]
+    },
+    {
+      "destination": "LHE",
+      "horizon_days": 14,
+      "carrier": "EK",
+      "points": [
+        {
+          "departure_date": "2026-09-23",
+          "price_eur": 754
+        }
+      ]
+    },
+    {
+      "destination": "LHE",
+      "horizon_days": 14,
+      "carrier": "QR",
+      "points": [
+        {
+          "departure_date": "2026-09-23",
+          "price_eur": 369
+        }
+      ]
+    },
+    {
+      "destination": "LHE",
+      "horizon_days": 14,
+      "carrier": "TK",
+      "points": [
+        {
+          "departure_date": "2026-09-23",
+          "price_eur": 570
+        }
+      ]
+    },
+    {
+      "destination": "LHE",
+      "horizon_days": 30,
+      "carrier": "QR",
+      "points": [
+        {
+          "departure_date": "2026-10-09",
+          "price_eur": 382
+        }
+      ]
+    },
+    {
+      "destination": "LHE",
+      "horizon_days": 30,
+      "carrier": "TK",
+      "points": [
+        {
+          "departure_date": "2026-10-09",
+          "price_eur": 570
+        }
+      ]
+    },
+    {
+      "destination": "LHE",
+      "horizon_days": 60,
+      "carrier": "EK",
+      "points": [
+        {
+          "departure_date": "2026-11-08",
+          "price_eur": 754
+        }
+      ]
+    },
+    {
+      "destination": "LHE",
+      "horizon_days": 60,
+      "carrier": "QR",
+      "points": [
+        {
+          "departure_date": "2026-11-08",
+          "price_eur": 382
+        }
+      ]
+    },
+    {
+      "destination": "LHE",
+      "horizon_days": 60,
+      "carrier": "TK",
+      "points": [
+        {
+          "departure_date": "2026-11-08",
+          "price_eur": 570
+        }
+      ]
+    },
+    {
+      "destination": "LHE",
+      "horizon_days": 90,
+      "carrier": "EK",
+      "points": [
+        {
+          "departure_date": "2026-12-08",
+          "price_eur": 754
+        }
+      ]
+    },
+    {
+      "destination": "LHE",
+      "horizon_days": 90,
+      "carrier": "QR",
+      "points": [
+        {
+          "departure_date": "2026-12-08",
+          "price_eur": 391
+        }
+      ]
+    },
+    {
+      "destination": "LHE",
+      "horizon_days": 90,
+      "carrier": "TK",
+      "points": [
+        {
+          "departure_date": "2026-12-08",
+          "price_eur": 550
+        }
+      ]
+    },
+    {
+      "destination": "LHE",
+      "horizon_days": 120,
+      "carrier": "EK",
+      "points": [
+        {
+          "departure_date": "2027-01-07",
+          "price_eur": 754
+        }
+      ]
+    },
+    {
+      "destination": "LHE",
+      "horizon_days": 120,
+      "carrier": "QR",
+      "points": [
+        {
+          "departure_date": "2027-01-07",
+          "price_eur": 746
+        }
+      ]
+    },
+    {
+      "destination": "LHE",
+      "horizon_days": 120,
+      "carrier": "SV",
+      "points": [
+        {
+          "departure_date": "2027-01-07",
+          "price_eur": 1561
+        }
+      ]
+    },
+    {
+      "destination": "LHE",
+      "horizon_days": 120,
+      "carrier": "TK",
+      "points": [
+        {
+          "departure_date": "2027-01-07",
+          "price_eur": 550
+        }
+      ]
+    },
+    {
+      "destination": "LHE",
+      "horizon_days": 180,
+      "carrier": "EK",
+      "points": [
+        {
+          "departure_date": "2027-03-08",
+          "price_eur": 754
+        }
+      ]
+    },
+    {
+      "destination": "LHE",
+      "horizon_days": 180,
+      "carrier": "QR",
+      "points": [
+        {
+          "departure_date": "2027-03-08",
+          "price_eur": 796
+        }
+      ]
+    },
+    {
+      "destination": "LHE",
+      "horizon_days": 180,
+      "carrier": "SV",
+      "points": [
+        {
+          "departure_date": "2027-03-08",
+          "price_eur": 667
+        }
+      ]
+    },
+    {
+      "destination": "LHE",
+      "horizon_days": 180,
+      "carrier": "TK",
+      "points": [
+        {
+          "departure_date": "2027-03-08",
+          "price_eur": 550
+        }
+      ]
+    },
+    {
+      "destination": "SKT",
+      "horizon_days": 14,
+      "carrier": "QR",
+      "points": [
+        {
+          "departure_date": "2026-09-23",
+          "price_eur": 373
+        }
+      ]
+    },
+    {
+      "destination": "SKT",
+      "horizon_days": 30,
+      "carrier": "QR",
+      "points": [
+        {
+          "departure_date": "2026-10-09",
+          "price_eur": 385
+        }
+      ]
+    },
+    {
+      "destination": "SKT",
+      "horizon_days": 60,
+      "carrier": "EK",
+      "points": [
+        {
+          "departure_date": "2026-11-08",
+          "price_eur": 754
+        }
+      ]
+    },
+    {
+      "destination": "SKT",
+      "horizon_days": 60,
+      "carrier": "QR",
+      "points": [
+        {
+          "departure_date": "2026-11-08",
+          "price_eur": 385
+        }
+      ]
+    },
+    {
+      "destination": "SKT",
+      "horizon_days": 90,
+      "carrier": "EK",
+      "points": [
+        {
+          "departure_date": "2026-12-08",
+          "price_eur": 754
+        }
+      ]
+    },
+    {
+      "destination": "SKT",
+      "horizon_days": 120,
+      "carrier": "EK",
+      "points": [
+        {
+          "departure_date": "2027-01-07",
+          "price_eur": 754
+        }
+      ]
+    },
+    {
+      "destination": "SKT",
+      "horizon_days": 180,
+      "carrier": "EK",
+      "points": [
+        {
+          "departure_date": "2027-03-08",
+          "price_eur": 754
+        }
+      ]
+    }
+  ],
+  "bands": [
+    {
+      "tag": "french_summer",
+      "label": "French summer",
+      "short_label": "FR summer peak",
+      "kind": "french",
+      "from": "2026-07-01",
+      "to": "2026-08-31",
+      "multiplier_low": 1.15,
+      "multiplier_high": 1.35
+    },
+    {
+      "tag": "french_toussaint",
+      "label": "French Toussaint",
+      "short_label": "FR school holiday",
+      "kind": "french",
+      "from": "2026-10-17",
+      "to": "2026-11-02",
+      "multiplier_low": 1.05,
+      "multiplier_high": 1.15
+    },
+    {
+      "tag": "wedding_rush",
+      "label": "Desi wedding season",
+      "short_label": "Wedding peak",
+      "kind": "wedding",
+      "from": "2026-11-15",
+      "to": "2027-01-15",
+      "multiplier_low": 1.4,
+      "multiplier_high": 1.8
+    },
+    {
+      "tag": "christmas_new_year",
+      "label": "Christmas / New Year",
+      "short_label": "Christmas",
+      "kind": "wedding",
+      "from": "2026-12-18",
+      "to": "2027-01-05",
+      "multiplier_low": 1.6,
+      "multiplier_high": 2.0
+    },
+    {
+      "tag": "ramadan_phase1",
+      "label": "Ramadan (first half)",
+      "short_label": "Ramadan",
+      "kind": "religious",
+      "from": "2027-02-08",
+      "to": "2027-02-22",
+      "multiplier_low": 0.85,
+      "multiplier_high": 0.95
+    },
+    {
+      "tag": "eid_ul_fitr",
+      "label": "Chaand Raat / Eid-ul-Fitr",
+      "short_label": "Eid-ul-Fitr",
+      "kind": "religious",
+      "from": "2027-03-05",
+      "to": "2027-03-11",
+      "multiplier_low": 1.2,
+      "multiplier_high": 1.6
+    },
+    {
+      "tag": "hajj_eid_ul_adha",
+      "label": "Hajj / Eid-ul-Adha",
+      "short_label": "Hajj corridor",
+      "kind": "religious",
+      "from": "2027-05-07",
+      "to": "2027-05-19",
+      "multiplier_low": 1.1,
+      "multiplier_high": 1.3
+    },
+    {
+      "tag": "french_summer",
+      "label": "French summer",
+      "short_label": "FR summer peak",
+      "kind": "french",
+      "from": "2027-07-01",
+      "to": "2027-08-31",
+      "multiplier_low": 1.15,
+      "multiplier_high": 1.35
+    }
+  ],
+  "events": [],
+  "arbitrage": {
+    "departure_date": "2026-09-23",
+    "lhe_eur": 369,
+    "skt_eur": 373,
+    "isb_eur": 387,
+    "spread_eur": -4,
+    "ground_transfer_eur": 34,
+    "ground_time": "4h 10m",
+    "verdict": "either"
+  },
+  "efficiency": [
+    {
+      "carrier": "QR",
+      "price_eur": 463,
+      "transit_minutes": 767
+    },
+    {
+      "carrier": "TK",
+      "price_eur": 571,
+      "transit_minutes": 658
+    },
+    {
+      "carrier": "PK",
+      "price_eur": 451,
+      "transit_minutes": 460
+    },
+    {
+      "carrier": "EK",
+      "price_eur": 772,
+      "transit_minutes": 756
+    },
+    {
+      "carrier": "SV",
+      "price_eur": 1171,
+      "transit_minutes": 760
+    }
+  ],
+  "seasonal_gauge": {
+    "current_avg_eur": 706,
+    "baseline_avg_eur": 718,
+    "pct": -2,
+    "method": "Wedding-window departures against the February/March baseline"
+  }
+}
