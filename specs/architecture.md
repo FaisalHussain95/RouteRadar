@@ -77,7 +77,7 @@ news/
   dedupe.py         One row per incident (title similarity + same day)
   ingest.py         run_news_ingest(): taxonomy queries, dedupe, severity, upsert, log
 analytics/
-  queries.py        The five F5 questions as functions returning records
+  queries.py        The five F5 questions, plus fare_series for the chart, as records
   explain.py        F6: tags + nearby events for a fare row
 export/
   site.py           Builds DashboardData (Pydantic) from analytics and writes dashboard.json
@@ -456,9 +456,11 @@ Decisions from S12 (2026-09-09):
 
 Shaped by what the design's component consumes (see `specs/ux/design-system.md` § Data
 the page needs). Top level: `schema_version`, `generated_at`, `observed_on`, `carriers[]`,
-`destinations[]`, `horizons[]`, `series[]` (per destination × horizon × carrier: `[date,
-price_eur]` points), `bands[]`, `events[]`, `arbitrage`, `efficiency[]`, `seasonal_gauge`.
-Written with `tmp + os.replace` so a reader never sees a partial file.
+`destinations[]`, `horizons[]`, `series[]` (per destination × horizon × carrier: `{date,
+price_eur}` points), `bands[]`, `events[]`, `arbitrage`, `efficiency[]`, `seasonal_gauge`.
+Written with `tmp + os.replace` so a reader never sees a partial file. The generated
+schema is `specs/dashboard-data.schema.json`; see § Decisions from S14 for the details a
+reader of the file needs.
 
 ## Rules every story follows
 
@@ -534,3 +536,61 @@ Written with `tmp + os.replace` so a reader never sees a partial file.
   deuteranopia. Both are outside S13's scope (it owns the carrier hues) and neither is a
   data-identity channel — a gold pin carries `▲` and sits on the baseline, a band is a wash.
   Worth revisiting if S15 finds them confusable on the real page.
+
+## Decisions from S14 (2026-09-09)
+
+- `export/site.py` is Pydantic models plus one builder, `build_dashboard(conn, *,
+  generated_at, horizons, break_even_eur)`, and `write_dashboard(data, path)`. The
+  timestamp is a **parameter, not `now()`**, because the export window is anchored on it:
+  the tests pin a day, and a replay produces that day's file. `export/schema.py` renders
+  the JSON Schema in **serialization** mode and `fd export-schema` writes the committed
+  copy; `tests/test_export.py` fails if the committed file has drifted from the model, so
+  the site's generated TypeScript can never be a version behind.
+- **The window reaches backwards as well as forwards**: `generated_at - 90 days` (GDELT's
+  archive, so no pin can exist before it) to `generated_at + 365 days` (the range
+  `fd tag-dates` tags, so no band names a window `calendar_tag` has no rows for). Anchoring
+  the chart at today would have put every news pin off the left edge — GDELT only knows the
+  recent past, while the fares are all in the future.
+- **Three regions never come from the database**: `carriers[]`, `destinations[]` and
+  `horizons[]` are reference tables in `site.py`, so the filter bar renders before the
+  first ingest. `bands[]` is the same argument one step on: it is built from
+  `tags_for_range`, not from `calendar_tag`, so the chart shades an empty plot. Building it
+  from the engine also means a band is exactly what `fd tag-dates` would write — clipped at
+  the window edges, and split into two bands when a window recurs inside the window
+  (Ramadan drifts ~11 days a year), with no special case for either.
+- **A carrier the palette has no colour for is left out of every region.** S13 fixed the
+  palette at six and a seventh is a design change, not a row; the page cannot draw a line it
+  has no colour for. The scope filters (`providers/filters.py`) do not filter by carrier, so
+  a real ingest does return other codes — and dropping them from the chart while leaving
+  them in the modules would put a spread on the arbitrage card that no line on the chart
+  accounts for. `queries._scope` therefore takes a `carriers=` set, threaded through
+  `fare_series`, `airport_arbitrage`, `wedding_premium` and `carrier_efficiency` (the four
+  the export calls), and the export passes `CARRIER_CODES` to all four. `fd export-site`
+  says how many series it wrote, which is where a silently missing carrier shows up.
+- **Prices are integers of euros and durations are integers of minutes.** Pydantic
+  serialises a `Decimal` to a JSON *string*, so a `Decimal` in the contract would make the
+  site parse numbers out of strings. Band multipliers are the one float in the file: they
+  are a display hint on a band chip, never an input to exact arithmetic.
+- `arbitrage` is the **nearest departure on the latest observation day** that was priced
+  into both Lahore and Sialkot — the snapshot question ("what would I pay to go"), not the
+  cheapest the market ever showed. Its `spread_eur` keeps the analytics convention,
+  `lhe_eur - skt_eur`, which is the opposite sign to the design's caption ("spread SKT −
+  LHE"); one convention across the codebase beats matching a caption.
+- `seasonal_gauge` **is** `queries.wedding_premium`: the design's "current average vs
+  February baseline" is that query, so the gauge carries a `method` line saying so rather
+  than leaving the mapping in the code.
+- **`impact_score` is not exported.** The design derives it from severity (high 0.91, med
+  0.64, low 0.22), so it would be a second copy of a field already in the file. `body` is
+  null in v1 for a harder reason: GDELT's DOC 2.0 `artlist` carries titles and URLs, not
+  article text. `impact_text` carries the ingest's own note (how many outlets, which
+  keyword set the severity), which is not the fare-impact estimate the design's drawer
+  labels it as — S15 relabels it.
+- `analytics/queries.py` gained a sixth function, `fare_series`, for the chart's own shape.
+  It is not an F5 question; it lives there because that is where reads of
+  `fare_observation` live, and it buckets lead times with the same `_horizon_bucket_sql` as
+  `lead_time_curve` so a run that slipped a day stays on its curve. Origins are pooled: the
+  design's origin control is display-only.
+- `calendar_engine`'s `Window` gained `short_label` (the uppercase band chip) and
+  `tags.window_for(tag)` returns the whole window rather than just its label, so the export
+  reads label, short label and kind from one place. `label_for` is unchanged and still
+  falls back to the raw tag.

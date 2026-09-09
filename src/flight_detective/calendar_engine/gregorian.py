@@ -81,6 +81,8 @@ class Window:
     """Stable identifier stored in `calendar_tag.tag`."""
     label: str
     """Human label for the dashboard band."""
+    short_label: str
+    """The uppercase chip the chart and the hover card use, where `label` will not fit."""
     kind: BandKind
     """Band colour family in the design: `--band-wedding`, `--band-religious`, `--band-french`."""
     multiplier_low: Decimal
@@ -109,6 +111,7 @@ WINDOWS: tuple[Window, ...] = (
     Window(
         tag="wedding_rush",
         label="Desi wedding season",
+        short_label="Wedding peak",
         kind="wedding",
         multiplier_low=Decimal("1.40"),
         multiplier_high=Decimal("1.80"),
@@ -117,6 +120,7 @@ WINDOWS: tuple[Window, ...] = (
     Window(
         tag="christmas_new_year",
         label="Christmas / New Year",
+        short_label="Christmas",
         kind="wedding",
         multiplier_low=Decimal("1.60"),
         multiplier_high=Decimal("2.00"),
@@ -125,6 +129,7 @@ WINDOWS: tuple[Window, ...] = (
     Window(
         tag="french_summer",
         label="French summer",
+        short_label="FR summer peak",
         kind="french",
         multiplier_low=Decimal("1.15"),
         multiplier_high=Decimal("1.35"),
@@ -133,6 +138,7 @@ WINDOWS: tuple[Window, ...] = (
     Window(
         tag="french_toussaint",
         label="French Toussaint",
+        short_label="FR school holiday",
         kind="french",
         multiplier_low=Decimal("1.05"),
         multiplier_high=Decimal("1.15"),

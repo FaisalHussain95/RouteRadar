@@ -109,6 +109,7 @@ HIJRI_WINDOWS: tuple[HijriWindow, ...] = (
     HijriWindow(
         tag="ramadan_phase1",
         label="Ramadan (first half)",
+        short_label="Ramadan",
         kind="religious",
         multiplier_low=Decimal("0.85"),
         multiplier_high=Decimal("0.95"),
@@ -117,6 +118,7 @@ HIJRI_WINDOWS: tuple[HijriWindow, ...] = (
     HijriWindow(
         tag="eid_ul_fitr",
         label="Chaand Raat / Eid-ul-Fitr",
+        short_label="Eid-ul-Fitr",
         kind="religious",
         multiplier_low=Decimal("1.20"),
         multiplier_high=Decimal("1.60"),
@@ -125,6 +127,7 @@ HIJRI_WINDOWS: tuple[HijriWindow, ...] = (
     HijriWindow(
         tag="hajj_eid_ul_adha",
         label="Hajj / Eid-ul-Adha",
+        short_label="Hajj corridor",
         kind="religious",
         multiplier_low=Decimal("1.10"),
         multiplier_high=Decimal("1.30"),

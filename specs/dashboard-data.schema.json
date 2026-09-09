@@ -1,0 +1,481 @@
+{
+  "$defs": {
+    "Arbitrage": {
+      "additionalProperties": false,
+      "description": "Lahore against Sialkot on one departure date, with the ground transfer priced in.",
+      "properties": {
+        "departure_date": {
+          "format": "date",
+          "title": "Departure Date",
+          "type": "string"
+        },
+        "lhe_eur": {
+          "title": "Lhe Eur",
+          "type": "integer"
+        },
+        "skt_eur": {
+          "title": "Skt Eur",
+          "type": "integer"
+        },
+        "isb_eur": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Isb Eur"
+        },
+        "spread_eur": {
+          "description": "`lhe_eur - skt_eur`, as analytics defines it: positive means Sialkot is the cheaper airport. The design's card captions this the other way round.",
+          "title": "Spread Eur",
+          "type": "integer"
+        },
+        "ground_transfer_eur": {
+          "title": "Ground Transfer Eur",
+          "type": "integer"
+        },
+        "ground_time": {
+          "title": "Ground Time",
+          "type": "string"
+        },
+        "verdict": {
+          "enum": [
+            "lhe",
+            "skt",
+            "either"
+          ],
+          "title": "Verdict",
+          "type": "string"
+        }
+      },
+      "required": [
+        "departure_date",
+        "lhe_eur",
+        "skt_eur",
+        "isb_eur",
+        "spread_eur",
+        "ground_transfer_eur",
+        "ground_time",
+        "verdict"
+      ],
+      "title": "Arbitrage",
+      "type": "object"
+    },
+    "Band": {
+      "additionalProperties": false,
+      "description": "One edition of a calendar window, clipped to the export window.",
+      "properties": {
+        "tag": {
+          "title": "Tag",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "short_label": {
+          "title": "Short Label",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "wedding",
+            "religious",
+            "french"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "from": {
+          "format": "date",
+          "title": "From",
+          "type": "string"
+        },
+        "to": {
+          "format": "date",
+          "title": "To",
+          "type": "string"
+        },
+        "multiplier_low": {
+          "title": "Multiplier Low",
+          "type": "number"
+        },
+        "multiplier_high": {
+          "title": "Multiplier High",
+          "type": "number"
+        }
+      },
+      "required": [
+        "tag",
+        "label",
+        "short_label",
+        "kind",
+        "from",
+        "to",
+        "multiplier_low",
+        "multiplier_high"
+      ],
+      "title": "Band",
+      "type": "object"
+    },
+    "Carrier": {
+      "additionalProperties": false,
+      "description": "One line on the chart, one chip in the filter bar, one dot in the scatter.",
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "color": {
+          "description": "`--carrier-<code>` from specs/ux/design-system.md \u00a7 Tokens",
+          "title": "Color",
+          "type": "string"
+        },
+        "hub": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Transit airport, or null when the carrier flies direct",
+          "title": "Hub"
+        },
+        "direct": {
+          "title": "Direct",
+          "type": "boolean"
+        },
+        "typical_transit_minutes": {
+          "description": "Reference door-to-door time, for the hover card before a fare is loaded",
+          "title": "Typical Transit Minutes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "code",
+        "name",
+        "color",
+        "hub",
+        "direct",
+        "typical_transit_minutes"
+      ],
+      "title": "Carrier",
+      "type": "object"
+    },
+    "CarrierSeries": {
+      "additionalProperties": false,
+      "description": "The lowest fare per departure date for one (destination, horizon, carrier).",
+      "properties": {
+        "destination": {
+          "title": "Destination",
+          "type": "string"
+        },
+        "horizon_days": {
+          "title": "Horizon Days",
+          "type": "integer"
+        },
+        "carrier": {
+          "title": "Carrier",
+          "type": "string"
+        },
+        "points": {
+          "items": {
+            "$ref": "#/$defs/SeriesPoint"
+          },
+          "title": "Points",
+          "type": "array"
+        }
+      },
+      "required": [
+        "destination",
+        "horizon_days",
+        "carrier",
+        "points"
+      ],
+      "title": "CarrierSeries",
+      "type": "object"
+    },
+    "DestinationInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "label"
+      ],
+      "title": "DestinationInfo",
+      "type": "object"
+    },
+    "Efficiency": {
+      "additionalProperties": false,
+      "description": "One dot of the price-against-transit-time scatter.",
+      "properties": {
+        "carrier": {
+          "title": "Carrier",
+          "type": "string"
+        },
+        "price_eur": {
+          "title": "Price Eur",
+          "type": "integer"
+        },
+        "transit_minutes": {
+          "title": "Transit Minutes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "carrier",
+        "price_eur",
+        "transit_minutes"
+      ],
+      "title": "Efficiency",
+      "type": "object"
+    },
+    "Event": {
+      "additionalProperties": false,
+      "description": "One `news_event` row as the feed, the drawer and the chart pins need it.",
+      "properties": {
+        "date": {
+          "format": "date",
+          "title": "Date",
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "high",
+            "med",
+            "low"
+          ],
+          "title": "Severity",
+          "type": "string"
+        },
+        "headline": {
+          "title": "Headline",
+          "type": "string"
+        },
+        "source": {
+          "description": "Publisher host, for the feed's `date \u00b7 source` line",
+          "title": "Source",
+          "type": "string"
+        },
+        "source_url": {
+          "title": "Source Url",
+          "type": "string"
+        },
+        "impact_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The ingest's own note on the row: how many outlets carried it and which keyword set the severity. v1 has no estimate of the fare impact itself.",
+          "title": "Impact Text"
+        },
+        "body": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Always null in v1: GDELT's DOC 2.0 artlist carries titles and URLs, not article text.",
+          "title": "Body"
+        }
+      },
+      "required": [
+        "date",
+        "severity",
+        "headline",
+        "source",
+        "source_url",
+        "impact_text",
+        "body"
+      ],
+      "title": "Event",
+      "type": "object"
+    },
+    "SeasonalGauge": {
+      "additionalProperties": false,
+      "properties": {
+        "current_avg_eur": {
+          "title": "Current Avg Eur",
+          "type": "integer"
+        },
+        "baseline_avg_eur": {
+          "title": "Baseline Avg Eur",
+          "type": "integer"
+        },
+        "pct": {
+          "title": "Pct",
+          "type": "integer"
+        },
+        "method": {
+          "title": "Method",
+          "type": "string"
+        }
+      },
+      "required": [
+        "current_avg_eur",
+        "baseline_avg_eur",
+        "pct",
+        "method"
+      ],
+      "title": "SeasonalGauge",
+      "type": "object"
+    },
+    "SeriesPoint": {
+      "additionalProperties": false,
+      "properties": {
+        "departure_date": {
+          "format": "date",
+          "title": "Departure Date",
+          "type": "string"
+        },
+        "price_eur": {
+          "title": "Price Eur",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "departure_date",
+        "price_eur"
+      ],
+      "title": "SeriesPoint",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "observed_on": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Latest day the fares were observed; null before the first ingest",
+      "title": "Observed On"
+    },
+    "carriers": {
+      "items": {
+        "$ref": "#/$defs/Carrier"
+      },
+      "title": "Carriers",
+      "type": "array"
+    },
+    "destinations": {
+      "items": {
+        "$ref": "#/$defs/DestinationInfo"
+      },
+      "title": "Destinations",
+      "type": "array"
+    },
+    "horizons": {
+      "items": {
+        "type": "integer"
+      },
+      "title": "Horizons",
+      "type": "array"
+    },
+    "series": {
+      "items": {
+        "$ref": "#/$defs/CarrierSeries"
+      },
+      "title": "Series",
+      "type": "array"
+    },
+    "bands": {
+      "items": {
+        "$ref": "#/$defs/Band"
+      },
+      "title": "Bands",
+      "type": "array"
+    },
+    "events": {
+      "items": {
+        "$ref": "#/$defs/Event"
+      },
+      "title": "Events",
+      "type": "array"
+    },
+    "arbitrage": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Arbitrage"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "efficiency": {
+      "items": {
+        "$ref": "#/$defs/Efficiency"
+      },
+      "title": "Efficiency",
+      "type": "array"
+    },
+    "seasonal_gauge": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SeasonalGauge"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "generated_at",
+    "observed_on",
+    "carriers",
+    "destinations",
+    "horizons",
+    "series",
+    "bands",
+    "events",
+    "arbitrage",
+    "efficiency",
+    "seasonal_gauge"
+  ],
+  "title": "Flight Detective dashboard data (schema_version 1)",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/flight-detective/dashboard-data.schema.json"
+}

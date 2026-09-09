@@ -15,6 +15,8 @@ from flight_detective import __version__, db
 from flight_detective.analytics import queries
 from flight_detective.calendar_engine.tags import tags_for_range
 from flight_detective.config import load_settings
+from flight_detective.export import schema as schema_export
+from flight_detective.export import site as site_export
 from flight_detective.ingest import DEFAULT_HORIZONS, run_ingest
 from flight_detective.models import Destination, Origin
 from flight_detective.news.gdelt import MAX_DAYS, GdeltClient
@@ -496,6 +498,47 @@ def report(
             _report_wedding_premium(conn, **scope)
         else:
             _report_efficiency(conn, **scope)
+
+
+@app.command("export-site")
+def export_site(
+    out: Annotated[
+        Path | None,
+        typer.Option(
+            "--out",
+            help="Where to write the dashboard JSON; defaults to FD_SITE_EXPORT_PATH or "
+            "data/site/dashboard.json.",
+        ),
+    ] = None,
+    path: DbPathOption = None,
+) -> None:
+    """Write `dashboard.json`, everything the static site reads, atomically.
+
+    Runs on any database, including one that has never been ingested into: the site has to
+    build before the first pipeline run, and an empty file with populated calendar bands is
+    what lets it. `generated_at` is now (Paris)."""
+    destination = out if out is not None else load_settings().site_export_path
+    with db.connect(_db_path(path)) as conn:
+        # Same reason `fd report` does it: a database that predates a table is not an error.
+        db.init_schema(conn)
+        data = site_export.build_dashboard(conn, generated_at=datetime.now(PARIS))
+    written = site_export.write_dashboard(data, destination)
+    typer.echo(
+        f"wrote {written}: {len(data.series)} series, {len(data.bands)} bands, "
+        f"{len(data.events)} events (observed_on {data.observed_on or 'never'})"
+    )
+
+
+@app.command("export-schema")
+def export_schema(
+    out: Annotated[
+        Path,
+        typer.Option("--out", help="Where to write the JSON Schema for dashboard.json."),
+    ] = schema_export.DEFAULT_SCHEMA_PATH,
+) -> None:
+    """Regenerate the committed JSON Schema from the export model. Run it whenever the
+    model changes: the site's TypeScript types are generated from the committed file."""
+    typer.echo(f"wrote {schema_export.write_schema(out)}")
 
 
 if __name__ == "__main__":

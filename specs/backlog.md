@@ -204,7 +204,7 @@ closes its gaps. No app code.
       `generated_at` is > 36 h old) written up as acceptance criteria on S15
 
 ## S14 — Dashboard data export (the JSON contract)
-- status: todo
+- status: done
 - size: M
 
 `export/site.py`: `DashboardData` Pydantic model per `specs/ux/design-system.md` § Data the
@@ -212,11 +212,11 @@ page needs, built from `analytics/`; `fd export-site [--out data/site/dashboard.
 writing atomically (`tmp` + `os.replace`). `export/schema.py` + `fd export-schema` writing
 `specs/dashboard-data.schema.json`; commit the schema.
 
-- [ ] Export on the seeded test DB validates against the schema and round-trips
-- [ ] Prices are integers of euros; dates are ISO `YYYY-MM-DD`; `schema_version` present
-- [ ] A reader opening the file mid-write never sees a partial file (test: no `.tmp` left,
+- [x] Export on the seeded test DB validates against the schema and round-trips
+- [x] Prices are integers of euros; dates are ISO `YYYY-MM-DD`; `schema_version` present
+- [x] A reader opening the file mid-write never sees a partial file (test: no `.tmp` left,
       output written via rename)
-- [ ] `fd export-site` on an empty DB produces a valid file with empty series and a
+- [x] `fd export-site` on an empty DB produces a valid file with empty series and a
       `generated_at`, so the site can build before the first ingest
 
 Note from S13: the empty and stale states S15 now lists need the contract to say so.
@@ -291,6 +291,49 @@ region by region using the tokens in `design-system.md`. `src/types.ts` generate
       `.github/workflows/deploy-site.yml` calls them
 - [ ] `scripts/check.sh` runs the web checks and stays green
 
+Note from S14: the contract is `specs/dashboard-data.schema.json` (generated; regenerate
+with `fd export-schema`). Things S15 has to know that the design does not show:
+
+- `series[]` points are `{departure_date, price_eur}` objects, not `[date, price]` pairs, so
+  `json-schema-to-typescript` emits a named type rather than a tuple. Prices are integers of
+  euros and durations integers of minutes throughout; the only floats in the file are a
+  band's `multiplier_low`/`multiplier_high`.
+- A band's date keys are `from` and `to`. `short_label` is the uppercase chip; `label` is
+  the long form for the chart's band caption.
+- `arbitrage.spread_eur` is `lhe_eur - skt_eur` (positive = Sialkot cheaper), the **opposite
+  sign** to the design's caption "spread SKT − LHE". Reword the caption; do not flip the
+  data. `verdict` is already computed with the same break-even the card prints.
+- `events[]` has no `impact_score`: the design derives it from severity (high 0.91 / med
+  0.64 / low 0.22), so the feed line should read `date · source · severity` instead.
+  `body` is always null in v1 (GDELT's artlist has no article text), so the drawer needs
+  its own muted line for it, and `impact_text` is the *ingest's* note — how many outlets
+  carried the story and which keyword set the severity — not a fare-impact estimate, so
+  the drawer's "Est. fare impact" label is wrong as drawn.
+- `seasonal_gauge` carries a `method` line; print it as the card's one-line method note
+  rather than writing one in the component.
+- `web/fixtures/dashboard.json` is produced from the same seeded DB the Python tests use:
+
+  ```python
+  import sys; sys.path.insert(0, "tests")
+  import duckdb
+  from datetime import datetime
+  from pathlib import Path
+  from conftest import seed_analytics_db
+  from flight_detective.export import site
+
+  conn = duckdb.connect(":memory:")
+  seed_analytics_db(conn)
+  when = datetime.fromisoformat("2026-09-09T06:35:00+02:00")
+  site.write_dashboard(
+      site.build_dashboard(conn, generated_at=when), Path("web/fixtures/dashboard.json")
+  )
+  ```
+
+  Pin `generated_at`: the export window is anchored on it, so letting it default to now
+  would change the fixture's shape every day. That timestamp reads as fresh against a
+  "12 h old" clock; the stale-data case needs its own copy with `generated_at` moved back
+  40 h, and the two empty-state cases need hand-made fixtures rather than this one.
+
 Note from S13: `tests/test_design_system.py` vendors the `dataviz` skill's thresholds and
 Machado matrices, because the skill lives outside the repo. They matched exactly on
 2026-09-09, but nothing detects drift if the skill's floors move. Before touching
@@ -318,6 +361,10 @@ access) rather than doing them; that needs the GitHub UI.
 - [ ] Pages is enabled with source "GitHub Actions"; the deployed URL is recorded in
       `README.md`
 - [ ] A polling loop against the Pages URL during a deploy never gets a 404
+
+Note from S14: `fd export-site` now exists and writes the JSON, so the chain stops only at
+`push-data.sh`. README § Scheduled pipeline still carries a narrowed "not end-to-end yet"
+paragraph naming just this story; delete it when the script lands.
 
 Note from S09: `deploy/install.sh` warns that `deploy/push-data.sh` does not exist yet, and
 `tests/test_deploy.py::test_install_warns_that_the_last_step_of_the_chain_is_missing` skips

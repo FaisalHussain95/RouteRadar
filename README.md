@@ -54,11 +54,19 @@ News is context around the fares, not the dataset, so one flaky query on a free 
 not cost the day's export. GDELT needs no key and no quota; the courtesy pause between
 queries makes the step take about 20 seconds.
 
-**The chain is not end-to-end yet.** `fd export-site` (S14) and `deploy/push-data.sh`
-(S16) do not exist, so a scheduled run today stores fares, calendar tags and news and
-then stops at the first missing step with a usage error. Installing now gets the daily
-ingest running; the export and the push start working when those land, with no change to
-the unit.
+`fd export-site` writes `data/site/dashboard.json`, the one file the static site reads:
+carriers, destinations and horizons for the filter bar, a fare curve per
+destination x horizon x carrier, the calendar bands, the news pins, and the three module
+cards. It runs on any database, including one that has never been ingested into, so the
+site can build before the first pipeline run. The shape is described by
+`specs/dashboard-data.schema.json`, generated from the Pydantic model by
+`fd export-schema` and committed; regenerate it whenever the model changes. The write is a
+temp file plus a rename, so a reader never sees a half-written export.
+
+**The chain is not end-to-end yet.** `deploy/push-data.sh` (S16) does not exist, so a
+scheduled run today stores fares, calendar tags and news, writes the dashboard JSON, and
+then stops at that last step with a usage error. Installing now gets the daily ingest and
+the export running; the push starts working when that lands, with no change to the unit.
 
 ### Watching it
 

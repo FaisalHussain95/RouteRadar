@@ -1,7 +1,10 @@
 """The five research questions of PRD § F5, as functions over DuckDB returning records.
 
 Each function is one read-only query (two for the wedding premium) plus the arithmetic
-DuckDB cannot do exactly. `fd report` prints them; S14 exports them. Nothing here writes.
+DuckDB cannot do exactly. `fd report` prints them; `export/site.py` exports them. Nothing
+here writes. `fare_series` is the one function no F5 question asks for: it is the chart's
+own shape, added by S14, and it lives here because this is where reads of
+`fare_observation` live.
 
 ## Averages are computed in Python, from `sum` and `count`
 
@@ -79,6 +82,18 @@ class LowestFarePoint:
 
 
 @dataclass(frozen=True)
+class FareSeriesPoint:
+    """One point of the dashboard's fare chart: a curve is every point sharing the first
+    three fields, ordered by departure date."""
+
+    destination: str
+    horizon_days: int
+    carrier: str
+    departure_date: date
+    price_eur: Decimal
+
+
+@dataclass(frozen=True)
 class ArbitrageRow:
     """Lahore against Sialkot for one departure date, with the ground transfer priced in."""
 
@@ -139,14 +154,25 @@ def _scope(
     origin: Origin | None,
     destination: Destination | None,
     carrier: str | None,
+    carriers: Sequence[str] | None = None,
 ) -> tuple[list[str], list[object]]:
-    """The filters every question shares, as SQL fragments and their bound values."""
+    """The filters every question shares, as SQL fragments and their bound values.
+
+    `carriers` restricts to a *set* of codes, where `carrier` picks one. The export uses it
+    to hold every region of `dashboard.json` to the six carriers the palette has colours
+    for; an empty sequence means "no carriers" and correctly matches nothing."""
     clauses: list[str] = []
     params: list[object] = []
     for column, value in (("origin", origin), ("destination", destination), ("carrier", carrier)):
         if value is not None:
             clauses.append(f"{prefix}{column} = ?")
             params.append(value)
+    if carriers is not None:
+        codes = list(carriers)
+        clauses.append(
+            f"{prefix}carrier IN ({', '.join('?' for _ in codes)})" if codes else "false"
+        )
+        params.extend(codes)
     return clauses, params
 
 
@@ -200,19 +226,67 @@ def lowest_fare_curve(
     ]
 
 
+def fare_series(
+    conn: duckdb.DuckDBPyConnection,
+    *,
+    horizons: Sequence[int] = DEFAULT_HORIZONS,
+    start: date | None = None,
+    end: date | None = None,
+    origin: Origin | None = None,
+    destination: Destination | None = None,
+    carrier: str | None = None,
+    carriers: Sequence[str] | None = None,
+) -> list[FareSeriesPoint]:
+    """The dashboard's chart data: the lowest fare per departure date, per destination,
+    booking horizon and carrier (S14). `start`/`end` bound the departure date inclusively.
+
+    Origins are pooled on purpose: the design's origin control is display-only (`CDG / ORY`)
+    and a reader comparing carriers wants the cheapest way out of Paris, not out of one
+    terminal. `origin=` is still there for a caller that disagrees.
+
+    Horizons are bucketed to the nearest configured one, exactly as `lead_time_curve` does,
+    so a run that slipped a day still lands on the 14d curve rather than vanishing from
+    every curve."""
+    clauses, params = _scope("", origin, destination, carrier, carriers)
+    clauses.append("departure_date >= observed_on")
+    for column, bound in (("departure_date >= ?", start), ("departure_date <= ?", end)):
+        if bound is not None:
+            clauses.append(column)
+            params.append(bound)
+    bucket = _horizon_bucket_sql("departure_date - observed_on", horizons)
+    rows = conn.execute(
+        f"SELECT destination, {bucket} AS horizon_days, carrier, departure_date, min(price_eur) "
+        f"FROM fare_observation{_where(clauses)} "
+        "GROUP BY destination, horizon_days, carrier, departure_date "
+        "ORDER BY destination, horizon_days, carrier, departure_date",
+        params,
+    ).fetchall()
+    return [
+        FareSeriesPoint(
+            destination=str(row[0]),
+            horizon_days=int(row[1]),
+            carrier=str(row[2]),
+            departure_date=row[3],
+            price_eur=_money(Decimal(row[4])),
+        )
+        for row in rows
+    ]
+
+
 def airport_arbitrage(
     conn: duckdb.DuckDBPyConnection,
     *,
     break_even_eur: Decimal = DEFAULT_BREAK_EVEN_EUR,
     origin: Origin | None = None,
     observed_on: date | None = None,
+    carriers: Sequence[str] | None = None,
 ) -> list[ArbitrageRow]:
     """PRD F5: Lahore against Sialkot per departure date, versus the ground transfer.
 
     Only departure dates with a fare into *both* airports are returned: a spread needs
     two prices, and a date where one airport was simply never quoted would otherwise read
     as an infinite saving. Islamabad rides along for context and may be `None`."""
-    clauses, params = _scope("", origin, None, None)
+    clauses, params = _scope("", origin, None, None, carriers)
     if observed_on is not None:
         clauses.append("observed_on = ?")
         params.append(observed_on)
@@ -294,6 +368,7 @@ def wedding_premium(
     origin: Origin | None = None,
     destination: Destination | None = None,
     carrier: str | None = None,
+    carriers: Sequence[str] | None = None,
 ) -> WeddingPremium | None:
     """PRD F5: what departures in the wedding window cost over the Feb/March baseline.
 
@@ -305,7 +380,7 @@ def wedding_premium(
     about eleven days earlier each year and sits inside February/March for the rest of the
     decade, so the baseline is depressed and the premium reads a little high. Fixing it
     means choosing a different baseline in the PRD, not special-casing it here."""
-    clauses, params = _scope("f.", origin, destination, carrier)
+    clauses, params = _scope("f.", origin, destination, carrier, carriers)
     wedding_row = conn.execute(
         "SELECT sum(f.price_eur), count(*) FROM fare_observation f "
         "JOIN calendar_tag t ON t.date = f.departure_date AND t.tag = ?"
@@ -343,13 +418,14 @@ def carrier_efficiency(
     *,
     origin: Origin | None = None,
     destination: Destination | None = None,
+    carriers: Sequence[str] | None = None,
 ) -> list[CarrierEfficiency]:
     """PRD F5: euros per hour of total transit per carrier, cheapest hour first.
 
     The index is total euros over total hours, so a carrier is not rewarded for one short
     cheap hop among long ones; `avg_price_eur` and `avg_duration_hours` are reported
     beside it because the index alone cannot tell "cheap and slow" from "dear and fast"."""
-    clauses, params = _scope("", origin, destination, None)
+    clauses, params = _scope("", origin, destination, None, carriers)
     rows = conn.execute(
         "SELECT carrier, sum(price_eur), sum(duration_minutes), count(*) "
         f"FROM fare_observation{_where(clauses)} GROUP BY carrier",
