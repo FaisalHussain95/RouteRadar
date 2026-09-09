@@ -81,7 +81,12 @@ def test_installed_units_verify(installed: Install, unit: str) -> None:
         text=True,
     )
     assert result.returncode == 0, result.stdout + result.stderr
-    assert result.stderr == ""
+    # A host without a system bus (a CI runner, a container) prints one line about it
+    # before verifying the unit offline; that is the host's state, not a unit problem.
+    complaints = [
+        line for line in result.stderr.splitlines() if "Failed to connect to system bus" not in line
+    ]
+    assert complaints == []
 
 
 def test_rendering_leaves_no_placeholder(installed: Install) -> None:

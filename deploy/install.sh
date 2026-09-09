@@ -86,5 +86,5 @@ Installed. The timer fires daily at 06:30 Europe/Paris.
   stop scheduling     systemctl --user disable --now flight-detective-pipeline.timer
 
 If this user is not always logged in, the user manager needs lingering, or the timer
-only runs while a session is open:  sudo loginctl enable-linger $USER
+only runs while a session is open:  sudo loginctl enable-linger ${USER:-$(id -un)}
 TXT

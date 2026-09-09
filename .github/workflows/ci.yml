@@ -21,10 +21,15 @@ jobs:
         if: hashFiles('web/package.json') != ''
         with:
           node-version: 24
-          cache: pnpm
-          cache-dependency-path: web/pnpm-lock.yaml
       # tests/test_deploy.py runs `systemd-analyze --user verify` on the pipeline units. A
       # runner has no login session, so XDG_RUNTIME_DIR is unset and systemd-analyze fails
       # to initialise its user manager before it ever reads the unit; any short existing
       # directory satisfies it (long paths trip a socket-path length limit).
-      - run: mkdir -p /tmp/xdg && XDG_RUNTIME_DIR=/tmp/xdg bash scripts/check.sh
+      # On failure, surface the tail of the log as check annotations: those are readable
+      # through the public API, while the full job log needs a GitHub login.
+      - run: |
+          mkdir -p /tmp/xdg
+          if ! XDG_RUNTIME_DIR=/tmp/xdg bash scripts/check.sh 2>&1 | tee check.log; then
+            grep -vE '^\s*$' check.log | tail -n 12 | while IFS= read -r line; do echo "::error::${line}"; done
+            exit 1
+          fi
