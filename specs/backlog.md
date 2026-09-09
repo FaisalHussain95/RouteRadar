@@ -165,17 +165,17 @@ written up in `specs/architecture.md` § Decisions from S09.
 - [x] Each row has category, severity 1–3, source URL
 
 ## S11 — Analytics queries
-- status: todo
+- status: done
 - size: L
 
 `analytics/queries.py` implementing the five PRD F5 questions as functions over DuckDB,
 plus `fd report <question>` printing a table. Seed a test DB from fixtures.
 
-- [ ] Lowest-fare curve per carrier per departure month
-- [ ] LHE vs SKT spread with a `break_even_eur` parameter for ground transport
-- [ ] Lead-time curve bucketed by horizon and seasonal band
-- [ ] Wedding premium vs Feb/Mar baseline
-- [ ] Carrier efficiency index (EUR per hour of total duration)
+- [x] Lowest-fare curve per carrier per departure month
+- [x] LHE vs SKT spread with a `break_even_eur` parameter for ground transport
+- [x] Lead-time curve bucketed by horizon and seasonal band
+- [x] Wedding premium vs Feb/Mar baseline
+- [x] Carrier efficiency index (EUR per hour of total duration)
 
 ## S12 — Explanation layer
 - status: todo

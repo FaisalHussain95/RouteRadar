@@ -350,6 +350,75 @@ Decisions from S10 (2026-09-09):
 - `tests/conftest.py` exposes `gdelt_body(slug)` so the client, dedupe and pipeline tests
   all answer from the same four files.
 
+Decisions from S11 (2026-09-09):
+
+- `analytics/queries.py` is five read-only functions returning frozen dataclasses, one per
+  PRD F5 question; `cli.py` owns `fd report <question>` and the table rendering. The
+  records are dataclasses, not Pydantic: they never cross a boundary that needs
+  validating. S14 turns them into the JSON contract, which *is* a Pydantic model.
+- **`avg()` is never used.** DuckDB's `avg()` over a `DECIMAL` returns a `DOUBLE`, and a
+  float is what `models.Money` exists to keep out of a fare table. Every aggregate asks for
+  `sum(price_eur)` (exact `DECIMAL(38,2)`) and `count(*)` and divides in `Decimal`,
+  quantized to the cent with `ROUND_HALF_UP`. Ratios (the wedding multiplier, euros per
+  hour) divide the *sums*, so they carry one rounding rather than two.
+- Every question aggregates over all observation days, not the latest snapshot: the
+  lowest-fare curve is the cheapest the market ever showed, the arbitrage rows are the
+  cheapest way into each airport on a departure date. `airport_arbitrage(observed_on=)` is
+  the pin for "what does it cost today". All five take the same scope filters
+  (`origin`/`destination`/`carrier`, whichever apply) so a caller narrows instead of
+  re-querying.
+- **Lead times are bucketed to the *nearest* configured horizon**, not matched exactly: a
+  run that slips a day lands 13 or 15 days out, and a horizon added later shifts every
+  boundary. The SQL is a `CASE` over `days * 2 <= lo + hi`, integer arithmetic so the
+  midpoint is exact; a lead time exactly between two horizons goes to the shorter one.
+  Departures earlier than the day they were seen are dropped — only a backfill mistake
+  makes one, and they would all pile into the shortest bucket.
+- **A departure in two calendar windows contributes to both band curves.** That is what a
+  band curve means, and picking one tag per date would need a precedence order nothing in
+  the PRD supplies. Consequence: observation counts across bands sum to more than the
+  table. Untagged departures land in `UNTAGGED_BAND` (`off_peak`), which is the curve the
+  banded ones are read against, not a hole.
+- `airport_arbitrage` returns only departure dates with a fare into **both** LHE and SKT: a
+  spread needs two prices, and a date where one airport was never quoted would otherwise
+  read as an infinite saving. ISB rides along as context and may be `None`. The verdict is
+  `lhe`/`skt` when one airport wins by more than `break_even_eur` (default 34, the design's
+  `ground_transfer_eur`), else `either` — inside the transfer cost the choice is about
+  convenience, not money.
+- `wedding_premium` returns `None` when either side is empty: a premium against nothing is
+  unknown, not `1.00`, and `fd report` prints `no rows`. The baseline is **months**
+  (February/March), as the PRD words it, not "dates with no tag". Known drift: Ramadan is
+  cheap and moves ~11 days earlier a year, sitting inside Feb/March for the rest of the
+  decade, so the baseline is depressed and the premium reads a little high. Fixing that
+  means changing the baseline in the PRD, not special-casing it here.
+- The carrier efficiency index is total euros over total hours, not the mean of per-row
+  indices, so a carrier is not rewarded for one short cheap hop among long ones.
+  `avg_price_eur` and `avg_duration_hours` are reported beside it because the index alone
+  cannot tell "cheap and slow" from "dear and fast".
+- `fd report` prints a hand-rolled fixed-width table rather than pulling in `rich`, so the
+  output is byte-stable and the tests can assert on a row. `--break-even` is parsed from a
+  **string** into `Decimal`; a `float` option would put a float back into the money path.
+  `Decimal` also builds `NaN` and `Infinity` without complaint, and a `NaN` survives until
+  the spread comparison and surfaces as a traceback, so non-finite and negative amounts are
+  rejected at parse time. `--origin`/`--destination` are validated against
+  `get_args(Origin)`/`get_args(Destination)`. `--break-even` defaults to `None` and the
+  arbitrage branch substitutes `DEFAULT_BREAK_EVEN_EUR`, so the option can be checked like
+  the others; a real default would make "asked for" indistinguishable from "left alone".
+- **An option a question does not read is a usage error, not a no-op** (`cli.QUESTION_OPTIONS`).
+  `report arbitrage --destination LHE` would otherwise print a table with SKT and ISB
+  columns and an unfiltered verdict — a different question than the one asked, with no sign
+  that anything was ignored. The verdict boundary is inclusive on the "no advantage" side:
+  a spread exactly equal to `break_even_eur` reads `either`, because the drive has eaten
+  the whole saving.
+- **The analytics fixture is `tests/fixtures/analytics/fares.json`**, 21 hand-written
+  `fare_observation` rows over two observation days, loaded by `conftest.seed_analytics_db`
+  (fixtures `analytics_db_path` and `analytics_conn`). It is shaped so every F5 question has
+  a hand-checkable answer: LHE/SKT spreads either side of the break-even, lead times both on
+  and off the horizon grid, a departure in two calendar windows, wedding and Feb/March
+  departures, five carriers with different durations. Expected values in the tests are
+  literals worked out by hand — recomputing them from the fixture would only prove the test
+  agrees with itself. Calendar tags come from the real engine, so a window moving in
+  `calendar_engine` surfaces as a failing analytics test. S12 and S14 should seed from it too.
+
 ## The JSON contract (`dashboard.json`)
 
 Shaped by what the design's component consumes (see `specs/ux/design-system.md` § Data

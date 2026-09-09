@@ -1,0 +1,149 @@
+[
+  {
+    "observed_on": "2026-09-09", "departure_date": "2026-09-23",
+    "origin": "CDG", "destination": "ISB", "carrier": "QR",
+    "flight_numbers": ["QR40", "QR614"], "stops": 1, "layover_minutes": 120,
+    "duration_minutes": 840, "price_eur": 700, "provider": "fixture",
+    "raw_ref": "fixture:analytics#1"
+  },
+  {
+    "observed_on": "2026-09-09", "departure_date": "2026-09-23",
+    "origin": "CDG", "destination": "ISB", "carrier": "PK",
+    "flight_numbers": ["PK750"], "stops": 0, "layover_minutes": 0,
+    "duration_minutes": 540, "price_eur": 600, "provider": "fixture",
+    "raw_ref": "fixture:analytics#2"
+  },
+  {
+    "observed_on": "2026-09-09", "departure_date": "2026-09-23",
+    "origin": "CDG", "destination": "LHE", "carrier": "GF",
+    "flight_numbers": ["GF20", "GF790"], "stops": 1, "layover_minutes": 180,
+    "duration_minutes": 900, "price_eur": 520, "provider": "fixture",
+    "raw_ref": "fixture:analytics#3"
+  },
+  {
+    "observed_on": "2026-09-09", "departure_date": "2026-09-23",
+    "origin": "CDG", "destination": "SKT", "carrier": "GF",
+    "flight_numbers": ["GF20", "GF792"], "stops": 1, "layover_minutes": 200,
+    "duration_minutes": 900, "price_eur": 610, "provider": "fixture",
+    "raw_ref": "fixture:analytics#4"
+  },
+  {
+    "observed_on": "2026-09-09", "departure_date": "2026-10-09",
+    "origin": "CDG", "destination": "ISB", "carrier": "QR",
+    "flight_numbers": ["QR40", "QR614"], "stops": 1, "layover_minutes": 120,
+    "duration_minutes": 840, "price_eur": 660, "provider": "fixture",
+    "raw_ref": "fixture:analytics#5"
+  },
+  {
+    "observed_on": "2026-09-09", "departure_date": "2026-10-09",
+    "origin": "CDG", "destination": "LHE", "carrier": "GF",
+    "flight_numbers": ["GF20", "GF790"], "stops": 1, "layover_minutes": 180,
+    "duration_minutes": 900, "price_eur": 500, "provider": "fixture",
+    "raw_ref": "fixture:analytics#6"
+  },
+  {
+    "observed_on": "2026-09-09", "departure_date": "2026-10-09",
+    "origin": "CDG", "destination": "SKT", "carrier": "GF",
+    "flight_numbers": ["GF20", "GF792"], "stops": 1, "layover_minutes": 200,
+    "duration_minutes": 900, "price_eur": 480, "provider": "fixture",
+    "raw_ref": "fixture:analytics#7"
+  },
+  {
+    "observed_on": "2026-09-09", "departure_date": "2026-12-08",
+    "origin": "CDG", "destination": "ISB", "carrier": "QR",
+    "flight_numbers": ["QR40", "QR614"], "stops": 1, "layover_minutes": 120,
+    "duration_minutes": 840, "price_eur": 980, "provider": "fixture",
+    "raw_ref": "fixture:analytics#8"
+  },
+  {
+    "observed_on": "2026-09-09", "departure_date": "2026-12-08",
+    "origin": "CDG", "destination": "ISB", "carrier": "PK",
+    "flight_numbers": ["PK750"], "stops": 0, "layover_minutes": 0,
+    "duration_minutes": 540, "price_eur": 900, "provider": "fixture",
+    "raw_ref": "fixture:analytics#9"
+  },
+  {
+    "observed_on": "2026-09-09", "departure_date": "2026-12-08",
+    "origin": "CDG", "destination": "LHE", "carrier": "GF",
+    "flight_numbers": ["GF20", "GF790"], "stops": 1, "layover_minutes": 180,
+    "duration_minutes": 900, "price_eur": 940, "provider": "fixture",
+    "raw_ref": "fixture:analytics#10"
+  },
+  {
+    "observed_on": "2026-09-09", "departure_date": "2026-12-08",
+    "origin": "CDG", "destination": "SKT", "carrier": "GF",
+    "flight_numbers": ["GF20", "GF792"], "stops": 1, "layover_minutes": 200,
+    "duration_minutes": 900, "price_eur": 800, "provider": "fixture",
+    "raw_ref": "fixture:analytics#11"
+  },
+  {
+    "observed_on": "2026-09-09", "departure_date": "2026-12-08",
+    "origin": "ORY", "destination": "ISB", "carrier": "TK",
+    "flight_numbers": ["TK1828", "TK710"], "stops": 1, "layover_minutes": 240,
+    "duration_minutes": 890, "price_eur": 870, "provider": "fixture",
+    "raw_ref": "fixture:analytics#12"
+  },
+  {
+    "observed_on": "2026-09-09", "departure_date": "2026-12-20",
+    "origin": "CDG", "destination": "ISB", "carrier": "QR",
+    "flight_numbers": ["QR40", "QR614"], "stops": 1, "layover_minutes": 120,
+    "duration_minutes": 840, "price_eur": 1150, "provider": "fixture",
+    "raw_ref": "fixture:analytics#13"
+  },
+  {
+    "observed_on": "2026-09-09", "departure_date": "2027-01-07",
+    "origin": "CDG", "destination": "ISB", "carrier": "EK",
+    "flight_numbers": ["EK76", "EK614"], "stops": 1, "layover_minutes": 150,
+    "duration_minutes": 780, "price_eur": 1020, "provider": "fixture",
+    "raw_ref": "fixture:analytics#14"
+  },
+  {
+    "observed_on": "2026-09-09", "departure_date": "2027-01-07",
+    "origin": "CDG", "destination": "ISB", "carrier": "QR",
+    "flight_numbers": ["QR40", "QR614"], "stops": 1, "layover_minutes": 120,
+    "duration_minutes": 840, "price_eur": 1100, "provider": "fixture",
+    "raw_ref": "fixture:analytics#15"
+  },
+  {
+    "observed_on": "2026-09-09", "departure_date": "2026-10-11",
+    "origin": "CDG", "destination": "ISB", "carrier": "QR",
+    "flight_numbers": ["QR42", "QR616"], "stops": 1, "layover_minutes": 120,
+    "duration_minutes": 840, "price_eur": 700, "provider": "fixture",
+    "raw_ref": "fixture:analytics#16"
+  },
+  {
+    "observed_on": "2026-09-02", "departure_date": "2026-09-23",
+    "origin": "CDG", "destination": "ISB", "carrier": "QR",
+    "flight_numbers": ["QR40", "QR614"], "stops": 1, "layover_minutes": 120,
+    "duration_minutes": 840, "price_eur": 720, "provider": "fixture",
+    "raw_ref": "fixture:analytics#17"
+  },
+  {
+    "observed_on": "2026-09-02", "departure_date": "2027-02-01",
+    "origin": "CDG", "destination": "ISB", "carrier": "QR",
+    "flight_numbers": ["QR40", "QR614"], "stops": 1, "layover_minutes": 120,
+    "duration_minutes": 840, "price_eur": 620, "provider": "fixture",
+    "raw_ref": "fixture:analytics#18"
+  },
+  {
+    "observed_on": "2026-09-02", "departure_date": "2027-03-01",
+    "origin": "CDG", "destination": "ISB", "carrier": "QR",
+    "flight_numbers": ["QR40", "QR614"], "stops": 1, "layover_minutes": 120,
+    "duration_minutes": 840, "price_eur": 640, "provider": "fixture",
+    "raw_ref": "fixture:analytics#19"
+  },
+  {
+    "observed_on": "2026-09-02", "departure_date": "2027-03-01",
+    "origin": "CDG", "destination": "ISB", "carrier": "PK",
+    "flight_numbers": ["PK750"], "stops": 0, "layover_minutes": 0,
+    "duration_minutes": 540, "price_eur": 560, "provider": "fixture",
+    "raw_ref": "fixture:analytics#20"
+  },
+  {
+    "observed_on": "2026-09-02", "departure_date": "2027-03-01",
+    "origin": "CDG", "destination": "LHE", "carrier": "GF",
+    "flight_numbers": ["GF20", "GF790"], "stops": 1, "layover_minutes": 180,
+    "duration_minutes": 900, "price_eur": 480, "provider": "fixture",
+    "raw_ref": "fixture:analytics#21"
+  }
+]

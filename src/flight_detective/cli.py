@@ -1,17 +1,22 @@
 """Command-line entry point. Every subcommand added by a story is registered here."""
 
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from datetime import datetime, timedelta
+from decimal import Decimal, InvalidOperation
+from enum import StrEnum
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, cast, get_args
 from zoneinfo import ZoneInfo
 
+import duckdb
 import typer
 
 from flight_detective import __version__, db
+from flight_detective.analytics import queries
 from flight_detective.calendar_engine.tags import tags_for_range
 from flight_detective.config import load_settings
 from flight_detective.ingest import DEFAULT_HORIZONS, run_ingest
+from flight_detective.models import Destination, Origin
 from flight_detective.news.gdelt import MAX_DAYS, GdeltClient
 from flight_detective.news.ingest import DEFAULT_DAYS, run_news_ingest
 from flight_detective.providers.base import FareProvider, ProviderError
@@ -49,6 +54,10 @@ DbPathOption = Annotated[
         "--path", help="Database file; defaults to FD_DB_PATH or data/flight_detective.duckdb."
     ),
 ]
+
+# The scope airports, straight off the Literal types, so a new one is added in one place.
+ORIGINS: tuple[str, ...] = get_args(Origin)
+DESTINATIONS: tuple[str, ...] = get_args(Destination)
 
 app = typer.Typer(help="Flight Detective: fare tracking and explanation, CDG/ORY to ISB/LHE/SKT.")
 db_app = typer.Typer(help="Database maintenance.")
@@ -226,6 +235,267 @@ def ingest(
             typer.echo(f"  {line}", err=True)
         partial = failed < run.queries
         raise typer.Exit(code=EXIT_INGEST_PARTIAL if partial else EXIT_INGEST_FAILED)
+
+
+class Question(StrEnum):
+    """The five PRD F5 questions, as `fd report` names them."""
+
+    LOWEST_FARE = "lowest-fare"
+    ARBITRAGE = "arbitrage"
+    LEAD_TIME = "lead-time"
+    WEDDING_PREMIUM = "wedding-premium"
+    EFFICIENCY = "efficiency"
+
+
+# Which scope options each question actually reads. One it does not read is rejected
+# rather than ignored: `report arbitrage --destination LHE` would otherwise print a table
+# with SKT and ISB columns and an unfiltered verdict, i.e. answer a different question
+# than the one asked. Arbitrage compares destinations and takes whichever carrier is
+# cheapest into each; the efficiency index groups by carrier, so filtering to one is a
+# table of one row the caller can read off the full one. `--break-even` defaults to None
+# rather than to `DEFAULT_BREAK_EVEN_EUR` precisely so it can be checked here too: with a
+# real default there is no telling "asked for" from "left alone".
+QUESTION_OPTIONS: dict[Question, frozenset[str]] = {
+    Question.LOWEST_FARE: frozenset({"--origin", "--destination", "--carrier"}),
+    Question.ARBITRAGE: frozenset({"--origin", "--break-even"}),
+    Question.LEAD_TIME: frozenset({"--origin", "--destination", "--carrier"}),
+    Question.WEDDING_PREMIUM: frozenset({"--origin", "--destination", "--carrier"}),
+    Question.EFFICIENCY: frozenset({"--origin", "--destination"}),
+}
+
+
+def _euros(value: Decimal | None) -> str:
+    return "-" if value is None else f"{value:.2f}"
+
+
+def _print_table(headers: Sequence[str], rows: Sequence[Sequence[str]]) -> None:
+    """A fixed-width table on stdout. Hand-rolled rather than pulled from rich, so the
+    output is byte-stable and a test can assert on it."""
+    if not rows:
+        typer.echo("no rows")
+        return
+    widths = [max(len(header), *(len(row[i]) for row in rows)) for i, header in enumerate(headers)]
+
+    def line(cells: Sequence[str]) -> str:
+        # First column left, the rest right: everything after the label is a number.
+        return "  ".join(
+            cell.ljust(width) if i == 0 else cell.rjust(width)
+            for i, (cell, width) in enumerate(zip(cells, widths, strict=True))
+        )
+
+    typer.echo(line(headers))
+    typer.echo("  ".join("-" * width for width in widths))
+    for row in rows:
+        typer.echo(line(row))
+
+
+def _choice(value: str | None, allowed: tuple[str, ...], hint: str) -> str | None:
+    if value is not None and value not in allowed:
+        raise typer.BadParameter(f"{value!r}; choose from {', '.join(allowed)}", param_hint=hint)
+    return value
+
+
+def _break_even(value: str) -> Decimal:
+    """Parsed from a string, never a float: `Money` rejects floats for a reason.
+
+    `Decimal` happily builds `NaN` and `Infinity`, and a `NaN` only fails much later, on
+    the comparison inside `airport_arbitrage`, as a traceback rather than a usage error.
+    A negative transfer cost parses too and makes every spread a win, so the verdict
+    column stops meaning anything. Both are rejected here, where the message can name the
+    option."""
+    try:
+        amount = Decimal(value)
+    except InvalidOperation:
+        raise typer.BadParameter(f"{value!r} is not an amount", param_hint="--break-even") from None
+    if not amount.is_finite():
+        raise typer.BadParameter(f"{value!r} is not a finite amount", param_hint="--break-even")
+    if amount < 0:
+        raise typer.BadParameter(
+            "a ground transfer cannot cost less than 0", param_hint="--break-even"
+        )
+    return amount
+
+
+def _report_lowest_fare(conn: duckdb.DuckDBPyConnection, **scope: object) -> None:
+    points = queries.lowest_fare_curve(
+        conn,
+        origin=cast(Origin | None, scope["origin"]),
+        destination=cast(Destination | None, scope["destination"]),
+        carrier=cast(str | None, scope["carrier"]),
+    )
+    _print_table(
+        ("carrier", "month", "lowest_eur", "observations"),
+        [
+            (
+                p.carrier,
+                p.departure_month.strftime("%Y-%m"),
+                _euros(p.price_eur),
+                str(p.observations),
+            )
+            for p in points
+        ],
+    )
+
+
+def _report_arbitrage(
+    conn: duckdb.DuckDBPyConnection, break_even_eur: Decimal, **scope: object
+) -> None:
+    rows = queries.airport_arbitrage(
+        conn, break_even_eur=break_even_eur, origin=cast(Origin | None, scope["origin"])
+    )
+    _print_table(
+        ("departure", "lhe_eur", "skt_eur", "isb_eur", "spread_eur", "break_even_eur", "verdict"),
+        [
+            (
+                r.departure_date.isoformat(),
+                _euros(r.lhe_eur),
+                _euros(r.skt_eur),
+                _euros(r.isb_eur),
+                _euros(r.spread_eur),
+                _euros(r.break_even_eur),
+                r.verdict,
+            )
+            for r in rows
+        ],
+    )
+
+
+def _report_lead_time(conn: duckdb.DuckDBPyConnection, **scope: object) -> None:
+    points = queries.lead_time_curve(
+        conn,
+        origin=cast(Origin | None, scope["origin"]),
+        destination=cast(Destination | None, scope["destination"]),
+        carrier=cast(str | None, scope["carrier"]),
+    )
+    _print_table(
+        ("band", "horizon_days", "min_eur", "avg_eur", "observations"),
+        [
+            (
+                p.band,
+                str(p.horizon_days),
+                _euros(p.min_price_eur),
+                _euros(p.avg_price_eur),
+                str(p.observations),
+            )
+            for p in points
+        ],
+    )
+
+
+def _report_wedding_premium(conn: duckdb.DuckDBPyConnection, **scope: object) -> None:
+    premium = queries.wedding_premium(
+        conn,
+        origin=cast(Origin | None, scope["origin"]),
+        destination=cast(Destination | None, scope["destination"]),
+        carrier=cast(str | None, scope["carrier"]),
+    )
+    if premium is None:
+        # One empty side means the premium is unknown, not zero. Which side is empty is a
+        # question for `report lowest-fare` with the same filters, not for this table.
+        typer.echo("no rows")
+        return
+    _print_table(
+        (
+            "tag",
+            "wedding_eur",
+            "baseline_eur",
+            "multiplier",
+            "premium_pct",
+            "wedding_n",
+            "baseline_n",
+        ),
+        [
+            (
+                premium.tag,
+                _euros(premium.wedding_avg_eur),
+                _euros(premium.baseline_avg_eur),
+                _euros(premium.multiplier),
+                _euros(premium.premium_pct),
+                str(premium.wedding_observations),
+                str(premium.baseline_observations),
+            )
+        ],
+    )
+
+
+def _report_efficiency(conn: duckdb.DuckDBPyConnection, **scope: object) -> None:
+    rows = queries.carrier_efficiency(
+        conn,
+        origin=cast(Origin | None, scope["origin"]),
+        destination=cast(Destination | None, scope["destination"]),
+    )
+    _print_table(
+        ("carrier", "avg_price_eur", "avg_hours", "eur_per_hour", "observations"),
+        [
+            (
+                r.carrier,
+                _euros(r.avg_price_eur),
+                _euros(r.avg_duration_hours),
+                _euros(r.eur_per_hour),
+                str(r.observations),
+            )
+            for r in rows
+        ],
+    )
+
+
+@app.command()
+def report(
+    question: Annotated[Question, typer.Argument(help="Which PRD F5 question to answer.")],
+    origin: Annotated[
+        str | None, typer.Option("--origin", help=f"Limit to one origin: {', '.join(ORIGINS)}.")
+    ] = None,
+    destination: Annotated[
+        str | None,
+        typer.Option("--destination", help=f"Limit to one destination: {', '.join(DESTINATIONS)}."),
+    ] = None,
+    carrier: Annotated[
+        str | None, typer.Option("--carrier", help="Limit to one marketing carrier (IATA code).")
+    ] = None,
+    break_even: Annotated[
+        str | None,
+        typer.Option(
+            "--break-even",
+            help="Ground transfer cost in EUR, for arbitrage "
+            f"(default {queries.DEFAULT_BREAK_EVEN_EUR}).",
+        ),
+    ] = None,
+    path: DbPathOption = None,
+) -> None:
+    """Answer one of the five F5 questions from the stored observations, as a table.
+
+    An option a question does not use is a usage error, not a no-op: see QUESTION_OPTIONS.
+    An unanswerable question prints `no rows` rather than an empty table or a zero, and
+    every question tolerates an empty database."""
+    for hint, value in (
+        ("--origin", origin),
+        ("--destination", destination),
+        ("--carrier", carrier),
+        ("--break-even", break_even),
+    ):
+        if value is not None and hint not in QUESTION_OPTIONS[question]:
+            raise typer.BadParameter(f"{hint} does not apply to {question}", param_hint=hint)
+    scope = {
+        "origin": _choice(origin, ORIGINS, "--origin"),
+        "destination": _choice(destination, DESTINATIONS, "--destination"),
+        "carrier": carrier,
+    }
+    break_even_eur = (
+        queries.DEFAULT_BREAK_EVEN_EUR if break_even is None else _break_even(break_even)
+    )
+    with db.connect(_db_path(path)) as conn:
+        # A report on a database that predates a table should say "no rows", not crash.
+        db.init_schema(conn)
+        if question is Question.LOWEST_FARE:
+            _report_lowest_fare(conn, **scope)
+        elif question is Question.ARBITRAGE:
+            _report_arbitrage(conn, break_even_eur, **scope)
+        elif question is Question.LEAD_TIME:
+            _report_lead_time(conn, **scope)
+        elif question is Question.WEDDING_PREMIUM:
+            _report_wedding_premium(conn, **scope)
+        else:
+            _report_efficiency(conn, **scope)
 
 
 if __name__ == "__main__":
