@@ -35,11 +35,40 @@ else
   echo "note: systemd-analyze not found, units written unverified" >&2
 fi
 
-# The chain is only as complete as the stories that have landed. push-data.sh is its last
-# step, so its absence is the cheap tell that a scheduled run will still stop short.
-if [ ! -x "$REPO/deploy/push-data.sh" ]; then
-  echo "warning: deploy/push-data.sh does not exist yet, so a run stops before the" >&2
-  echo "         push (and before any step after the last one that exists)." >&2
+# The chain ends in a push, and the push needs a key this script deliberately does not
+# create: generating one is a command, but registering it and switching Pages on are
+# GitHub-UI actions, and half-doing that would leave a key nobody knows is trusted. So it
+# checks and prints, which is also the reminder for a box being set up from scratch.
+DEPLOY_KEY="${FD_DEPLOY_KEY:-$HOME/.ssh/flight-detective-deploy}"
+if [ ! -r "$DEPLOY_KEY" ]; then
+  cat >&2 <<TXT
+warning: no deploy key at $DEPLOY_KEY, so deploy/push-data.sh cannot
+         publish and the daily run will stop at its last step. To set it up:
+
+  ssh-keygen -t ed25519 -N '' -C 'flight-detective deploy' -f $DEPLOY_KEY
+
+  GitHub -> the repo -> Settings -> Deploy keys -> Add deploy key: paste
+  $DEPLOY_KEY.pub and tick "Allow write access".
+
+  GitHub -> the repo -> Settings -> Pages -> Source: "GitHub Actions".
+TXT
+fi
+
+# The other precondition push-data.sh enforces, and the only one that is shell-checkable:
+# it refuses to publish from a checkout parked on some other branch, because `git push
+# origin main` from there would carry every unrelated commit that branch happens to hold.
+# A box set up mid-development sits on a feature branch and would find this out at 06:30.
+BRANCH="${FD_BRANCH:-main}"
+# --quiet covers a detached HEAD; the redirect covers a box set up from an exported tarball
+# rather than a clone. Both end up here with nothing in $current, and "on ''" would read as
+# a bug in this script rather than as the thing it is trying to say.
+current="$(git -C "$REPO" symbolic-ref --quiet --short HEAD 2>/dev/null || true)"
+if [ -z "$current" ]; then
+  echo "warning: $REPO is not a git checkout sitting on a branch (detached HEAD, or not a" >&2
+  echo "         clone at all), so deploy/push-data.sh cannot publish: it needs '$BRANCH'." >&2
+elif [ "$current" != "$BRANCH" ]; then
+  echo "warning: this checkout is on '$current', and deploy/push-data.sh only publishes" >&2
+  echo "         from '$BRANCH'. Move it there (git switch $BRANCH) before the timer fires." >&2
 fi
 
 systemctl --user daemon-reload

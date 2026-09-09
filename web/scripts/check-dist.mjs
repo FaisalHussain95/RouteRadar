@@ -5,8 +5,10 @@
 //    stale by a reader; a hashed name makes a changed file a new URL, and index.html is the
 //    only thing that ever has to be re-fetched to see a new deploy.
 // 2. index.html points at those files under the configured base. The deploy is a Pages
-//    *project* site at /flight-detective/, so a build that silently fell back to `/` would
-//    produce a page whose every asset 404s — and it would look perfectly fine locally.
+//    *project* site, served from /<repo>/ — deploy-site.yml sets VITE_BASE from the
+//    repository name — so a build that silently fell back to `/`, or to the local default
+//    below, would produce a page whose every asset 404s, and it would look perfectly fine
+//    locally either way.
 //
 // Run from `pnpm build`, so CI enforces both rather than someone remembering to look.
 import { readdir, readFile } from "node:fs/promises";
@@ -15,7 +17,7 @@ import { fileURLToPath } from "node:url";
 
 const DIST = resolve(fileURLToPath(new URL("..", import.meta.url)), "dist");
 const HASHED = /-[A-Za-z0-9_-]{8,}\.[a-z0-9]+$/;
-const base = process.env.VITE_BASE ?? "/flight-detective/";
+const base = process.env.VITE_BASE ?? "/flight-detective/"; // the dev default, as in vite.config.ts
 
 const files = (await readdir(DIST, { recursive: true, withFileTypes: true })).filter((e) =>
   e.isFile(),

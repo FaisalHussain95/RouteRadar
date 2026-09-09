@@ -511,7 +511,9 @@ reader of the file needs.
   absolute `uv` path because systemd does not source the shell profile.
 - `deploy/push-data.sh` commits `data/site/dashboard.json` on `main` with the message
   `data: <observed_on>` and pushes with the deploy key. If the file is unchanged it exits 0
-  without committing. It never touches anything else in the tree.
+  without committing. It never touches anything else in the tree. `FD_REMOTE`, `FD_BRANCH`
+  and `FD_DEPLOY_KEY` override the three defaults; see § Decisions from S16 for what it
+  refuses to do and why.
 - `deploy-site.yml` builds on that push and deploys to Pages; `ci.yml` runs the checks on
   every push and PR.
 - Secrets: `SERPAPI_KEY` in `.env` (git-ignored), read by `config.py`. Never in code or
@@ -669,3 +671,40 @@ reader of the file needs.
   (`gen`, `lint`, `typecheck`, `test`, `build`), `gen` first so a lint never passes against
   yesterday's types. It fails loudly when `pnpm` is missing rather than skipping them: nvm
   lives in the shell profile, so a non-login shell has to source it.
+
+## Decisions from S16 (2026-09-09)
+
+- **`push-data.sh` refuses rather than guesses.** It runs unattended at 06:30 in a checkout
+  a human also edits, so it stages one path and stops if anything else is already staged —
+  committing on top of someone's staged work would publish it, and there is no safe reading
+  of what they meant. It also stops if HEAD is not the branch it pushes: `git push origin
+  main` from a checkout parked on another branch publishes every unrelated commit on it.
+  Both refusals happen before the commit, along with the missing-key and missing-export
+  checks, so a refusal never leaves a dangling commit for the next run to reason about.
+- **A failed push keeps the commit.** The next run stacks its own on top and pushes both,
+  so a night without a network costs nothing. The case this cannot repair is a remote that
+  has moved on: a rejected non-fast-forward needs a human, and re-running will keep failing
+  the same way until it gets one. Deliberately no auto-rebase — unattended history rewriting
+  on the branch that feeds the deploy is worse than a loud stall.
+- **`IdentitiesOnly=yes` is the half of the deploy key that matters.** Without it `ssh -i`
+  is a preference: ssh still offers every key the agent holds, and the push authenticates
+  as whoever happens to be logged in on the box. The key is scoped to this repo; the human's
+  `~/.ssh/id_ed25519` is not, and it is also the key that reaches the TV.
+- **Commits are authored by `flight-detective bot`** via `git -c user.name=…`, not a config
+  write, so the checkout's own identity is untouched and `git log` still separates the timer's
+  commits from a human's at a glance.
+- **The Pages base path comes from the repository name at build time.** `deploy-site.yml`
+  sets `VITE_BASE: /${{ github.event.repository.name }}/`, because Vite bakes the prefix into
+  every asset URL and a project site is served from `/<repo>/` — the previous arrangement
+  relied on `vite.config.ts`'s `/flight-detective/` default, which does not match this repo
+  (`RouteRadar`) and would have deployed an `index.html` whose every asset 404s. The default
+  in `vite.config.ts` stays as the local one for `pnpm dev`/`vite preview`.
+- **The GitHub-side steps are not automatable and are not pretended to be.** Registering the
+  deploy key with write access, and setting Pages' source to "GitHub Actions", are UI
+  actions; `deploy/install.sh` prints both when the key is missing and README § Publishing
+  records them. See S16's `### Blocked` note in the backlog for what that leaves unverified.
+- **The push tests use a stub `ssh` that runs the remote command locally** against an
+  on-disk bare repo, so the deploy-key wiring is asserted on a push that really succeeded,
+  with no network and no key that exists anywhere. `tests/test_push_data.py` also hand-parses
+  `deploy-site.yml`'s `paths:` list rather than adding a YAML dependency to assert on six
+  lines we wrote.

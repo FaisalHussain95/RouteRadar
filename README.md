@@ -67,10 +67,38 @@ site can build before the first pipeline run. The shape is described by
 `fd export-schema` and committed; regenerate it whenever the model changes. The write is a
 temp file plus a rename, so a reader never sees a half-written export.
 
-**The chain is not end-to-end yet.** `deploy/push-data.sh` (S16) does not exist, so a
-scheduled run today stores fares, calendar tags and news, writes the dashboard JSON, and
-then stops at that last step with a usage error. Installing now gets the daily ingest and
-the export running; the push starts working when that lands, with no change to the unit.
+### Publishing
+
+`deploy/push-data.sh` is the last step and the only thing here that pushes. It stages
+`data/site/dashboard.json` and nothing else, refuses to run if anything else is already
+staged, and commits as `flight-detective bot` with the message `data: <observed_on>` —
+then pushes `main`. An export identical to yesterday's makes no commit, and no commit is
+what stops the site rebuilding for nothing.
+
+It publishes from `main` and refuses from anywhere else — pushing a branch you are not
+standing on carries every unrelated commit on it — so **the box's checkout has to sit on
+`main`**, not on a feature branch. `deploy/install.sh` warns when it does not. `FD_BRANCH`,
+`FD_REMOTE` and `FD_DEPLOY_KEY` override the three defaults for a rehearsal.
+
+The push uses a deploy key scoped to this repo, `~/.ssh/flight-detective-deploy`, with
+`IdentitiesOnly=yes` so ssh cannot fall back to a personal key. `deploy/install.sh` prints
+how to create it and register it; the two GitHub-side steps are manual, since neither can
+be done from a shell:
+
+- the repo → **Settings → Deploy keys → Add deploy key**, the `.pub` contents, **Allow
+  write access** ticked;
+- the repo → **Settings → Pages → Source: "GitHub Actions"**.
+
+That push triggers `.github/workflows/deploy-site.yml`, which builds `web/` and deploys to
+Pages. It runs on `web/**` and on the exported JSON only, so a commit that touches just
+pipeline code or specs rebuilds nothing. The deployment swaps atomically and a failed build
+leaves the previous one serving, which is the zero-downtime requirement in `specs/prd.md`
+F8 without a server of our own.
+
+The site is at **<https://faisalhussain95.github.io/RouteRadar/>**. Pages serves a project
+site from `/<repo>/` and Vite bakes that prefix into every asset URL, so the workflow sets
+`VITE_BASE` from the repository name; the local default in `web/vite.config.ts` is only for
+`pnpm dev` and `vite preview`.
 
 ### Watching it
 

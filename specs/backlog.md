@@ -352,7 +352,7 @@ Machado matrices, because the skill lives outside the repo. They matched exactly
 `scripts/validate_palette.js` rather than trusting the copy.
 
 ## S16 — Data push and Pages deploy
-- status: todo
+- status: doing
 - size: S
 
 The workflows already exist (`.github/workflows/ci.yml`, `deploy-site.yml`). This story
@@ -365,21 +365,61 @@ push `main` over the deploy key (`GIT_SSH_COMMAND` pointing at
 `deploy/install.sh` prints the deploy-key steps (generate, add to the repo with write
 access) rather than doing them; that needs the GitHub UI.
 
-- [ ] `push-data.sh` twice with the same JSON commits once (second run prints "unchanged")
-- [ ] With another file modified in the tree, the script commits only the JSON
+- [x] `push-data.sh` twice with the same JSON commits once (second run prints "unchanged")
+- [x] With another file modified in the tree, the script commits only the JSON
 - [ ] `deploy-site.yml` runs on a JSON-only commit and on a `web/**` commit, and not on a
       pipeline-code-only commit (check the Actions runs, note the run URLs in the story)
 - [ ] Pages is enabled with source "GitHub Actions"; the deployed URL is recorded in
       `README.md`
 - [ ] A polling loop against the Pages URL during a deploy never gets a 404
 
-Note from S14: `fd export-site` now exists and writes the JSON, so the chain stops only at
-`push-data.sh`. README § Scheduled pipeline still carries a narrowed "not end-to-end yet"
-paragraph naming just this story; delete it when the script lands.
+Note from S14 (done): `fd export-site` writes the JSON and `push-data.sh` now publishes it,
+so the chain is complete on the box side.
 
-Note from S09: `deploy/install.sh` warns that `deploy/push-data.sh` does not exist yet, and
-`tests/test_deploy.py::test_install_warns_that_the_last_step_of_the_chain_is_missing` skips
-itself once it does. Delete both when the script lands here, along with README § Scheduled
-pipeline's "The chain is not end-to-end yet" paragraph if S10 and S14 are also done. The
-script is called as `$REPO/deploy/push-data.sh` from `run-pipeline.sh`, with the repo as the
-working directory, and must be executable.
+Note from S09 (done): `deploy/install.sh`'s "does not exist yet" warning, the test that
+skipped itself on it, and README's "not end-to-end yet" paragraph are all deleted. The
+installer now warns about a missing deploy key instead, and README has a § Publishing.
+
+### Blocked
+
+The box side is complete and tested: `deploy/push-data.sh` exists, is executable, and
+`tests/test_push_data.py` covers the two script criteria plus its refusals, the bot
+identity, the `data: <observed_on>` message and the deploy-key flags (over a stub `ssh`
+that runs the remote command against a local bare repo, so no network).
+
+The last three criteria cannot be closed from here, and not for want of trying — each one
+needs an action only the repository owner can take in the GitHub UI:
+
+1. **The deploy key is not registered.** `~/.ssh/flight-detective-deploy` does not exist on
+   this box, and creating it is only half the job: the public half has to be added to
+   `FaisalHussain95/RouteRadar` → Settings → Deploy keys with **Allow write access**. Until
+   then `push-data.sh` refuses at its precondition check, by design.
+2. **Pages is not switched on**, or at least nothing here can see that it is. Settings →
+   Pages → Source: **"GitHub Actions"**. Without it `deploy-pages` fails at the deploy job.
+3. **Nothing has been pushed to `main`.** This work is on `dev`, twelve commits ahead of
+   `origin/dev`, and this session does not push. So there are no Actions runs to record URLs
+   for and no live Pages URL to poll.
+
+What is verified locally in place of criterion 3: `test_only_the_site_and_its_data_trigger_a_
+rebuild` checks `deploy-site.yml`'s `paths:` list against nine representative changed files,
+including a pipeline-code-only and a specs-only commit. That is the filter's logic, not a
+real Actions run, and does not substitute for one.
+
+Also found and fixed here, because it would have made criterion 5 fail on assets: the build
+had no `VITE_BASE`, so it fell back to `vite.config.ts`'s `/flight-detective/` while the repo
+is `RouteRadar`. `deploy-site.yml` now sets it from `github.event.repository.name`. Verified
+locally that `VITE_BASE=/RouteRadar/ pnpm build` emits `/RouteRadar/assets/…` and passes
+`check-dist.mjs`.
+
+**To finish this story**, someone with repo access does 1 and 2 above, merges `dev` to `main`
+and pushes, **and moves this box's own checkout to `main`** — it is on `dev`, and
+`push-data.sh` refuses from there, so without that step the first timed run after this story
+closes still publishes nothing (`deploy/install.sh` warns about it, and re-running the
+installer after switching is the check). Then: notes the two Actions run URLs (one from the `web/**` commit that merge
+carries, one from the next `data:` commit), confirms a pipeline-code-only commit produced no
+run, records the Pages URL — `https://faisalhussain95.github.io/RouteRadar/` — and polls it
+through a deploy (`while :; do curl -o /dev/null -sw '%{http_code}\n' <url>; sleep 1; done`)
+to confirm no 404. Then tick the last three boxes and set `status: done`.
+
+The script is called as `$REPO/deploy/push-data.sh` from `run-pipeline.sh`, with the repo as
+the working directory, and must be executable.

@@ -42,6 +42,12 @@ jobs:
         working-directory: web
       - run: pnpm gen && pnpm lint && pnpm typecheck && pnpm test && pnpm build
         working-directory: web
+        env:
+          # Pages serves a project site from /<repo>/, and Vite bakes that prefix into every
+          # asset URL at build time, so a base that does not match the repo name deploys an
+          # index.html whose scripts all 404. Reading it off the event rather than hardcoding
+          # it keeps the deploy correct through a rename or a fork.
+          VITE_BASE: /${{ github.event.repository.name }}/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

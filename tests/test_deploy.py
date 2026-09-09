@@ -89,15 +89,6 @@ def test_rendering_leaves_no_placeholder(installed: Install) -> None:
         assert "@" not in installed.unit(unit)
 
 
-def test_install_warns_that_the_last_step_of_the_chain_is_missing(installed: Install) -> None:
-    # deploy/push-data.sh is S16's. Until it lands the installer must say so, or the
-    # timer looks like it publishes a dashboard when it stops one step short. The test
-    # retires itself with the warning it checks.
-    if (DEPLOY / "push-data.sh").exists():
-        pytest.skip("S16 has landed: the chain is complete and there is nothing to warn about")
-    assert "push-data.sh does not exist yet" in installed.output
-
-
 # --- Acceptance: the service pins the absolute uv path --------------------------------
 
 
@@ -274,9 +265,6 @@ def test_provider_and_horizons_can_be_overridden_by_the_unit(
 def test_readme_documents_the_journal_and_the_search_budget() -> None:
     readme = REPO.joinpath("README.md").read_text()
     assert "journalctl --user -u flight-detective-pipeline" in readme
-    # Installing today schedules a run that stops at the first step a story has not
-    # written yet; the README must not read as if the chain were complete.
-    assert "not end-to-end yet" in readme
     # The default grid is 36 searches a day; the number a reader needs before enabling
     # the timer is what that costs per month against SerpApi's plans.
     assert "36 searches" in readme
