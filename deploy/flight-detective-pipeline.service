@@ -1,0 +1,32 @@
+# Daily pipeline, one oneshot run of deploy/run-pipeline.sh.
+#
+# This file is a template: deploy/install.sh replaces the two placeholders below with
+# the repo and uv paths of the machine it runs on, and writes the result into
+# ~/.config/systemd/user/. They cannot be committed, because uv lives in ~/.local/bin
+# here and /usr/bin elsewhere, and systemd needs both spelled out — it searches no PATH
+# and sources no shell profile.
+[Unit]
+Description=Flight Detective daily pipeline (ingest, tag, news, export, push)
+Documentation=file://@REPO@/README.md
+
+[Service]
+Type=oneshot
+# `fd ingest --provider serpapi` reads SERPAPI_KEY from `.env` in the working directory,
+# and every default path in config.py (data/flight_detective.duckdb, data/site/) is
+# repo-relative.
+WorkingDirectory=@REPO@
+Environment=FD_UV=@UV@
+# Persistent=true can fire this seconds after boot, before the bridge has a lease, and
+# the whole run is network calls (SerpApi, GDELT, a git push). A *user* manager has no
+# network-online.target to order on — `systemctl --user show network-online.target` says
+# not-found — so the wait is on the system manager finishing boot instead, which on this
+# box includes NetworkManager-wait-online. `-` because a degraded boot (one unrelated
+# failed unit) is not a reason to skip the day. Nothing here waits forever: for a oneshot,
+# TimeoutStartSec below covers this and the run together, so a system manager stuck in
+# `activating` fails the unit rather than hanging it — at the cost of the run's budget.
+ExecStartPre=-/usr/bin/systemctl is-system-running --wait
+ExecStart=@REPO@/deploy/run-pipeline.sh
+# 36 SerpApi searches, each retried once on a 5xx, plus GDELT: minutes, not tens of
+# them. A run still going after this is wedged, and the next day's must not queue behind
+# it.
+TimeoutStartSec=30min

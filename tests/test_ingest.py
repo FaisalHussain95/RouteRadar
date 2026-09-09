@@ -197,7 +197,8 @@ def test_run_ingest_returns_the_same_counts_it_stores(isolated_db_path: Path) ->
 def test_provider_error_is_recorded_and_exit_is_non_zero(isolated_db_path: Path) -> None:
     # Horizon 30 lands on 2027-01-05, which has no fixture: six FixtureMissing errors.
     result = runner.invoke(app, BASE_ARGS + ["--horizons", "14,30"])
-    assert result.exit_code == 1, result.output
+    # 3, not 1: half the grid answered and was stored (S09; see cli.EXIT_INGEST_PARTIAL).
+    assert result.exit_code == cli.EXIT_INGEST_PARTIAL, result.output
     runs = ingest_runs(isolated_db_path)
     assert len(runs) == 1
     _, _, queries, kept, dropped, error = runs[0]
@@ -282,7 +283,8 @@ def test_ingest_defaults_to_today_and_all_horizons(
     empty.mkdir()
     monkeypatch.setitem(cli.PROVIDERS, "fake", lambda: FakeFareProvider(empty))
     result = runner.invoke(app, ["ingest", "--provider", "fake"])
-    assert result.exit_code == 1
+    # Nothing answered, so this is a failed run, not a partial one.
+    assert result.exit_code == cli.EXIT_INGEST_FAILED
     runs = ingest_runs(isolated_db_path)
     assert len(runs) == 1
     assert runs[0][2] == 36
@@ -353,7 +355,7 @@ def test_multi_line_provider_messages_are_flattened_to_one_line_each(
     )
     monkeypatch.setitem(cli.PROVIDERS, "fake", lambda: FakeFareProvider(directory))
     result = runner.invoke(app, BASE_ARGS + ["--horizons", "14"])
-    assert result.exit_code == 1, result.output
+    assert result.exit_code == cli.EXIT_INGEST_PARTIAL, result.output
     runs = ingest_runs(isolated_db_path)
     error = runs[0][5]
     assert error is not None
@@ -361,3 +363,21 @@ def test_multi_line_provider_messages_are_flattened_to_one_line_each(
     assert error.startswith("CDG->ISB 2026-12-20: fare fixture ")
     assert "not valid" in error
     assert "1 of 6 queries failed" in result.output
+
+
+# --- S09: the exit codes deploy/run-pipeline.sh reads ---------------------------------
+
+
+def test_a_partial_run_and_a_total_failure_have_different_exit_codes(
+    isolated_db_path: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # The daily chain continues past a partial ingest and stops on a failed one, so the
+    # two must be distinguishable from the outside. Both are non-zero: a run with any
+    # missing cell is still a failure to a human reading the journal.
+    empty = tmp_path / "no-fixtures"
+    empty.mkdir()
+    monkeypatch.setitem(cli.PROVIDERS, "nothing", lambda: FakeFareProvider(empty))
+    total = runner.invoke(app, ["ingest", "--provider", "nothing", "--horizons", "14"])
+    partial = runner.invoke(app, BASE_ARGS + ["--horizons", "14,30"])
+    assert (total.exit_code, partial.exit_code) == (1, 3)
+    assert (cli.EXIT_INGEST_FAILED, cli.EXIT_INGEST_PARTIAL) == (1, 3)

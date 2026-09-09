@@ -119,7 +119,7 @@ step, documented in the module docstring) and test the mapping against it.
 - [x] Rate/quota errors are surfaced, not swallowed
 
 ## S09 — Scheduled pipeline on the host
-- status: todo
+- status: done
 - size: S
 
 `deploy/flight-detective-pipeline.{service,timer}` for `~/.config/systemd/user/`: oneshot
@@ -127,10 +127,10 @@ running `fd ingest && fd tag-dates && fd news-ingest && fd export-site &&
 deploy/push-data.sh` daily at 06:30 Europe/Paris. `deploy/install.sh` copies and enables.
 Commands that do not exist yet are fine to list: the unit is validated, not run, here.
 
-- [ ] `systemd-analyze --user verify` passes on both units
-- [ ] Service pins the absolute `uv` path (systemd does not source the shell profile)
-- [ ] A failing step stops the chain (`&&`), so nothing is pushed after a failed ingest
-- [ ] README section on `journalctl --user -u flight-detective-pipeline`
+- [x] `systemd-analyze --user verify` passes on both units
+- [x] Service pins the absolute `uv` path (systemd does not source the shell profile)
+- [x] A failing step stops the chain (`&&`), so nothing is pushed after a failed ingest
+- [x] README section on `journalctl --user -u flight-detective-pipeline`
 
 Note from S08: `fd ingest --provider serpapi` reads `SERPAPI_KEY` from the process
 environment or from `.env` in the working directory, so the unit needs `WorkingDirectory=`
@@ -145,6 +145,12 @@ the queries that answered were stored. Chained as `fd ingest && fd tag-dates && 
 missing cell would skip the export for the day, which is the opposite of what the PRD's
 "< 2 % missing cells" metric wants. Decide here whether the unit chains with `;`, or
 ingest grows an exit code that distinguishes "partial" from "nothing stored".
+
+Decided: `fd ingest` exits 3 for a partial run and 1 when nothing was gathered, and
+`deploy/run-pipeline.sh` continues past 3 and only 3; everything after the ingest stays an
+`&&` chain. The search budget stays at the PRD's 36 a day, which needs a paid SerpApi plan;
+README § What it costs has the numbers and the drop-in that shrinks the grid. Both are
+written up in `specs/architecture.md` § Decisions from S09.
 
 ## S10 — GDELT news ingestion
 - status: todo
@@ -257,3 +263,10 @@ access) rather than doing them; that needs the GitHub UI.
 - [ ] Pages is enabled with source "GitHub Actions"; the deployed URL is recorded in
       `README.md`
 - [ ] A polling loop against the Pages URL during a deploy never gets a 404
+
+Note from S09: `deploy/install.sh` warns that `deploy/push-data.sh` does not exist yet, and
+`tests/test_deploy.py::test_install_warns_that_the_last_step_of_the_chain_is_missing` skips
+itself once it does. Delete both when the script lands here, along with README § Scheduled
+pipeline's "The chain is not end-to-end yet" paragraph if S10 and S14 are also done. The
+script is called as `$REPO/deploy/push-data.sh` from `run-pipeline.sh`, with the repo as the
+working directory, and must be executable.

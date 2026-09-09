@@ -1,0 +1,19 @@
+# Fires the pipeline daily. Installed by deploy/install.sh; see README.md § Scheduled
+# pipeline for enabling it and for reading the journal afterwards.
+[Unit]
+Description=Daily Flight Detective pipeline run at 06:30 Europe/Paris
+
+[Timer]
+# The timezone is written out rather than left to the host's: the schedule is "before
+# the household is up in Paris", and DST must move it with the clock there.
+OnCalendar=*-*-* 06:30:00 Europe/Paris
+# The box is never asleep (it is the TV's uplink) but it does get rebooted; a run missed
+# while it was down happens at the next start instead of being skipped for the day.
+Persistent=true
+# Nothing here is urgent to the second, and every fare API on earth is quieter when the
+# world's timers are not all aligned to :00.
+RandomizedDelaySec=5min
+AccuracySec=1min
+
+[Install]
+WantedBy=timers.target

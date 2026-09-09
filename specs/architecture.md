@@ -246,6 +246,32 @@ Decisions from S08 (2026-09-09):
   1 100 a month, well above SerpApi's free tier (a few hundred; see
   https://serpapi.com/pricing), so the timer (S09) needs a paid plan or fewer horizons.
 
+Decisions from S09 (2026-09-09):
+
+- The daily chain lives in `deploy/run-pipeline.sh`, not in `ExecStart=`. `ExecStart` has
+  no shell, so a `&&` chain there would need `/bin/sh -c '…'` anyway, and a script can be
+  tested: `tests/test_deploy.py` runs it with a stub `uv` and a stub `push-data.sh` and
+  asserts which steps did *not* run after a failure.
+- **`fd ingest` now exits 3 for a partial run** (some route × horizon queries failed, the
+  rest were stored), 1 when every query failed, 2 for a configuration error. This is the
+  S07 note's open question, decided: `run-pipeline.sh` continues past 3 and only 3, so one
+  dead cell does not cost the day's export, while a provider that answered nothing stops
+  the run before `push-data.sh`. S07's "exits non-zero" still holds for both.
+- The units are **templates**: `deploy/install.sh` substitutes `@REPO@` and `@UV@` and
+  writes `~/.config/systemd/user/`. The absolute `uv` path has to be in the unit (systemd
+  sources no profile) and cannot be committed — `~/.local/bin/uv` here, `/usr/bin/uv` in
+  CI. `install.sh` runs `systemd-analyze --user verify` on what it wrote, so a bad path
+  fails at install time rather than silently at 06:30.
+- `OnCalendar` names `Europe/Paris` explicitly rather than inheriting the host timezone,
+  and the timer is `Persistent=true` (a run missed across a reboot happens at next start)
+  with `RandomizedDelaySec=5min`.
+- Grid size is `FD_HORIZONS`/`FD_PROVIDER` in the service's environment, defaulting to the
+  PRD's six horizons: 36 searches a day, ~1 100 a month, which needs a paid SerpApi plan.
+  Overrides go in a `systemctl --user edit` drop-in, not in the unit: `install.sh`
+  re-renders the unit from the template every run. README § What it costs has the numbers.
+- `install.sh` never sudoes. `loginctl enable-linger` is printed as a hint; on this box the
+  auto-logged-in gaming session keeps the user manager alive anyway.
+
 ## The JSON contract (`dashboard.json`)
 
 Shaped by what the design's component consumes (see `specs/ux/design-system.md` § Data
@@ -276,9 +302,11 @@ Written with `tmp + os.replace` so a reader never sees a partial file.
 ## Operational
 
 - `flight-detective-pipeline.service` (oneshot, user unit under `~/.config/systemd/user/`,
-  mirroring how `cloudgaming-panel.service` is run) runs `fd ingest && fd tag-dates &&
-  fd news-ingest && fd export-site && deploy/push-data.sh`;
-  `flight-detective-pipeline.timer` fires it daily at 06:30 Europe/Paris. It pins the
+  mirroring how `cloudgaming-panel.service` is run) runs `deploy/run-pipeline.sh`, which is
+  `fd ingest`, then `fd tag-dates && fd news-ingest && fd export-site &&
+  deploy/push-data.sh`. The ingest is deliberately outside the `&&` chain: its exit 3
+  (partial) continues, 1 and 2 stop the run. See § Decisions from S09.
+  `flight-detective-pipeline.timer` fires it daily at 06:30 Europe/Paris. The unit pins the
   absolute `uv` path because systemd does not source the shell profile.
 - `deploy/push-data.sh` commits `data/site/dashboard.json` on `main` with the message
   `data: <observed_on>` and pushes with the deploy key. If the file is unchanged it exits 0

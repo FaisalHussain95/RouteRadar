@@ -18,6 +18,12 @@ from flight_detective.providers.serpapi import SerpApiFareProvider
 
 PARIS = ZoneInfo("Europe/Paris")
 
+# `fd ingest` exit codes. 1 means nothing was gathered and 3 means some cells failed and
+# the rest were stored; deploy/run-pipeline.sh tolerates 3 and only 3, because the PRD
+# budgets < 2 % missing cells and a day with a few holes is still worth exporting.
+EXIT_INGEST_FAILED = 1
+EXIT_INGEST_PARTIAL = 3
+
 # A year covers the longest ingest horizon (180 days) and the dashboard's 11-month series
 # with room to spare, and re-tagging a year is milliseconds.
 DEFAULT_TAG_SPAN = timedelta(days=365)
@@ -150,8 +156,9 @@ def ingest(
     path: DbPathOption = None,
 ) -> None:
     """Query every route at every horizon, store the in-scope fares, and log the run.
-    Idempotent for a given observation date. Exits 1 if any query failed; the queries
-    that answered are stored regardless."""
+    Idempotent for a given observation date. The queries that answered are stored
+    whatever the others did; the exit code says how much of the grid that was: 3 if some
+    queries failed, 1 if all of them did."""
     try:
         horizon_list = _parse_horizons(horizons)
     except typer.BadParameter as exc:
@@ -178,7 +185,8 @@ def ingest(
         typer.echo(f"{failed} of {run.queries} queries failed:", err=True)
         for line in run.error.splitlines():
             typer.echo(f"  {line}", err=True)
-        raise typer.Exit(code=1)
+        partial = failed < run.queries
+        raise typer.Exit(code=EXIT_INGEST_PARTIAL if partial else EXIT_INGEST_FAILED)
 
 
 if __name__ == "__main__":
