@@ -16,7 +16,7 @@ from pathlib import Path
 
 import duckdb
 
-from flight_detective.models import CalendarTag, FareObservation, IngestRun
+from flight_detective.models import CalendarTag, FareObservation, IngestRun, NewsEvent
 
 SCHEMA: tuple[str, ...] = (
     """
@@ -101,6 +101,31 @@ _FARE_UPSERT = f"""
 """
 
 _TAG_COLUMNS = ("date", "tag", "multiplier_low", "multiplier_high")
+
+_NEWS_COLUMNS = (
+    "event_date",
+    "category",
+    "severity",
+    "headline",
+    "source_url",
+    "dedupe_key",
+    "impact_note",
+)
+
+# `dedupe_key` is the primary key, so re-ingesting a window that still contains an
+# incident refreshes its row (a later article can add a source domain to `impact_note`)
+# instead of adding a second marker to the chart.
+_NEWS_UPSERT = f"""
+    INSERT INTO news_event ({", ".join(_NEWS_COLUMNS)})
+    VALUES ({", ".join("?" for _ in _NEWS_COLUMNS)})
+    ON CONFLICT DO UPDATE SET
+        event_date = excluded.event_date,
+        category = excluded.category,
+        severity = excluded.severity,
+        headline = excluded.headline,
+        source_url = excluded.source_url,
+        impact_note = excluded.impact_note
+"""
 
 _RUN_COLUMNS = ("run_at", "provider", "queries", "rows_kept", "rows_dropped", "error")
 
@@ -230,3 +255,44 @@ def fetch_ingest_runs(conn: duckdb.DuckDBPyConnection) -> list[IngestRun]:
         f"SELECT {', '.join(_RUN_COLUMNS)} FROM ingest_run ORDER BY run_at, provider"
     ).fetchall()
     return [IngestRun.model_validate(dict(zip(_RUN_COLUMNS, row, strict=True))) for row in result]
+
+
+def upsert_news_events(conn: duckdb.DuckDBPyConnection, events: Iterable[NewsEvent]) -> int:
+    """Insert-or-update events by `dedupe_key`. Returns the number of rows written."""
+    rows = [
+        (
+            event.event_date,
+            event.category,
+            event.severity,
+            event.headline,
+            event.source_url,
+            event.dedupe_key,
+            event.impact_note,
+        )
+        for event in events
+    ]
+    if not rows:
+        return 0
+    conn.executemany(_NEWS_UPSERT, rows)
+    return len(rows)
+
+
+def fetch_news_events(
+    conn: duckdb.DuckDBPyConnection, start: date | None = None, end: date | None = None
+) -> list[NewsEvent]:
+    """Events in `start..end` inclusive (either end open when None), newest day first."""
+    where = []
+    params: list[date] = []
+    if start is not None:
+        where.append("event_date >= ?")
+        params.append(start)
+    if end is not None:
+        where.append("event_date <= ?")
+        params.append(end)
+    clause = f" WHERE {' AND '.join(where)}" if where else ""
+    result = conn.execute(
+        f"SELECT {', '.join(_NEWS_COLUMNS)} FROM news_event{clause} "
+        "ORDER BY event_date DESC, dedupe_key",
+        params,
+    ).fetchall()
+    return [NewsEvent.model_validate(dict(zip(_NEWS_COLUMNS, row, strict=True))) for row in result]

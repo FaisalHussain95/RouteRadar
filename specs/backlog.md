@@ -153,16 +153,16 @@ README § What it costs has the numbers and the drop-in that shrinks the grid. B
 written up in `specs/architecture.md` § Decisions from S09.
 
 ## S10 — GDELT news ingestion
-- status: todo
+- status: done
 - size: M
 
 `news/gdelt.py` client for the GDELT DOC 2.0 API using the three taxonomy groups
 (regulatory, airspace/disruption, pilgrimage/visas); `news/dedupe.py`; `fd news-ingest
 --days 7`. Severity heuristic documented in code.
 
-- [ ] Fixture-based tests for parsing and dedupe (same incident, two outlets → one row)
-- [ ] Re-ingesting the same window is idempotent
-- [ ] Each row has category, severity 1–3, source URL
+- [x] Fixture-based tests for parsing and dedupe (same incident, two outlets → one row)
+- [x] Re-ingesting the same window is idempotent
+- [x] Each row has category, severity 1–3, source URL
 
 ## S11 — Analytics queries
 - status: todo

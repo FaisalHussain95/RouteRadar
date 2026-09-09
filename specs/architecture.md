@@ -75,6 +75,7 @@ calendar_engine/
 news/
   gdelt.py          GDELT DOC 2.0 client with the taxonomy queries
   dedupe.py         One row per incident (title similarity + same day)
+  ingest.py         run_news_ingest(): taxonomy queries, dedupe, severity, upsert, log
 analytics/
   queries.py        The five F5 questions as functions returning records
   explain.py        F6: tags + nearby events for a fare row
@@ -271,6 +272,83 @@ Decisions from S09 (2026-09-09):
   re-renders the unit from the template every run. README § What it costs has the numbers.
 - `install.sh` never sudoes. `loginctl enable-linger` is printed as a hint; on this box the
   auto-logged-in gaming session keeps the user manager alive anyway.
+
+Decisions from S10 (2026-09-09):
+
+- The module map's `news/` gained a third file: `news/gdelt.py` is the DOC 2.0 client,
+  `news/dedupe.py` the incident grouping, and **`news/ingest.py`** the pipeline
+  (`run_news_ingest`) plus the severity heuristic — the same split as `providers/` and the
+  top-level `ingest.py`, so `cli.py` stays option-parsing and printing.
+- **The taxonomy is four queries, not eleven.** Brainstorming §3's phrases are OR-ed into
+  one request per group; `"EASA" "PIA"` is its own query because GDELT will not mix an
+  implicit AND with an OR group at the same level. Each `TaxonomyQuery` carries a `slug`
+  that names its fixture, so adding a group is one row plus one file.
+- **`timespan=<n>d`, not an explicit datetime range.** `--days` means "what GDELT has seen
+  in the last N days", which keeps the clock out of the request and out of the fixtures.
+  DOC 2.0 only indexes a rolling three months, so `--days` is capped at 90.
+- **`event_date` is the Paris date of GDELT's `seendate`.** `artlist` offers nothing
+  closer to when the incident happened, and for a disruption the two are hours apart; Paris
+  because every other date here is Paris-local and S12 joins events to fares on that
+  calendar.
+- **Dedupe is same-day plus title similarity, nothing cleverer.** GDELT gives no cluster
+  id in `artlist`; Event Registry, which does, stays the PRD's open question.
+- **Similarity is Jaccard overlap of content words, not character similarity.**
+  `difflib.SequenceMatcher` over normalised titles was the first attempt and is recorded in
+  `news/dedupe.py` as a trap: two *different* incidents one salient word apart score 0.79–
+  0.92 as strings ("… Paris flights" vs "… Lahore flights", "… to Indian carriers" vs "… to
+  all carriers", "EASA bans PIA" vs "EASA lifts ban on PIA"), i.e. above any threshold that
+  still merges a genuine reword. Dropping a short list of function words and comparing the
+  remaining word *sets* puts those pairs at 0.57–0.67 and real duplicates at 0.83–1.00, so
+  `SIMILARITY_THRESHOLD = 0.75` sits in a wide gap. "all" is deliberately not a function
+  word. False splits are preferred to false merges: a duplicate marker is cosmetic, a false
+  merge deletes an event and files the survivor under the wrong headline.
+- `dedupe_key` is `<event_date>:<slug of the canonical title>-<sha256[:8]>`, and the
+  canonical article is the earliest `(seen_at, url)` in the group — candidates are sorted
+  before grouping so the key does not depend on GDELT's listing order. Known limitation:
+  a rolling window eventually drops the canonical article and the same incident then gets a
+  new key and a second row. Accepted; the alternative is fuzzy-matching every new incident
+  against the whole table.
+- **Severity 1–3 is a keyword heuristic on the headline**, documented in `news/ingest.py`:
+  3 for capacity gone (closure, ban, suspension, grounding, strike, war), 2 for capacity
+  strained (delays, disruption, cancellations, quota cuts, reroutes), 1 for everything else
+  the taxonomy caught. Matching is word-bounded on the normalised title, highest band wins,
+  and the matching keyword goes into `impact_note` so a surprising severity is traceable.
+  Like the calendar multipliers these are inputs to revise from data, not conclusions.
+- **The scale reads direction.** Half of what the regulatory taxonomy catches is a
+  restriction being undone — "EASA *lifts* its ban", "airspace reopened", "strike called
+  off" — carrying the same band-3 keyword as the event it reverses. A `REVERSAL_CUES` word
+  anywhere in a band-3 headline demotes the row to 1 and names the cue in `impact_note`:
+  the scale measures capacity *lost*, and a maximum-severity marker on a fare drop is worse
+  for S12 than no marker. Band 2 is left alone; reading direction into a delay would
+  over-fit. `severity_for` returns a `Severity(level, keyword, reversed_by)` rather than a
+  bare int so the demotion is inspectable.
+- **The cue list holds only verbs with no other sense**, because the demotion goes straight
+  from 3 to 1 and a false demotion is as bad as the bug it fixes. "end"/"ends" and "revoked"
+  were tried and removed — "closure extended to the *end* of October", "strike *ends* its
+  third day", "suspends flights after its licence was *revoked*" are all live capacity
+  losses. Requiring the cue to sit next to the keyword does not rescue them ("strike ends"
+  is adjacent and still wrong), so the list is kept narrow instead;
+  `tests/test_news_ingest.py::test_an_ambiguous_word_does_not_demote_a_live_capacity_loss`
+  pins all four.
+- **`fd news-ingest` exits 1 only when every taxonomy query failed.** A dead query is one
+  line in `ingest_run.error` and a warning on stderr; the run still stores what answered and
+  exits 0. `deploy/run-pipeline.sh` chains it with `&&`, and news is context around the
+  fares rather than the dataset, so one flaky free-API query must not cost the day's export.
+  A totally unreachable GDELT does stop the chain — nothing new would be exported anyway.
+- News runs are logged to `ingest_run` under provider `gdelt`: `queries` is the number of
+  taxonomy queries, `rows_kept` the incidents written, `rows_dropped` the articles that
+  collapsed into an existing incident. Reusing the table is what makes "the pilgrimage
+  query has quietly stopped matching anything" visible.
+- The committed fixtures in `tests/fixtures/gdelt/` are **hand-written** to the documented
+  `artlist` shape, not recordings like the SerpApi one: what a live taxonomy query returns
+  depends on the week it runs, so a recording would date immediately.
+  `python -m flight_detective.news.gdelt [DAYS] [DIR]` records real ones over them (free,
+  no key) and the parsing tests read whatever is in the files. Unlike `providers/fake.py`,
+  the client does *not* know where the test tree is: nothing reads these fixtures at run
+  time, so the path lives in the recorder's `_main` (relative to the working directory) and
+  in `tests/conftest.py`.
+- `tests/conftest.py` exposes `gdelt_body(slug)` so the client, dedupe and pipeline tests
+  all answer from the same four files.
 
 ## The JSON contract (`dashboard.json`)
 

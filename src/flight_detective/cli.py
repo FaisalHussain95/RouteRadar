@@ -12,6 +12,8 @@ from flight_detective import __version__, db
 from flight_detective.calendar_engine.tags import tags_for_range
 from flight_detective.config import load_settings
 from flight_detective.ingest import DEFAULT_HORIZONS, run_ingest
+from flight_detective.news.gdelt import MAX_DAYS, GdeltClient
+from flight_detective.news.ingest import DEFAULT_DAYS, run_news_ingest
 from flight_detective.providers.base import FareProvider, ProviderError
 from flight_detective.providers.fake import FakeFareProvider
 from flight_detective.providers.serpapi import SerpApiFareProvider
@@ -23,6 +25,12 @@ PARIS = ZoneInfo("Europe/Paris")
 # budgets < 2 % missing cells and a day with a few holes is still worth exporting.
 EXIT_INGEST_FAILED = 1
 EXIT_INGEST_PARTIAL = 3
+
+# `fd news-ingest` fails only when *every* taxonomy query died. News is context around the
+# fares rather than the dataset, and deploy/run-pipeline.sh chains it with `&&`: one flaky
+# free-API query must not cost the day's export, while GDELT being wholly unreachable is
+# worth stopping for, since nothing new would be exported anyway.
+EXIT_NEWS_FAILED = 1
 
 # A year covers the longest ingest horizon (180 days) and the dashboard's 11-month series
 # with room to spare, and re-tagging a year is milliseconds.
@@ -106,6 +114,37 @@ def tag_dates(
         written = db.replace_calendar_tags(conn, start, end, tags)
     dates = len({t.date for t in tags})
     typer.echo(f"tagged {start}..{end}: {dates} dates, {written} rows")
+
+
+@app.command("news-ingest")
+def news_ingest(
+    days: Annotated[
+        int,
+        typer.Option("--days", help=f"How many days of GDELT coverage to pull (1-{MAX_DAYS})."),
+    ] = DEFAULT_DAYS,
+    path: DbPathOption = None,
+) -> None:
+    """Pull disruption news through the GDELT taxonomy, collapse duplicate coverage of one
+    incident into one row, and store it. Idempotent: rows land on their dedupe key."""
+    if not 1 <= days <= MAX_DAYS:
+        raise typer.BadParameter(
+            f"GDELT's DOC 2.0 archive covers the last {MAX_DAYS} days", param_hint="--days"
+        )
+    with db.connect(_db_path(path)) as conn:
+        db.init_schema(conn)
+        result = run_news_ingest(conn, GdeltClient(), days=days)
+    run = result.run
+    typer.echo(
+        f"news for the last {days} days: {run.queries} queries, "
+        f"{run.rows_kept} events, {run.rows_dropped} duplicates collapsed"
+    )
+    if run.error is not None:
+        failed = run.error.count("\n") + 1
+        typer.echo(f"{failed} of {run.queries} taxonomy queries failed:", err=True)
+        for line in run.error.splitlines():
+            typer.echo(f"  {line}", err=True)
+        if failed == run.queries:
+            raise typer.Exit(code=EXIT_NEWS_FAILED)
 
 
 def _parse_horizons(value: str) -> list[int]:

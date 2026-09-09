@@ -12,7 +12,7 @@ static dashboard.
 
 ```
 uv sync                   install / update the environment
-uv run fd --help          the CLI: db init, tag-dates, ingest, …
+uv run fd --help          the CLI: db init, tag-dates, ingest, news-ingest, …
 bash scripts/check.sh     definition of done: format, lint, mypy --strict, pytest
 ```
 
@@ -47,11 +47,18 @@ Re-run it after moving the repo or changing `uv`. It never uses sudo; if this us
 always logged in, the user manager needs `sudo loginctl enable-linger $USER` or the timer
 only runs while a session is open.
 
-**The chain is not end-to-end yet.** `fd news-ingest` (S10), `fd export-site` (S14) and
-`deploy/push-data.sh` (S16) do not exist, so a scheduled run today stores fares and
-calendar tags and then stops at the first missing step with a usage error. Installing now
-gets the daily ingest running; the export and the push start working when those land, with
-no change to the unit.
+`fd news-ingest` is the one step that tolerates its own partial failure: it pulls the
+four GDELT taxonomy queries (brainstorming §3), collapses duplicate coverage of one
+incident into one `news_event` row, and only fails the command when *every* query died.
+News is context around the fares, not the dataset, so one flaky query on a free API must
+not cost the day's export. GDELT needs no key and no quota; the courtesy pause between
+queries makes the step take about 20 seconds.
+
+**The chain is not end-to-end yet.** `fd export-site` (S14) and `deploy/push-data.sh`
+(S16) do not exist, so a scheduled run today stores fares, calendar tags and news and
+then stops at the first missing step with a usage error. Installing now gets the daily
+ingest running; the export and the push start working when those land, with no change to
+the unit.
 
 ### Watching it
 
@@ -66,11 +73,13 @@ systemctl --user disable --now flight-detective-pipeline.timer
 
 Each step prints a timestamped `run-pipeline:` line, so the journal says which step a
 failure came from; `fd ingest` also lists every failed cell on stderr, and the same
-counts are in the `ingest_run` table.
+counts are in the `ingest_run` table — `fd news-ingest` logs there too, under provider
+`gdelt`, so a taxonomy query that has quietly stopped matching anything shows up as a run
+with `rows_kept = 0`.
 
 ### What it costs
 
-The default grid is 6 routes × 6 horizons = **36 searches** per day, about 1 100 a month.
+Only the fare ingest costs money; GDELT is free. The default grid is 6 routes × 6 horizons = **36 searches** per day, about 1 100 a month.
 That is well past SerpApi's free tier and needs a paid plan — check the current tiers at
 <https://serpapi.com/pricing>. To spend less, override the grid in a drop-in rather than
 editing the script or the unit, which `install.sh` rewrites every time it runs:
