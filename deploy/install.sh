@@ -4,7 +4,8 @@
 #
 # It never uses sudo. These are user units, and the one thing that does need root —
 # `loginctl enable-linger`, so the user manager survives a logout — is printed rather
-# than done, because on this box the gaming session keeps that manager up anyway.
+# than done: on a VPS it is a one-off `loginctl enable-linger <user>`, and on a desktop
+# the logged-in session keeps that manager up anyway.
 set -euo pipefail
 
 REPO="$(cd "$(dirname "$0")/.." && pwd)"

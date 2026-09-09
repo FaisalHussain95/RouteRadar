@@ -76,7 +76,7 @@ then pushes `main`. An export identical to yesterday's makes no commit, and no c
 what stops the site rebuilding for nothing.
 
 It publishes from `main` and refuses from anywhere else — pushing a branch you are not
-standing on carries every unrelated commit on it — so **the box's checkout has to sit on
+standing on carries every unrelated commit on it — so **the pipeline host's checkout has to sit on
 `main`**, not on a feature branch. `deploy/install.sh` warns when it does not. `FD_BRANCH`,
 `FD_REMOTE` and `FD_DEPLOY_KEY` override the three defaults for a rehearsal.
 

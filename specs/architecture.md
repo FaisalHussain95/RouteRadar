@@ -5,7 +5,7 @@ Lead-tech decisions. Dev sessions follow these without re-deciding them. Change 
 ## Shape: two apps, one contract
 
 ```
- [ pipeline ]  Python, runs daily on this box              [ site ]  static, built in CI
+ [ pipeline ]  Python, runs daily on the VPS               [ site ]  static, built in CI
  fd ingest → fd tag-dates → fd news-ingest → fd export-site
                                               │
                                               ▼
@@ -35,8 +35,8 @@ Decisions this encodes (2026-09-09):
 - **Deployment is a directory.** `web/dist/` is plain files. Pages is the chosen host
   because it needs no server and no secrets beyond the repo itself; moving to Cloudflare
   Pages or the box's nginx changes only the last workflow step.
-- **The box needs push rights.** A deploy key limited to this repo, in
-  `~/.ssh/flight-detective-deploy` on the box, used only by `deploy/push-data.sh`.
+- **The pipeline host needs push rights.** A deploy key limited to this repo, in
+  `~/.ssh/flight-detective-deploy` on the VPS, used only by `deploy/push-data.sh`.
 
 ## Stack
 
@@ -100,7 +100,7 @@ fixtures/             dashboard.json + build.py, the committed fallback data
 scripts/              gen-types.mjs (`pnpm gen`), check-dist.mjs (part of `pnpm build`)
 ```
 
-`deploy/`: systemd units for the box, `push-data.sh`, `install.sh`.
+`deploy/`: systemd units for the pipeline host, `push-data.sh`, `install.sh`.
 
 ## Data model (pipeline)
 
@@ -282,8 +282,8 @@ Decisions from S09 (2026-09-09):
   PRD's six horizons: 36 searches a day, ~1 100 a month, which needs a paid SerpApi plan.
   Overrides go in a `systemctl --user edit` drop-in, not in the unit: `install.sh`
   re-renders the unit from the template every run. README § What it costs has the numbers.
-- `install.sh` never sudoes. `loginctl enable-linger` is printed as a hint; on this box the
-  auto-logged-in gaming session keeps the user manager alive anyway.
+- `install.sh` never sudoes. `loginctl enable-linger` is printed as a hint; on the VPS it
+  was run once for root, since nothing else keeps a user manager alive there.
 
 Decisions from S10 (2026-09-09):
 
@@ -502,6 +502,13 @@ reader of the file needs.
 
 ## Operational
 
+**Host (since 2026-09-09): the VPS `root@n1.realezio.com`**, Ubuntu 24.04, UTC clock. The
+repo is checked out at `/root/flight-detective` on `main`; `.env`, the DuckDB file and the
+deploy key live there. It replaced the `cloudgaming` TV box, whose timer is disabled, so
+that the pipeline does not depend on a living-room appliance and so that only one host
+ever spends the SerpApi quota. Everything below applies to whichever host runs it.
+
+
 - `flight-detective-pipeline.service` (oneshot, user unit under `~/.config/systemd/user/`,
   mirroring how `cloudgaming-panel.service` is run) runs `deploy/run-pipeline.sh`, which is
   `fd ingest`, then `fd tag-dates && fd news-ingest && fd export-site &&
@@ -517,7 +524,7 @@ reader of the file needs.
 - `deploy-site.yml` builds on that push and deploys to Pages; `ci.yml` runs the checks on
   every push and PR.
 - Secrets: `SERPAPI_KEY` in `.env` (git-ignored), read by `config.py`. Never in code or
-  specs. The site build has no secrets at all; the deploy key is on the box only.
+  specs. The site build has no secrets at all; the deploy key is on the VPS only.
 - `data/site/dashboard.json` is the **one tracked file under `data/`**; `.gitignore`
   keeps the DuckDB file and everything else out.
 
@@ -688,8 +695,8 @@ reader of the file needs.
   on the branch that feeds the deploy is worse than a loud stall.
 - **`IdentitiesOnly=yes` is the half of the deploy key that matters.** Without it `ssh -i`
   is a preference: ssh still offers every key the agent holds, and the push authenticates
-  as whoever happens to be logged in on the box. The key is scoped to this repo; the human's
-  `~/.ssh/id_ed25519` is not, and it is also the key that reaches the TV.
+  as whoever happens to be logged in on the host. The key is scoped to this repo; a personal
+  `~/.ssh/id_ed25519` is not.
 - **Commits are authored by `flight-detective bot`** via `git -c user.name=…`, not a config
   write, so the checkout's own identity is untouched and `git log` still separates the timer's
   commits from a human's at a glance.

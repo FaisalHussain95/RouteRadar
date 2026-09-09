@@ -423,3 +423,22 @@ to confirm no 404. Then tick the last three boxes and set `status: done`.
 
 The script is called as `$REPO/deploy/push-data.sh` from `run-pipeline.sh`, with the repo as
 the working directory, and must be executable.
+
+## S17 — GDELT resilience
+- status: todo
+- size: S
+
+The first real runs (2026-09-09, from two different hosts) got HTTP 429 from GDELT on
+nearly every query, even a trivial one-word query at 20 s spacing, so the 5 s courtesy
+interval is not what is being enforced. The pipeline degrades correctly (0 events, run
+logged with the errors) but the news layer is empty until this is handled.
+
+- [ ] `GdeltClient` retries a 429 with exponential backoff (e.g. 15 s, 45 s, 135 s, capped,
+      3 attempts) before giving up on that query; tested with an injected sleep
+- [ ] A run where every query 429s still exits 0 from `fd news-ingest` and the pipeline,
+      but `ingest_run.error` says so in one line and the dashboard shows the events feed
+      as "news unavailable since <date>" rather than empty (contract field + web change)
+- [ ] `specs/architecture.md` records the measured behaviour and names the fallback to
+      evaluate next if backoff is not enough: the GDELT GKG files on their public CDN (no
+      API, no throttle) or Event Registry (paid)
+
