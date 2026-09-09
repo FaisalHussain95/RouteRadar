@@ -160,9 +160,12 @@ above reports only the worst all-pairs figures and will not warn you.
    `● Updated today 04:00 CET · Daily cron ingest` — the timestamp comes from
    `generated_at`.
 2. **Filter bar**: Origin (fixed, display-only `CDG / ORY`), Destination segmented
-   control `ISB · LHE · SKT · All`, Carrier chips (toggle, colour dot with glow when on),
-   Booking horizon segmented control `14d … 180d`. Selected segment: accent-tinted
-   background `rgba(145,132,217,0.16)`, inset 1px accent ring, `--color-accent-300` text.
+   control `ISB · LHE · SKT · All`, Carrier chips (toggle, colour dot with glow when on).
+   Selected segment: accent-tinted background `rgba(145,132,217,0.16)`, inset 1px accent
+   ring, `--color-accent-300` text. The design also draws a Booking horizon segmented
+   control `14d … 180d`; the site **does not build it** (decided 2026-09-09). A daily ingest
+   prices one departure date per horizon, so a horizon filter left each carrier with one
+   dot per observed day and no curve; the chart draws every horizon together instead.
 3. **Main grid** `minmax(0,1fr) 320px`:
    - **Fare chart card**: title "Lowest fare by carrier", mono route, subtitle; 340px plot;
      calendar bands as vertical gradients (`color22 → color0d`, 1px `color40` edges) with

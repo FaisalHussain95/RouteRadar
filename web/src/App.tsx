@@ -24,18 +24,8 @@ import type { DashboardData, Event } from "./types";
  * differently — and none of them may print a `€0` or a `+0%` instead. */
 const WAITING = "Waiting for the first ingest";
 
-/** 60d is the design's default: far enough out to have a curve, near enough to book. But a
- * young database has not filled every cell of the grid yet, and opening on an empty chart
- * reads as "the site is broken" rather than as "that horizon has no fares" — so the default
- * falls through to the first horizon that has any, and only then back to 60. */
 function initialFilters(data: DashboardData): Filters {
-  const destination = data.destinations[0]?.code ?? "ISB";
-  const priced = (horizon: number) =>
-    data.series.some(
-      (s) => s.horizon_days === horizon && s.destination === destination && s.points.length > 0,
-    );
-  const horizon = priced(60) ? 60 : (data.horizons.find(priced) ?? 60);
-  return { destination, horizon, hiddenCarriers: new Set() };
+  return { destination: data.destinations[0]?.code ?? "ISB", hiddenCarriers: new Set() };
 }
 
 export function App({ data, now }: { data: DashboardData; now?: Date }) {

@@ -43,13 +43,14 @@ describe("the page, from the committed fixture", () => {
     expect(screen.getByText("CDG → PK-NORTH")).toBeInTheDocument();
     expect(screen.getByText(/Max 1 Stop/)).toBeInTheDocument();
 
-    // Filter bar: origin, three destinations plus the computed All, six carriers, six horizons.
+    // Filter bar: origin, three destinations plus the computed All, six carriers. No booking
+    // horizon: the chart draws every horizon at once (see `Filters` in lib/select.ts).
     expect(screen.getByText("Paris · fixed")).toBeInTheDocument();
     const dests = within(screen.getByRole("group", { name: "Destination" })).getAllByRole("button");
     expect(dests.map((b) => b.textContent)).toEqual(["ISB", "LHE", "SKT", "All · compare"]);
     expect(within(screen.getByRole("group", { name: "Carriers" })).getAllByRole("button")).toHaveLength(6);
-    const horizons = within(screen.getByRole("group", { name: "Booking horizon" })).getAllByRole("button");
-    expect(horizons.map((b) => b.textContent)).toEqual(["14d", "30d", "60d", "90d", "120d", "180d"]);
+    expect(screen.queryByRole("group", { name: "Booking horizon" })).toBeNull();
+    expect(screen.queryByText("60d")).toBeNull();
 
     // Chart: bands from the calendar engine, a line per carrier, a pin per event.
     expect(screen.getByRole("heading", { name: "Lowest fare by carrier" })).toBeInTheDocument();
@@ -85,7 +86,7 @@ describe("the page, from the committed fixture", () => {
     const user = userEvent.setup();
     show();
 
-    // ISB at 14d is PIA and Qatar; Lahore at 14d is Gulf Air alone.
+    // Islamabad is priced by PIA among others; Lahore by Gulf Air alone.
     const hasPoints = (code: string) =>
       (document.querySelector(`[data-testid='series-${code}']`)?.getAttribute("d") ?? "") !== "";
     expect(hasPoints("PK")).toBe(true);
@@ -99,9 +100,6 @@ describe("the page, from the committed fixture", () => {
     await user.click(within(screen.getByRole("group", { name: "Carriers" })).getByRole("button", { name: /Gulf Air/ }));
     expect(document.querySelector("[data-testid='series-GF']")).toBeNull();
     expect(screen.getByTestId("legend-carrier-GF")).toHaveStyle({ opacity: "0.4" });
-
-    await user.click(screen.getByRole("button", { name: "90d" }));
-    expect(screen.getByRole("button", { name: "90d" })).toHaveAttribute("aria-pressed", "true");
   });
 });
 
@@ -144,13 +142,13 @@ describe("empty states", () => {
     expect(screen.getByRole("button", { name: "SKT" })).toHaveAttribute("aria-pressed", "true");
   });
 
-  it("blames the horizon when the data is there but the filter selects nothing", async () => {
+  it("blames the destination when the data is there but nothing prices this one", async () => {
     const user = userEvent.setup();
-    show();
-    await user.click(screen.getByRole("button", { name: "60d" }));
+    show({ ...FIXTURE, series: FIXTURE.series.filter((s) => s.destination !== "SKT") });
+    await user.click(screen.getByRole("button", { name: "SKT" }));
 
     expect(screen.getByTestId("chart-empty-no-combination")).toHaveTextContent(
-      "No fares for Islamabad at 60d — try another horizon",
+      "No fares for Sialkot yet — try another destination",
     );
     expect(screen.queryByTestId("chart-empty-no-data-yet")).toBeNull();
     // The axes, bands and pins stay: it is a gap in one cell, not an empty page.

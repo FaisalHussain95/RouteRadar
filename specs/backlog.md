@@ -252,7 +252,8 @@ region by region using the tokens in `design-system.md`. `src/types.ts` generate
 
 - [x] Header, filter bar, fare chart (bands, series, pins, hover card), event feed,
       three modules, event drawer all render from the fixture and match the design
-- [x] Filters (destination, carriers, horizon) work client-side with no fetch
+- [x] Filters (destination, carriers, horizon) work client-side with no fetch — the
+      horizon filter was removed on 2026-09-09; see `architecture.md` § Decisions from S15
 - [x] **Carrier legend** (from S13): the legend row under the plot gains six line keys —
       a short stroke in `--carrier-<code>` plus the IATA code — before the existing band and
       news-pin keys. The design's row names no carrier, so without this the only
@@ -276,7 +277,8 @@ region by region using the tokens in `design-system.md`. `src/types.ts` generate
 - [x] **"No data for this combination" empty state** (from S13): distinct from the above —
       `series` is non-empty but the active destination × horizon × carrier filter selects
       nothing. The chart keeps its axes, bands and pins and shows `No fares for
-      <dest> at <horizon>d — try another horizon`; with every carrier chip toggled off it
+      <dest> yet — try another destination` (was `… at <horizon>d — try another horizon`
+      until the horizon filter went); with every carrier chip toggled off it
       shows `All carriers hidden` instead. The two messages must not be interchangeable:
       one is a gap in the data, the other is the reader's own filter
 - [x] **Per-region empty states** (from S13): a null `arbitrage`, `seasonal_gauge`, or an

@@ -103,23 +103,6 @@ export function FilterBar({
         </div>
       </div>
 
-      <div className="filter-group">
-        <div className="filter-label" id="horizon-label">
-          Booking horizon
-        </div>
-        <div className="segmented" role="group" aria-labelledby="horizon-label">
-          {data.horizons.map((h) => (
-            <button
-              key={h}
-              type="button"
-              aria-pressed={filters.horizon === h}
-              onClick={() => onChange({ ...filters, horizon: h })}
-            >
-              {h}d
-            </button>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }

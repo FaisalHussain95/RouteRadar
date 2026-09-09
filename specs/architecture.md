@@ -647,15 +647,21 @@ ever spends the SerpApi quota. Everything below applies to whichever host runs i
 - **The chart's x axis is the export window** (`generated_at` −90d to +365d, mirrored from
   `export/site.py` in `lib/select.ts`), not the extent of the data. Series, bands and events
   are all clipped to that window by the export, so the axis is stable: toggling a chip or a
-  horizon does not rescale time under the reader, and the bands still span a year on a plot
+  destination does not rescale time under the reader, and the bands still span a year on a plot
   with two fares on it. Fares are drawn as a path *and* a dot per point, because a carrier
   with one observation has no line.
 - **The efficiency scatter computes its axes**; the design hardcodes €480–€1100 and 7h–17h,
   which are its fake model's range, and a real dot outside that box lands on the card title.
-- **`initialFilters` opens on a horizon that has fares** — 60d when it has any, else the
-  first that does. The design defaults to 60d, but a young database has not filled every
-  cell of the grid, and opening on the "no fares for this combination" message reads as a
-  broken site rather than as a gap in one cell.
+- **The chart draws every horizon together; there is no horizon filter** (2026-09-09,
+  replacing the design's `14d … 180d` control and an `initialFilters` that hunted for a
+  horizon with fares). A daily ingest prices exactly one departure date per horizon, so
+  filtering to one horizon left each carrier with one dot per observed day and no curve —
+  the chart's question is what a departure on a date costs, and the horizon is how that
+  fare was found, not what it is. `seriesFor` collapses horizons to the cheapest fare per
+  departure date, the same way `ALL` collapses destinations; a date seen at 60d and again
+  at 30d keeps the lower. The export contract is untouched: `series[]` stays keyed by
+  horizon (the lead-time curve and the analytics still need it) and `horizons[]` is now
+  reference data the page does not read.
 - **Empty states are three distinct kinds, not one string** (`lib/select.ts`
   `chartEmptyState`): `no-data-yet` is a gap in the data, `no-combination` and `no-carriers`
   are the reader's own filter. Each renders its own `data-testid`, which is how the tests

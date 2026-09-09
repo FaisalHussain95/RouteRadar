@@ -18,7 +18,7 @@ import {
 const NONE = new Set<string>();
 
 function filters(over: Partial<Filters> = {}): Filters {
-  return { destination: "ISB", horizon: 14, hiddenCarriers: NONE, ...over };
+  return { destination: "ISB", hiddenCarriers: NONE, ...over };
 }
 
 describe("seriesFor", () => {
@@ -27,13 +27,40 @@ describe("seriesFor", () => {
     expect(series.map((s) => s.carrier.code)).toEqual(FIXTURE.carriers.map((c) => c.code));
   });
 
-  it("selects on both destination and horizon", () => {
-    const isb14 = seriesFor(FIXTURE, filters()).filter((s) => s.points.length > 0);
-    expect(isb14.map((s) => s.carrier.code).sort()).toEqual(["PK", "QR"]);
-    const lhe14 = seriesFor(FIXTURE, filters({ destination: "LHE" })).filter(
+  it("selects on destination and draws every horizon together", () => {
+    const isb = seriesFor(FIXTURE, filters()).filter((s) => s.points.length > 0);
+    expect(isb.map((s) => s.carrier.code).sort()).toEqual(["EK", "PK", "QR", "TK"]);
+    // PIA has one ISB fare at each of 14d, 90d and 180d: one line through three dates, not
+    // one dot behind a horizon switch.
+    expect(isb.find((s) => s.carrier.code === "PK")?.points.map((p) => p.departure_date)).toEqual(
+      ["2026-09-23", "2026-12-08", "2027-03-01"],
+    );
+    const lhe = seriesFor(FIXTURE, filters({ destination: "LHE" })).filter(
       (s) => s.points.length > 0,
     );
-    expect(lhe14.map((s) => s.carrier.code)).toEqual(["GF"]);
+    expect(lhe.map((s) => s.carrier.code)).toEqual(["GF"]);
+  });
+
+  it("keeps the cheapest fare when two horizons priced the same departure date", () => {
+    const data: DashboardData = {
+      ...FIXTURE,
+      series: [
+        {
+          destination: "ISB",
+          horizon_days: 60,
+          carrier: "PK",
+          points: [{ departure_date: "2026-11-08", price_eur: 640 }],
+        },
+        {
+          destination: "ISB",
+          horizon_days: 30,
+          carrier: "PK",
+          points: [{ departure_date: "2026-11-08", price_eur: 590 }],
+        },
+      ],
+    };
+    const pk = seriesFor(data, filters()).find((s) => s.carrier.code === "PK");
+    expect(pk?.points).toEqual([{ departure_date: "2026-11-08", price_eur: 590, destination: "ISB" }]);
   });
 
   it("drops a hidden carrier rather than repainting the survivors", () => {
@@ -141,20 +168,21 @@ describe("chartEmptyState", () => {
       "no-data-yet",
     );
 
-    const combination = filters({ horizon: 60 });
-    expect(chartEmptyState(FIXTURE, combination, seriesFor(FIXTURE, combination))).toEqual({
+    // Only Lahore priced: Islamabad is a gap in the data, whichever horizon it would be at.
+    const lheOnly = { ...FIXTURE, series: FIXTURE.series.filter((s) => s.destination === "LHE") };
+    expect(chartEmptyState(lheOnly, filters(), seriesFor(lheOnly, filters()))).toEqual({
       kind: "no-combination",
-      message: "No fares for Islamabad at 60d — try another horizon",
+      message: "No fares for Islamabad yet — try another destination",
     });
   });
 
   it("blames the chips when the reader hid the only carrier flying that cell", () => {
-    // Gulf Air is the only carrier with LHE fares at 14d in the fixture. Hiding it must not
-    // produce "try another horizon": the horizon has fares, they are just not shown.
+    // Gulf Air is the only carrier with LHE fares in the fixture. Hiding it must not produce
+    // "try another destination": Lahore has fares, they are just not shown.
     const f = filters({ destination: "LHE", hiddenCarriers: new Set(["GF"]) });
     expect(chartEmptyState(FIXTURE, f, seriesFor(FIXTURE, f))).toEqual({
       kind: "no-carriers",
-      message: "No fares for Lahore at 14d from the carriers you have shown",
+      message: "No fares for Lahore from the carriers you have shown",
     });
   });
 

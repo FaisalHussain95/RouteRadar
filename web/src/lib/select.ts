@@ -6,9 +6,14 @@ import { addDays, parseDay } from "./dates";
  * because "compare" is a view of the three real destinations, not a fourth airport. */
 export const ALL_DESTINATIONS = "ALL";
 
+/** No booking horizon here, on purpose. The export keeps one series per (destination,
+ * horizon, carrier) and the design drew a `14d … 180d` segmented control over it, but a
+ * daily ingest prices exactly one departure date per horizon, so filtering the chart to a
+ * horizon left each carrier with one dot per observed day and no curve to read. The chart's
+ * question is "what does a departure on this date cost", so every horizon is drawn together
+ * and the horizon is a detail of how the fare was found, not of what it costs. */
 export interface Filters {
   destination: string;
-  horizon: number;
   hiddenCarriers: ReadonlySet<string>;
 }
 
@@ -60,14 +65,17 @@ export function exportWindow(data: DashboardData): { start: number; end: number 
 /** The lines to draw, in the order `carriers[]` lists them — never in price order, so a
  * carrier keeps its colour and its place in the legend whatever the fares do.
  *
- * For `ALL` the three destinations are collapsed to the cheapest of them per day, which is
- * the comparison the segment promises: what this carrier would cost to fly to the region
- * on that date, whichever northern airport that turns out to be. */
+ * Every horizon is collapsed to the cheapest fare per departure date. A date is normally
+ * priced by one horizon per observed day, but over successive days the same departure is
+ * seen at 60d, then later at 30d, and the lowest of those is the "lowest fare" the chart
+ * title promises — which is also why a point carries no horizon of its own.
+ *
+ * For `ALL` the three destinations are collapsed the same way, which is the comparison the
+ * segment promises: what this carrier would cost to fly to the region on that date,
+ * whichever northern airport that turns out to be. */
 export function seriesFor(data: DashboardData, filters: Filters): CarrierPoints[] {
   const wanted = data.series.filter(
-    (s) =>
-      s.horizon_days === filters.horizon &&
-      (filters.destination === ALL_DESTINATIONS || s.destination === filters.destination),
+    (s) => filters.destination === ALL_DESTINATIONS || s.destination === filters.destination,
   );
   return data.carriers
     .filter((c) => !filters.hiddenCarriers.has(c.code))
@@ -120,14 +128,14 @@ export function chartEmptyState(
   }
   if (series.some((s) => s.points.length > 0)) return null;
 
-  // Nothing visible. Whose doing? If a *hidden* carrier has fares in this same cell then the
-  // reader hid the only line there was, and telling them to try another horizon would blame
-  // the data for their own chip.
-  const where = `${destinationLabel(data, filters.destination)} at ${filters.horizon}d`;
+  // Nothing visible. Whose doing? If a *hidden* carrier has fares for this destination then
+  // the reader hid the only line there was, and saying the destination has no fares would
+  // blame the data for their own chip.
+  const where = destinationLabel(data, filters.destination);
   const hiddenHaveFares = seriesFor(data, { ...filters, hiddenCarriers: new Set() }).some(
     (s) => s.points.length > 0,
   );
   return hiddenHaveFares
     ? { kind: "no-carriers", message: `No fares for ${where} from the carriers you have shown` }
-    : { kind: "no-combination", message: `No fares for ${where} — try another horizon` };
+    : { kind: "no-combination", message: `No fares for ${where} yet — try another destination` };
 }
