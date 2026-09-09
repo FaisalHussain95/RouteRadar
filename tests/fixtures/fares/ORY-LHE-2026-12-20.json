@@ -1,0 +1,6 @@
+{
+  "route": {"origin": "ORY", "destination": "LHE"},
+  "departure_date": "2026-12-20",
+  "note": "Orly has no single-ticket service to Pakistan (PRD open question); see ORY-ISB. Present so a full-grid ingest for this date has an answer for every route.",
+  "itineraries": []
+}

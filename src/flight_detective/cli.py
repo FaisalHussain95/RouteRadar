@@ -1,5 +1,6 @@
 """Command-line entry point. Every subcommand added by a story is registered here."""
 
+from collections.abc import Callable
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Annotated
@@ -10,12 +11,21 @@ import typer
 from flight_detective import __version__, db
 from flight_detective.calendar_engine.tags import tags_for_range
 from flight_detective.config import load_settings
+from flight_detective.ingest import DEFAULT_HORIZONS, run_ingest
+from flight_detective.providers.base import FareProvider
+from flight_detective.providers.fake import FakeFareProvider
 
 PARIS = ZoneInfo("Europe/Paris")
 
 # A year covers the longest ingest horizon (180 days) and the dashboard's 11-month series
 # with room to spare, and re-tagging a year is milliseconds.
 DEFAULT_TAG_SPAN = timedelta(days=365)
+
+# `--provider` names. S08 adds "serpapi" here; the constructor is called only when the
+# command runs, so a provider that needs a key can fail with its own message then.
+PROVIDERS: dict[str, Callable[[], FareProvider]] = {
+    "fake": FakeFareProvider,
+}
 
 DbPathOption = Annotated[
     Path | None,
@@ -88,6 +98,80 @@ def tag_dates(
         written = db.replace_calendar_tags(conn, start, end, tags)
     dates = len({t.date for t in tags})
     typer.echo(f"tagged {start}..{end}: {dates} dates, {written} rows")
+
+
+def _parse_horizons(value: str) -> list[int]:
+    """`14,30,60` -> [14, 30, 60]; every entry a distinct positive day count."""
+    horizons: list[int] = []
+    for part in value.split(","):
+        try:
+            horizon = int(part.strip())
+        except ValueError:
+            raise typer.BadParameter(f"{part!r} is not a whole number") from None
+        if horizon <= 0:
+            raise typer.BadParameter(f"{horizon} is not a positive number of days")
+        if horizon in horizons:
+            raise typer.BadParameter(f"{horizon} is listed twice")
+        horizons.append(horizon)
+    return horizons
+
+
+def _make_provider(name: str) -> FareProvider:
+    factory = PROVIDERS.get(name)
+    if factory is None:
+        raise typer.BadParameter(f"{name!r}; choose from {', '.join(PROVIDERS)}")
+    return factory()
+
+
+@app.command()
+def ingest(
+    provider: Annotated[
+        str, typer.Option("--provider", help=f"Fare provider: {', '.join(PROVIDERS)}.")
+    ] = "fake",
+    horizons: Annotated[
+        str,
+        typer.Option(
+            "--horizons",
+            help="Comma-separated days before departure to query.",
+            show_default=True,
+        ),
+    ] = ",".join(str(h) for h in DEFAULT_HORIZONS),
+    observed_on: Annotated[
+        datetime | None,
+        typer.Option(
+            "--observed-on",
+            formats=["%Y-%m-%d"],
+            help="Observation date the horizons count from; defaults to today (Paris). "
+            "Set it to replay a day against fixtures.",
+        ),
+    ] = None,
+    path: DbPathOption = None,
+) -> None:
+    """Query every route at every horizon, store the in-scope fares, and log the run.
+    Idempotent for a given observation date. Exits 1 if any query failed; the queries
+    that answered are stored regardless."""
+    try:
+        horizon_list = _parse_horizons(horizons)
+    except typer.BadParameter as exc:
+        raise typer.BadParameter(str(exc), param_hint="--horizons") from None
+    try:
+        fare_provider = _make_provider(provider)
+    except typer.BadParameter as exc:
+        raise typer.BadParameter(str(exc), param_hint="--provider") from None
+    day = observed_on.date() if observed_on is not None else datetime.now(PARIS).date()
+    with db.connect(_db_path(path)) as conn:
+        db.init_schema(conn)
+        run = run_ingest(conn, fare_provider, observed_on=day, horizons=horizon_list)
+    typer.echo(
+        f"ingested {day} via {run.provider}: {run.queries} queries, "
+        f"{run.rows_kept} kept, {run.rows_dropped} dropped"
+    )
+    if run.error is not None:
+        failed = run.error.count("\n") + 1
+        typer.echo(f"{failed} of {run.queries} queries failed:", err=True)
+        for line in run.error.splitlines():
+            typer.echo(f"  {line}", err=True)
+        raise typer.Exit(code=1)
 
 
 if __name__ == "__main__":

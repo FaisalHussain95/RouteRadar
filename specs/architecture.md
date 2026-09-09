@@ -62,6 +62,7 @@ cli.py              Typer app; one subcommand per pipeline step
 config.py           Settings from env (.env for local), API keys, DB path, site export path
 models.py           Route, Itinerary, FareObservation, CalendarTag, NewsEvent, IngestRun
 db.py               DuckDB connection, schema migrations (idempotent CREATE), upserts
+ingest.py           run_ingest(): routes × horizons through a FareProvider, filter, upsert, log
 providers/
   base.py           FareProvider protocol: search(route, departure_date) -> list[Itinerary]
   fake.py           Fixture-backed provider for tests/offline
@@ -189,6 +190,33 @@ Decisions from S06 (2026-09-09):
   range and upserts inside one transaction, so a retired or renamed window leaves no ghost
   rows. Rows outside the range are untouched. It runs `init_schema` itself, so the pipeline
   does not depend on a prior `fd db init`.
+
+Decisions from S07 (2026-09-09):
+
+- `ingest.py` holds the pipeline (`run_ingest(conn, provider, observed_on=, horizons=)`),
+  and `cli.py` only parses options and prints. `ROUTES` is every `Origin` × `Destination`
+  pair in a fixed order; `DEFAULT_HORIZONS` is the PRD's 14/30/60/90/120/180.
+- **One bad query costs one cell, not the day.** A `ProviderError` on a query is appended
+  to `ingest_run.error` (`"CDG->ISB 2027-01-05: <message>"`, one per line, whitespace
+  flattened so a multi-line pydantic error stays on its line) and the loop goes
+  on; what did answer is stored; the CLI exits 1 and lists the failures on stderr. Any other
+  exception propagates before anything is written. This is what the PRD's "< 2 % missing
+  cells" metric needs.
+- All queries run first, then observations and the `ingest_run` row are written in one
+  transaction, so a crash leaves no half-day and no run row.
+- Kept itineraries are deduplicated by `fare_observation` primary key **after** scope
+  filtering, lowest price wins. The key has no cabin column, and the fixtures' business
+  records reuse the economy flight numbers; DuckDB's multi-row upsert keeps the *first*
+  duplicate silently, so the choice is made explicitly. `rows_kept` counts rows written,
+  after dedupe; `rows_dropped` counts scope drops only.
+- `ingest_run` is a log: plain `INSERT`, one row per run, never upserted. `run_at` is
+  `datetime.now(Europe/Paris)`; DuckDB stores the instant.
+- `fd ingest --observed-on YYYY-MM-DD` exists to replay a day against fixtures (the
+  fake's fixtures are all dated 2026-12-20, so `--observed-on 2026-12-06 --horizons 14`
+  is the offline smoke test) and, later, to backfill. `--provider` is looked up in
+  `cli.PROVIDERS`, a name → constructor dict; S08 adds `serpapi` to it.
+- `pytz` is a runtime dependency: DuckDB refuses to return a `TIMESTAMPTZ` column to
+  Python without it (`Required module 'pytz' failed to import`). Nothing imports it.
 
 ## The JSON contract (`dashboard.json`)
 

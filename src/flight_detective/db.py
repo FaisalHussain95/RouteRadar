@@ -16,7 +16,7 @@ from pathlib import Path
 
 import duckdb
 
-from flight_detective.models import CalendarTag, FareObservation
+from flight_detective.models import CalendarTag, FareObservation, IngestRun
 
 SCHEMA: tuple[str, ...] = (
     """
@@ -101,6 +101,15 @@ _FARE_UPSERT = f"""
 """
 
 _TAG_COLUMNS = ("date", "tag", "multiplier_low", "multiplier_high")
+
+_RUN_COLUMNS = ("run_at", "provider", "queries", "rows_kept", "rows_dropped", "error")
+
+# Plain INSERT: `ingest_run` is a log, one row per run, and a re-run must add a row rather
+# than rewrite an earlier one. Two runs cannot share a `run_at` to the microsecond.
+_RUN_INSERT = f"""
+    INSERT INTO ingest_run ({", ".join(_RUN_COLUMNS)})
+    VALUES ({", ".join("?" for _ in _RUN_COLUMNS)})
+"""
 
 _TAG_UPSERT = f"""
     INSERT INTO calendar_tag ({", ".join(_TAG_COLUMNS)})
@@ -205,3 +214,19 @@ def fetch_calendar_tags(
         [start, end],
     ).fetchall()
     return [CalendarTag.model_validate(dict(zip(_TAG_COLUMNS, row, strict=True))) for row in result]
+
+
+def insert_ingest_run(conn: duckdb.DuckDBPyConnection, run: IngestRun) -> None:
+    """Append one run to the `ingest_run` log."""
+    conn.execute(
+        _RUN_INSERT,
+        (run.run_at, run.provider, run.queries, run.rows_kept, run.rows_dropped, run.error),
+    )
+
+
+def fetch_ingest_runs(conn: duckdb.DuckDBPyConnection) -> list[IngestRun]:
+    """Every run, oldest first. `run_at` comes back timezone-aware (DuckDB TIMESTAMPTZ)."""
+    result = conn.execute(
+        f"SELECT {', '.join(_RUN_COLUMNS)} FROM ingest_run ORDER BY run_at, provider"
+    ).fetchall()
+    return [IngestRun.model_validate(dict(zip(_RUN_COLUMNS, row, strict=True))) for row in result]

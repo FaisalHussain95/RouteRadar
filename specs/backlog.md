@@ -85,16 +85,16 @@ Chaand Raat/Eid-ul-Fitr (Eid −4 to +2 days), Hajj/Eid-ul-Adha corridor (Dhul H
 - [x] `fd tag-dates --from --to` materialises `calendar_tag` rows idempotently
 
 ## S07 — Ingest pipeline with the fake provider
-- status: todo
+- status: done
 - size: M
 
 `fd ingest --horizons 14,30,60,90,120,180 --provider fake` queries every origin/destination
 pair, applies scope filters, upserts observations and writes an `ingest_run` row with
 kept/dropped counts.
 
-- [ ] Running twice for the same day leaves row counts unchanged
-- [ ] `ingest_run.rows_dropped` reflects the out-of-scope fixtures
-- [ ] A provider exception is recorded in `ingest_run.error` and the command exits non-zero
+- [x] Running twice for the same day leaves row counts unchanged
+- [x] `ingest_run.rows_dropped` reflects the out-of-scope fixtures
+- [x] A provider exception is recorded in `ingest_run.error` and the command exits non-zero
 
 Note from S04: fake fixtures are keyed by exact departure date and only exist for
 `2026-12-20` (CDG→ISB/LHE/SKT, ORY→ISB). Six horizons from a real "today" will not hit
@@ -131,6 +131,12 @@ Commands that do not exist yet are fine to list: the unit is validated, not run,
 - [ ] Service pins the absolute `uv` path (systemd does not source the shell profile)
 - [ ] A failing step stops the chain (`&&`), so nothing is pushed after a failed ingest
 - [ ] README section on `journalctl --user -u flight-detective-pipeline`
+
+Note from S07: `fd ingest` exits 1 whenever *any* route × horizon query failed, even though
+the queries that answered were stored. Chained as `fd ingest && fd tag-dates && …`, one
+missing cell would skip the export for the day, which is the opposite of what the PRD's
+"< 2 % missing cells" metric wants. Decide here whether the unit chains with `;`, or
+ingest grows an exit code that distinguishes "partial" from "nothing stored".
 
 ## S10 — GDELT news ingestion
 - status: todo
