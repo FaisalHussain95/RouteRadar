@@ -34,7 +34,9 @@ for i in $(seq 1 "$max"); do
   echo "=== $(date -Is) session $i start (doing=$doing)" | tee -a "$log"
   # Pushing is allowed for interactive sessions (project settings) but never for the
   # loop: a bad autonomous run must stay local until a human has looked at `dev`.
-  claude -p "$(cat prompts/dev-story.md)" --permission-mode auto \
+  # Opus for the loop: the stories are well-specified and mechanically gated, so the
+  # cheaper model is enough; Fable is kept for the interactive planning sessions.
+  claude -p "$(cat prompts/dev-story.md)" --model "${LOOP_MODEL:-opus}" --permission-mode auto \
     --disallowedTools "Bash(git push:*)" 2>&1 | tee -a "$log"
   echo "=== $(date -Is) session $i end" | tee -a "$log"
   last_doing="$(grep -B2 'status: doing' specs/backlog.md | grep -o '^## S[0-9]*' | head -1)"
