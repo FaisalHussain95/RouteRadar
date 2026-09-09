@@ -573,3 +573,46 @@ Also relevant: a full page of semantic results is the normal shape of a *quiet* 
 as a busy one (the pool is bounded and always fills), so "zero events exported" genuinely
 can mean nothing happened. That is exactly why the signal has to come from the run row
 rather than from the event count.
+
+## S19 — SerpApi within the free plan
+- status: todo
+- size: S
+
+The free plan is 250 searches a month; the grid as built (2 origins × 3 destinations × 6
+horizons) is 36 a day, about 1,080 a month, so fares stop around the 7th of each month.
+Measured 2026-09-09: 37 used, 213 left. ORY returned nothing usable on the first real run,
+which the PRD anticipated. Both keys stay on free plans by decision (2026-09-09).
+
+- [ ] `fd ingest` gains a `--plan rotating` (default) mode: CDG only, the three
+      destinations, two horizons a day cycling 14/30 → 60/90 → 120/180 by
+      `observed_on.toordinal() % 3`, so every cell refreshes every 3 days (the dashboard
+      plots at a 3-day step). 6 searches a day. `--plan full` keeps the old grid.
+- [ ] `run-pipeline.sh` and the README § What it costs updated; the timer needs no change
+- [ ] A budget guard: before ingesting, read `https://serpapi.com/account.json` (free) and
+      skip the run with a one-line `ingest_run.error` if `plan_searches_left` is below the
+      day's need, rather than burning the last searches on a partial grid
+- [ ] `specs/prd.md` F1 and the success metric reworded for a 3-day refresh; the export
+      and dashboard already tolerate gaps (verify with the seeded DB)
+
+## S20 — GDELT Cloud within the free plan
+- status: todo
+- size: M
+
+The 971-unit grant is a 7-day evaluation (plugin docs); afterwards the free plan is 50
+units a month, under 2 calls a day, while S17 spends 9 a day. Measured 2026-09-09: 962
+units left. Design, per the plugin's `hosted-monitors` skill: monitor runs cost 0 units
+and deliver by signed webhook.
+
+- [ ] A throttle first: `fd news-ingest --budget <units/day>` (default 1) rotates the nine
+      S17 queries so no more than the budget is spent per day, and stops calling when
+      `usage.remaining` from `/meta/query-units` (free) is below 5; the daily journal
+      says which queries ran. Ships regardless of the monitor work below.
+- [ ] Hosted monitors evaluated: create the nine as paused monitors with
+      `POST /api/v2/monitors/preview` first, record the previews as fixtures, and write
+      into this entry whether the free plan allows nine monitors and webhook delivery.
+      If yes: a `deploy/webhook-receiver` (Python stdlib http.server, signature-verified,
+      appends JSONL under `data/news-inbox/`) as a user unit on the VPS, `fd news-ingest
+      --from-inbox` reading it, monitors enabled, API calls dropped to zero.
+      If no: the throttle stays and this box is documented as the ceiling.
+- [ ] README § What it costs updated with the measured monthly units either way
+
