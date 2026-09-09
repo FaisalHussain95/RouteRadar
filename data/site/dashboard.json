@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-09-09T13:17:02.737945+02:00",
+  "generated_at": "2026-09-09T16:19:12.864918+02:00",
   "observed_on": "2026-09-09",
   "carriers": [
     {
@@ -642,7 +642,98 @@
       "multiplier_high": 1.35
     }
   ],
-  "events": [],
+  "events": [
+    {
+      "date": "2026-09-05",
+      "severity": "low",
+      "headline": "Qatar Airways ordered to compensate Kerala children",
+      "source": "timesofindia.indiatimes.com",
+      "source_url": "https://timesofindia.indiatimes.com/city/kochi/qatar-airways-ordered-to-pay-rs-10-lakh-to-expatriate-couples-children/articleshow/133810641.cms",
+      "impact_text": "1 article (timesofindia.indiatimes.com); significance 0.0753; kept on 'qatar airways'",
+      "body": null
+    },
+    {
+      "date": "2026-09-06",
+      "severity": "low",
+      "headline": "Cathay Pacific suspends Dubai Riyadh flights",
+      "source": "asiaone.com",
+      "source_url": "https://www.asiaone.com:443/world/cathay-pacific-cancels-dubai-riyadh-flights-amid-middle-east-tensions",
+      "impact_text": "1 article (asiaone.com); significance 0.0753; kept on 'dubai'",
+      "body": null
+    },
+    {
+      "date": "2026-09-06",
+      "severity": "low",
+      "headline": "UAE flights disrupted by Iran tensions",
+      "source": "gulfnews.com",
+      "source_url": "https://gulfnews.com/business/aviation/uae-flights-status-emirates-etihad-air-arabia-flydubai-delays-and-cancellations-indonesia-travel-disrupted-1.500664722",
+      "impact_text": "1 article (gulfnews.com); significance 0.0753; kept on 'emirates'",
+      "body": null
+    },
+    {
+      "date": "2026-09-07",
+      "severity": "low",
+      "headline": "Syrian aviation chief discusses Flynas Syria launch",
+      "source": "sana.sy",
+      "source_url": "https://sana.sy/en/syria/2341130/",
+      "impact_text": "1 article (sana.sy); significance 0.0753; kept on 'riyadh'",
+      "body": null
+    },
+    {
+      "date": "2026-09-07",
+      "severity": "med",
+      "headline": "Malaysia Airlines plane diverted to Chennai",
+      "source": "udaipurkiran.com",
+      "source_url": "https://udaipurkiran.com/malaysia-airlines-flight-diverted-to-chennai-due-to-engine-failure/",
+      "impact_text": "4 articles (indiablooms.com, moneycontrol.com, udaipurkiran.com); significance 0.1747; kept on 'jeddah'",
+      "body": null
+    },
+    {
+      "date": "2026-09-07",
+      "severity": "low",
+      "headline": "Pakistan Air Force chief vows protect air sovereignty",
+      "source": "thefrontierpost.com",
+      "source_url": "https://thefrontierpost.com/on-pakistan-air-force-day-islamabad-warns-paf-ready-to-defend-nations-airspace/",
+      "impact_text": "2 articles (samaa.tv, thefrontierpost.com); significance 0.1193; kept on 'airspace'",
+      "body": null
+    },
+    {
+      "date": "2026-09-07",
+      "severity": "low",
+      "headline": "Emirates flight disruption at Plaisance Airport",
+      "source": "defimedia.info",
+      "source_url": "http://defimedia.info/vol-ek704-vers-dubai-des-passagers-toujours-dans-lattente-laeroport-de-plaisance",
+      "impact_text": "1 article (defimedia.info); significance 0.0753; kept on 'emirates'",
+      "body": null
+    },
+    {
+      "date": "2026-09-08",
+      "severity": "low",
+      "headline": "PIA seeks new leadership and staff",
+      "source": "arynews.tv",
+      "source_url": "https://arynews.tv/restructuring-underway-at-pia-as-airline-seeks-new-talent-and-leadership",
+      "impact_text": "1 article (arynews.tv); significance 0.0753; kept on 'pia'",
+      "body": null
+    },
+    {
+      "date": "2026-09-08",
+      "severity": "low",
+      "headline": "Ukraine Norway discuss closing Ukrainian airspace",
+      "source": "en.interfax.com.ua",
+      "source_url": "https://en.interfax.com.ua/news/general/1200888.html",
+      "impact_text": "1 article (en.interfax.com.ua); significance 0.0753; kept on 'airspace'",
+      "body": null
+    },
+    {
+      "date": "2026-09-08",
+      "severity": "med",
+      "headline": "Liverpool agrees record Premier League shirt sponsorship",
+      "source": "abc.com.py",
+      "source_url": "https://abc.com.py/deportes/futbol/internacional/2026/09/08/el-liverpool-firma-un-patrocinio-de-350-millones-con-turkish-airlines/",
+      "impact_text": "3 articles (abc.com.py, telegrafi.com, thebusinessdesk.com); significance 0.1505; kept on 'turkish airlines'",
+      "body": null
+    }
+  ],
   "arbitrage": {
     "departure_date": "2026-09-23",
     "lhe_eur": 369,
