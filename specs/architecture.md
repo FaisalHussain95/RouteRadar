@@ -167,6 +167,29 @@ Decisions from S05 (2026-09-09):
 - `gregorian_tags(day)` returns `CalendarTag`s sorted by tag. S06's `tags_for` unions it
   with the Hijri tags and owns dedupe across the two.
 
+Decisions from S06 (2026-09-09):
+
+- `calendar_engine/hijri.py` mirrors `gregorian.py`: `HijriWindow` is a `Window` whose
+  `span(year)` is keyed by **Hijri** year (the edition starting in that year) and whose
+  `contains` checks the day's Hijri year and the one before. Tags: `ramadan_phase1`
+  (Ramadan 1–15), `eid_ul_fitr` (1 Shawwal −4 to +2 Gregorian days), `hajj_eid_ul_adha`
+  (Dhul Hijjah 1–13); all `kind="religious"`. Ranges 0.85–0.95, 1.20–1.60, 1.10–1.30,
+  bracketing the design's 0.92 / 1.27 / 1.21 points.
+- Dates come from `hijri-converter`'s Umm al-Qura tables, i.e. the *calculated* Saudi
+  calendar. Pakistan sights the moon and trails it by a day about half the time (both Eids
+  in 2025). The PRD's ±1 day covers this; tests pin against Pakistan's observed dates. Do
+  not "correct" the engine to one year's sighting.
+- `hijri-converter` is deprecated upstream in favour of `hijridate` (same author, same API
+  and tables). Kept because the PRD names it; the import warning is silenced in `hijri.py`.
+  Switching is the import line plus `pyproject.toml`, when a session decides to.
+- `calendar_engine/tags.py`: `tags_for(day)` unions the two calendars, first source wins
+  on a duplicate tag, sorted by tag; `tags_for_range(start, end)` iterates inclusive days.
+- `fd tag-dates --from --to` (`--path` as for `db init`) defaults to today (Europe/Paris)
+  through +365 days, and **replaces** the range: `db.replace_calendar_tags` deletes the
+  range and upserts inside one transaction, so a retired or renamed window leaves no ghost
+  rows. Rows outside the range are untouched. It runs `init_schema` itself, so the pipeline
+  does not depend on a prior `fd db init`.
+
 ## The JSON contract (`dashboard.json`)
 
 Shaped by what the design's component consumes (see `specs/ux/design-system.md` § Data

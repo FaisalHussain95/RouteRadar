@@ -72,17 +72,17 @@ with a comment citing `specs/brainstorming.md` § 2 and `specs/ux/design-system.
 - [x] Table-driven tests for window edges (Nov 14 vs Nov 15, Jan 15 vs Jan 16)
 
 ## S06 — Hijri calendar windows
-- status: todo
+- status: done
 - size: M
 
 `calendar_engine/hijri.py` using `hijri-converter`: Ramadan phase 1 (days 1–15),
 Chaand Raat/Eid-ul-Fitr (Eid −4 to +2 days), Hajj/Eid-ul-Adha corridor (Dhul Hijjah
 1–13). `calendar_engine/tags.py` unions Gregorian and Hijri tags.
 
-- [ ] Eid-ul-Fitr and Eid-ul-Adha tags for 2025, 2026, 2027 match the published dates
+- [x] Eid-ul-Fitr and Eid-ul-Adha tags for 2025, 2026, 2027 match the published dates
       within ±1 day (assert against a small table in the test)
-- [ ] `tags_for(date)` returns a deduplicated, sorted list
-- [ ] `fd tag-dates --from --to` materialises `calendar_tag` rows idempotently
+- [x] `tags_for(date)` returns a deduplicated, sorted list
+- [x] `fd tag-dates --from --to` materialises `calendar_tag` rows idempotently
 
 ## S07 — Ingest pipeline with the fake provider
 - status: todo

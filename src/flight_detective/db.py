@@ -11,11 +11,12 @@ the primary key, and DuckDB cannot index a list column.
 """
 
 from collections.abc import Iterable
+from datetime import date
 from pathlib import Path
 
 import duckdb
 
-from flight_detective.models import FareObservation
+from flight_detective.models import CalendarTag, FareObservation
 
 SCHEMA: tuple[str, ...] = (
     """
@@ -99,6 +100,16 @@ _FARE_UPSERT = f"""
         raw_ref = excluded.raw_ref
 """
 
+_TAG_COLUMNS = ("date", "tag", "multiplier_low", "multiplier_high")
+
+_TAG_UPSERT = f"""
+    INSERT INTO calendar_tag ({", ".join(_TAG_COLUMNS)})
+    VALUES ({", ".join("?" for _ in _TAG_COLUMNS)})
+    ON CONFLICT DO UPDATE SET
+        multiplier_low = excluded.multiplier_low,
+        multiplier_high = excluded.multiplier_high
+"""
+
 
 def connect(path: Path) -> duckdb.DuckDBPyConnection:
     """Open (creating if needed) the database file, making the parent directory first."""
@@ -154,3 +165,43 @@ def fetch_fare_observations(conn: duckdb.DuckDBPyConnection) -> list[FareObserva
         )
         for row in result
     ]
+
+
+def upsert_calendar_tags(conn: duckdb.DuckDBPyConnection, tags: Iterable[CalendarTag]) -> int:
+    """Insert-or-update tags by `(date, tag)`. Returns the number of rows written."""
+    rows = [(t.date, t.tag, t.multiplier_low, t.multiplier_high) for t in tags]
+    if not rows:
+        return 0
+    conn.executemany(_TAG_UPSERT, rows)
+    return len(rows)
+
+
+def replace_calendar_tags(
+    conn: duckdb.DuckDBPyConnection, start: date, end: date, tags: Iterable[CalendarTag]
+) -> int:
+    """Make `calendar_tag` for `start..end` (inclusive) exactly `tags`, in one transaction.
+
+    Upserting alone would leave a row behind for a window that was renamed or retired,
+    and `calendar_tag` is documented as *recomputed*, so the range is cleared first.
+    Rows outside the range are untouched. Returns the number of rows written."""
+    conn.begin()
+    try:
+        conn.execute("DELETE FROM calendar_tag WHERE date BETWEEN ? AND ?", [start, end])
+        written = upsert_calendar_tags(conn, tags)
+    except Exception:
+        conn.rollback()
+        raise
+    conn.commit()
+    return written
+
+
+def fetch_calendar_tags(
+    conn: duckdb.DuckDBPyConnection, start: date, end: date
+) -> list[CalendarTag]:
+    """Tags for `start..end` inclusive, in date then tag order."""
+    result = conn.execute(
+        f"SELECT {', '.join(_TAG_COLUMNS)} FROM calendar_tag "
+        "WHERE date BETWEEN ? AND ? ORDER BY date, tag",
+        [start, end],
+    ).fetchall()
+    return [CalendarTag.model_validate(dict(zip(_TAG_COLUMNS, row, strict=True))) for row in result]
