@@ -424,21 +424,62 @@ to confirm no 404. Then tick the last three boxes and set `status: done`.
 The script is called as `$REPO/deploy/push-data.sh` from `run-pipeline.sh`, with the repo as
 the working directory, and must be executable.
 
-## S17 — GDELT resilience
+## S17 — News from GDELT Cloud
+- status: todo
+- size: M
+
+The public GDELT DOC API answered HTTP 429 to nearly every request on 2026-09-09, from two
+hosts, even a one-word query at 20 s spacing. It is replaced by **GDELT Cloud**
+(`https://gdeltcloud.com/api/v2`, Bearer `GDELT_API_KEY` from `.env`, present on both
+hosts). Measured on 2026-09-09 with `/api/v2/meta/query-units` (free): plan "Explore",
+1,048 units this calendar month, every call costs 1 unit, `/meta/*` is free, stories
+coverage starts 2026-03-08, search windows are at most 30 inclusive days. Docs, all plain
+markdown: `https://docs.gdeltcloud.com/llms.txt` (index),
+`…/api-reference/stories/search-stories.md`, `…/api-reference/events/search-events.md`,
+`…/api-keys.md`. The `gdelt-cloud` Claude Code plugin is installed at user scope and
+carries the same docs as skills.
+
+Design:
+
+- `news/gdeltcloud.py` replaces `news/gdelt.py` (delete the old client, its fixtures and
+  tests; one news source, per architecture). `GET /api/v2/stories` with `search=<taxonomy
+  query>`, `days=7`, `sort=recent`, `limit=50`, `languages=en,fr`, following `next_cursor`
+  within the window. Errors: 401 → `GdeltCloudAuthError`; 402/429 → `GdeltCloudQuotaError`
+  (never retried); 5xx/transport → one retry. `X-Quota-Cost` is logged per call.
+- **Relevance guard.** Semantic search is fuzzy: the regulatory query returned Iranian
+  airline sanctions and Ryanair border stories. Record real responses for all four
+  taxonomy queries in both `search_mode=semantic` and `lexical` (8 units, once), keep the
+  mode that scores better on the fixtures, and in either case drop a story unless its
+  title or a top article mentions one of a documented keyword list (Pakistan, PIA,
+  Islamabad, Lahore, Sialkot, Paris, CDG, the six carriers, their hubs, EASA, Hajj, Umrah,
+  airspace). The list lives in code as data with the reason for each entry.
+- Stories are already clusters: `dedupe_key` is the GDELT Cloud story `id`, so
+  `news/dedupe.py`'s title-similarity grouping goes away. `NewsEvent` maps `story_date` →
+  `event_date`, `title` → `headline`, `top_articles[0].url` → `source_url`, taxonomy group
+  → `category`; severity from `metrics.significance` with thresholds written next to the
+  data, tie-broken by `article_count`.
+- `fd news-ingest` logs `usage.remaining` from `/meta/query-units` at the start of each
+  run and warns below 100. Budget: 4 calls/day ≈ 120 units/month.
+
+- [ ] Fixture-based tests for parsing, the relevance guard, paging and the error classes;
+      no network in tests
+- [ ] The eight recorded fixtures are committed under `tests/fixtures/gdeltcloud/` with the
+      recording command documented in the module docstring
+- [ ] Re-ingesting the same window is idempotent (story id as the key)
+- [ ] `fd news-ingest` on the box (key in `.env`) returns real events for the last 7 days
+      and the run row shows kept/dropped; paste the command output into this entry
+- [ ] `specs/architecture.md` § news updated: source, budget, guard, why DOC API was dropped
+- [ ] `config.py` reads `GDELT_API_KEY`; missing key gives a one-line actionable error
+
+## S18 — Stale-news signal on the dashboard
 - status: todo
 - size: S
 
-The first real runs (2026-09-09, from two different hosts) got HTTP 429 from GDELT on
-nearly every query, even a trivial one-word query at 20 s spacing, so the 5 s courtesy
-interval is not what is being enforced. The pipeline degrades correctly (0 events, run
-logged with the errors) but the news layer is empty until this is handled.
+If every news call fails, the pipeline still exits 0 and exports zero events, and the
+feed looks like a quiet week. Export `news_status` (`last_success` date, `last_error`
+one-liner) in `dashboard.json` (schema bump), and have the event feed show a muted
+"News unavailable since <date>" line when `last_success` is older than 2 days.
 
-- [ ] `GdeltClient` retries a 429 with exponential backoff (e.g. 15 s, 45 s, 135 s, capped,
-      3 attempts) before giving up on that query; tested with an injected sleep
-- [ ] A run where every query 429s still exits 0 from `fd news-ingest` and the pipeline,
-      but `ingest_run.error` says so in one line and the dashboard shows the events feed
-      as "news unavailable since <date>" rather than empty (contract field + web change)
-- [ ] `specs/architecture.md` records the measured behaviour and names the fallback to
-      evaluate next if backoff is not enough: the GDELT GKG files on their public CDN (no
-      API, no throttle) or Event Registry (paid)
-
+- [ ] Contract field added, schema regenerated, `web/src/types.ts` regenerated
+- [ ] Feed renders the line from the fixture; hidden when news is fresh (tested)
+- [ ] Empty feed with fresh news still reads as "no events this week", not as an error
