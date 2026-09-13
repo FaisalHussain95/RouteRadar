@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-12T06:33:18.924364+02:00",
-  "observed_on": "2026-09-12",
+  "generated_at": "2026-09-13T06:38:14.130531+02:00",
+  "observed_on": "2026-09-13",
   "carriers": [
     {
       "code": "PK",
@@ -101,6 +101,17 @@
     {
       "destination": "ISB",
       "horizon_days": 14,
+      "carrier": "PK",
+      "points": [
+        {
+          "departure_date": "2026-09-27",
+          "price_eur": 433
+        }
+      ]
+    },
+    {
+      "destination": "ISB",
+      "horizon_days": 14,
       "carrier": "QR",
       "points": [
         {
@@ -117,6 +128,10 @@
         },
         {
           "departure_date": "2026-09-26",
+          "price_eur": 400
+        },
+        {
+          "departure_date": "2026-09-27",
           "price_eur": 400
         }
       ]
@@ -140,6 +155,10 @@
         },
         {
           "departure_date": "2026-09-26",
+          "price_eur": 590
+        },
+        {
+          "departure_date": "2026-09-27",
           "price_eur": 590
         }
       ]
@@ -198,6 +217,10 @@
         {
           "departure_date": "2026-10-12",
           "price_eur": 402
+        },
+        {
+          "departure_date": "2026-10-13",
+          "price_eur": 654
         }
       ]
     },
@@ -221,6 +244,10 @@
         {
           "departure_date": "2026-10-12",
           "price_eur": 659
+        },
+        {
+          "departure_date": "2026-10-13",
+          "price_eur": 590
         }
       ]
     },
@@ -270,6 +297,10 @@
         {
           "departure_date": "2026-11-11",
           "price_eur": 387
+        },
+        {
+          "departure_date": "2026-11-12",
+          "price_eur": 387
         }
       ]
     },
@@ -293,6 +324,10 @@
         {
           "departure_date": "2026-11-11",
           "price_eur": 570
+        },
+        {
+          "departure_date": "2026-11-12",
+          "price_eur": 570
         }
       ]
     },
@@ -307,6 +342,10 @@
         },
         {
           "departure_date": "2026-12-11",
+          "price_eur": 856
+        },
+        {
+          "departure_date": "2026-12-12",
           "price_eur": 856
         }
       ]
@@ -342,6 +381,10 @@
         {
           "departure_date": "2026-12-11",
           "price_eur": 584
+        },
+        {
+          "departure_date": "2026-12-12",
+          "price_eur": 618
         }
       ]
     },
@@ -353,6 +396,10 @@
         {
           "departure_date": "2026-12-09",
           "price_eur": 870
+        },
+        {
+          "departure_date": "2026-12-12",
+          "price_eur": 1054
         }
       ]
     },
@@ -376,6 +423,10 @@
         {
           "departure_date": "2026-12-11",
           "price_eur": 570
+        },
+        {
+          "departure_date": "2026-12-12",
+          "price_eur": 570
         }
       ]
     },
@@ -391,6 +442,10 @@
         {
           "departure_date": "2027-01-09",
           "price_eur": 788
+        },
+        {
+          "departure_date": "2027-01-11",
+          "price_eur": 763
         }
       ]
     },
@@ -429,6 +484,10 @@
         {
           "departure_date": "2027-01-10",
           "price_eur": 442
+        },
+        {
+          "departure_date": "2027-01-11",
+          "price_eur": 411
         }
       ]
     },
@@ -463,6 +522,10 @@
         {
           "departure_date": "2027-01-10",
           "price_eur": 570
+        },
+        {
+          "departure_date": "2027-01-11",
+          "price_eur": 570
         }
       ]
     },
@@ -478,6 +541,21 @@
         {
           "departure_date": "2027-03-10",
           "price_eur": 763
+        },
+        {
+          "departure_date": "2027-03-12",
+          "price_eur": 788
+        }
+      ]
+    },
+    {
+      "destination": "ISB",
+      "horizon_days": 180,
+      "carrier": "PK",
+      "points": [
+        {
+          "departure_date": "2027-03-12",
+          "price_eur": 574
         }
       ]
     },
@@ -516,6 +594,10 @@
         {
           "departure_date": "2027-03-10",
           "price_eur": 667
+        },
+        {
+          "departure_date": "2027-03-12",
+          "price_eur": 870
         }
       ]
     },
@@ -539,6 +621,10 @@
         {
           "departure_date": "2027-03-11",
           "price_eur": 570
+        },
+        {
+          "departure_date": "2027-03-12",
+          "price_eur": 570
         }
       ]
     },
@@ -558,6 +644,10 @@
         {
           "departure_date": "2026-09-26",
           "price_eur": 779
+        },
+        {
+          "departure_date": "2026-09-27",
+          "price_eur": 754
         }
       ]
     },
@@ -580,6 +670,10 @@
         },
         {
           "departure_date": "2026-09-26",
+          "price_eur": 382
+        },
+        {
+          "departure_date": "2026-09-27",
           "price_eur": 382
         }
       ]
@@ -604,6 +698,10 @@
         {
           "departure_date": "2026-09-26",
           "price_eur": 570
+        },
+        {
+          "departure_date": "2026-09-27",
+          "price_eur": 570
         }
       ]
     },
@@ -622,6 +720,10 @@
         },
         {
           "departure_date": "2026-10-12",
+          "price_eur": 754
+        },
+        {
+          "departure_date": "2026-10-13",
           "price_eur": 754
         }
       ]
@@ -646,6 +748,10 @@
         {
           "departure_date": "2026-10-12",
           "price_eur": 540
+        },
+        {
+          "departure_date": "2026-10-13",
+          "price_eur": 684
         }
       ]
     },
@@ -669,6 +775,10 @@
         {
           "departure_date": "2026-10-12",
           "price_eur": 570
+        },
+        {
+          "departure_date": "2026-10-13",
+          "price_eur": 570
         }
       ]
     },
@@ -691,6 +801,10 @@
         },
         {
           "departure_date": "2026-11-11",
+          "price_eur": 754
+        },
+        {
+          "departure_date": "2026-11-12",
           "price_eur": 754
         }
       ]
@@ -715,6 +829,10 @@
         {
           "departure_date": "2026-11-11",
           "price_eur": 369
+        },
+        {
+          "departure_date": "2026-11-12",
+          "price_eur": 369
         }
       ]
     },
@@ -738,6 +856,10 @@
         {
           "departure_date": "2026-11-11",
           "price_eur": 550
+        },
+        {
+          "departure_date": "2026-11-12",
+          "price_eur": 550
         }
       ]
     },
@@ -757,6 +879,10 @@
         {
           "departure_date": "2026-12-10",
           "price_eur": 754
+        },
+        {
+          "departure_date": "2026-12-12",
+          "price_eur": 847
         }
       ]
     },
@@ -780,6 +906,10 @@
         {
           "departure_date": "2026-12-11",
           "price_eur": 587
+        },
+        {
+          "departure_date": "2026-12-12",
+          "price_eur": 621
         }
       ]
     },
@@ -814,6 +944,10 @@
         {
           "departure_date": "2026-12-11",
           "price_eur": 550
+        },
+        {
+          "departure_date": "2026-12-12",
+          "price_eur": 613
         }
       ]
     },
@@ -832,6 +966,10 @@
         },
         {
           "departure_date": "2027-01-10",
+          "price_eur": 754
+        },
+        {
+          "departure_date": "2027-01-11",
           "price_eur": 754
         }
       ]
@@ -856,6 +994,10 @@
         {
           "departure_date": "2027-01-10",
           "price_eur": 777
+        },
+        {
+          "departure_date": "2027-01-11",
+          "price_eur": 391
         }
       ]
     },
@@ -894,6 +1036,10 @@
         {
           "departure_date": "2027-01-10",
           "price_eur": 550
+        },
+        {
+          "departure_date": "2027-01-11",
+          "price_eur": 550
         }
       ]
     },
@@ -940,6 +1086,10 @@
         {
           "departure_date": "2027-03-11",
           "price_eur": 796
+        },
+        {
+          "departure_date": "2027-03-12",
+          "price_eur": 827
         }
       ]
     },
@@ -963,6 +1113,10 @@
         {
           "departure_date": "2027-03-11",
           "price_eur": 667
+        },
+        {
+          "departure_date": "2027-03-12",
+          "price_eur": 1079
         }
       ]
     },
@@ -986,6 +1140,10 @@
         {
           "departure_date": "2027-03-11",
           "price_eur": 550
+        },
+        {
+          "departure_date": "2027-03-12",
+          "price_eur": 550
         }
       ]
     },
@@ -1001,6 +1159,10 @@
         {
           "departure_date": "2026-09-26",
           "price_eur": 779
+        },
+        {
+          "departure_date": "2026-09-27",
+          "price_eur": 754
         }
       ]
     },
@@ -1062,6 +1224,10 @@
         {
           "departure_date": "2026-11-11",
           "price_eur": 754
+        },
+        {
+          "departure_date": "2026-11-12",
+          "price_eur": 754
         }
       ]
     },
@@ -1077,6 +1243,10 @@
         {
           "departure_date": "2026-11-10",
           "price_eur": 373
+        },
+        {
+          "departure_date": "2026-11-12",
+          "price_eur": 372
         }
       ]
     },
@@ -1100,6 +1270,10 @@
         {
           "departure_date": "2026-12-11",
           "price_eur": 847
+        },
+        {
+          "departure_date": "2026-12-12",
+          "price_eur": 847
         }
       ]
     },
@@ -1115,6 +1289,10 @@
         {
           "departure_date": "2026-12-11",
           "price_eur": 587
+        },
+        {
+          "departure_date": "2026-12-12",
+          "price_eur": 621
         }
       ]
     },
@@ -1138,6 +1316,10 @@
         {
           "departure_date": "2027-01-10",
           "price_eur": 754
+        },
+        {
+          "departure_date": "2027-01-11",
+          "price_eur": 754
         }
       ]
     },
@@ -1153,6 +1335,10 @@
         {
           "departure_date": "2027-01-09",
           "price_eur": 422
+        },
+        {
+          "departure_date": "2027-01-11",
+          "price_eur": 556
         }
       ]
     },
@@ -1176,6 +1362,10 @@
         {
           "departure_date": "2027-03-11",
           "price_eur": 754
+        },
+        {
+          "departure_date": "2027-03-12",
+          "price_eur": 779
         }
       ]
     },
@@ -1547,53 +1737,116 @@
       "source_url": "https://akipress.com/news:918450:Defense_Ministry_proposes_special_airspace_regime_during_emergencies_and_martial_law_in_Kyrgyzstan/",
       "impact_text": "1 article (akipress.com); significance 0.0753; kept on 'airspace'",
       "body": null
+    },
+    {
+      "date": "2026-09-12",
+      "severity": "low",
+      "headline": "UAE flight delays and cancellations disrupt weekend travel",
+      "source": "gulfnews.com",
+      "source_url": "https://gulfnews.com/business/aviation/uae-weekend-flights-status-emirates-etihad-air-arabia-flydubai-delays-cancellations-what-travellers-need-to-know-1.500672081",
+      "impact_text": "1 article (gulfnews.com); significance 0.0753; kept on 'emirates'",
+      "body": null
+    },
+    {
+      "date": "2026-09-12",
+      "severity": "low",
+      "headline": "Two passengers restrained after assaulting crew on Melbourne–Doha flight",
+      "source": "leparisien.fr",
+      "source_url": "https://www.leparisien.fr/faits-divers/cetait-tres-effrayant-coups-de-tete-et-crachats-sur-lequipage-deux-passagers-maitrises-sur-un-vol-melbourne-doha-12-09-2026-DGBFTC2OUVAUPDJH67TRCAHHPM.php",
+      "impact_text": "1 article (leparisien.fr); significance 0.0753; kept on 'doha'",
+      "body": null
+    },
+    {
+      "date": "2026-09-12",
+      "severity": "low",
+      "headline": "Algeria closes airspace to UAE-registered civilian and military aircraft",
+      "source": "fr.allafrica.com",
+      "source_url": "https://fr.allafrica.com/stories/202609120033.html",
+      "impact_text": "1 article (fr.allafrica.com); significance 0.0753; kept on 'airspace'",
+      "body": null
+    },
+    {
+      "date": "2026-09-12",
+      "severity": "low",
+      "headline": "Pakistan airport stops 92 Sikh pilgrims amid cross-border dispute",
+      "source": "moneycontrol.com",
+      "source_url": "https://www.moneycontrol.com/news/trends/92-sikh-pilgrims-stopped-at-pakistan-airport-a-pilgrimage-caught-in-a-cross-border-tangle-14028498.html",
+      "impact_text": "1 article (moneycontrol.com); significance 0.0753; kept on 'pakistan'",
+      "body": null
+    },
+    {
+      "date": "2026-09-12",
+      "severity": "med",
+      "headline": "Pakistan mandates NADRA vaccination certificates for international travel",
+      "source": "en.dailypakistan.com.pk",
+      "source_url": "https://en.dailypakistan.com.pk/12-Sep-2026/pakistan-makes-nadra-vaccination-certificate-mandatory-for-international-travel",
+      "impact_text": "5 articles (en.dailypakistan.com.pk, geo.tv, tribune.com.pk); significance 0.1945; kept on 'hajj'",
+      "body": null
+    },
+    {
+      "date": "2026-09-12",
+      "severity": "low",
+      "headline": "Pakistan minister seeks to restart Cathay Pacific flights",
+      "source": "tribune.com.pk",
+      "source_url": "https://tribune.com.pk/story/2628847/minister-for-restarting-cathay-pacific-flights",
+      "impact_text": "1 article (tribune.com.pk); significance 0.0753; kept on 'pakistan'",
+      "body": null
+    },
+    {
+      "date": "2026-09-13",
+      "severity": "low",
+      "headline": "Passengers restrain two men claiming to have a gun on Melbourne flight",
+      "source": "perthnow.com.au",
+      "source_url": "https://www.perthnow.com.au/news/world/virgin-australia-melbourne-to-doha-flight-chaos-as-passengers-restrain-two-men-over-alleged-threats-c-22862256",
+      "impact_text": "2 articles (dailymail.com, perthnow.com.au); significance 0.1193; kept on 'doha'",
+      "body": null
     }
   ],
   "news_status": {
-    "last_success": "2026-09-12",
+    "last_success": "2026-09-13",
     "last_error": null
   },
   "arbitrage": {
-    "departure_date": "2026-09-26",
+    "departure_date": "2026-09-27",
     "lhe_eur": 382,
-    "skt_eur": 385,
+    "skt_eur": 754,
     "isb_eur": 400,
-    "spread_eur": -3,
+    "spread_eur": -372,
     "ground_transfer_eur": 34,
     "ground_time": "4h 10m",
-    "verdict": "either"
+    "verdict": "lhe"
   },
   "efficiency": [
     {
       "carrier": "QR",
-      "price_eur": 489,
-      "transit_minutes": 763
+      "price_eur": 499,
+      "transit_minutes": 761
     },
     {
       "carrier": "TK",
-      "price_eur": 575,
-      "transit_minutes": 657
+      "price_eur": 576,
+      "transit_minutes": 659
     },
     {
       "carrier": "EK",
-      "price_eur": 779,
-      "transit_minutes": 760
+      "price_eur": 782,
+      "transit_minutes": 761
     },
     {
       "carrier": "PK",
-      "price_eur": 486,
+      "price_eur": 491,
       "transit_minutes": 461
     },
     {
       "carrier": "SV",
-      "price_eur": 858,
-      "transit_minutes": 776
+      "price_eur": 878,
+      "transit_minutes": 773
     }
   ],
   "seasonal_gauge": {
-    "current_avg_eur": 647,
-    "baseline_avg_eur": 717,
-    "pct": -10,
+    "current_avg_eur": 652,
+    "baseline_avg_eur": 720,
+    "pct": -9,
     "method": "Wedding-window departures against the February/March baseline"
   }
 }
